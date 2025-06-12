@@ -1,0 +1,8 @@
+{
+  "LoginPage": {
+    "title": "Melden Sie sich bei Ihrem Konto an",
+    "usernameLabel": "Benutzername",
+    "passwordLabel": "Passwort",
+    "signInButton": "Anmelden"
+  }
+}
