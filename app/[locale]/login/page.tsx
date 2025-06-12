@@ -27,7 +27,7 @@ export default function LoginPage() {
 
       console.log("Sign-in result from client:", result);
 
-      if (result?.error) {
+      if (!result || result.error) {
         toast({
           variant: "destructive",
           title: "Authentication failed",
