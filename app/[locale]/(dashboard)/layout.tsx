@@ -1,7 +1,8 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import { DashboardLayout } from "@/components/layout/dashboard-layout";
 
-export default async function DashboardLayout({
+export default async function AdminDashboardLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -12,16 +13,5 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
-  return (
-    <div className="flex h-screen">
-      <aside className="w-64 bg-gray-100 p-6">
-        <h1 className="text-2xl font-bold mb-8">Admin</h1>
-        <nav>
-          {/* Navigation items will be dynamically generated here */}
-          <p>Navigation</p>
-        </nav>
-      </aside>
-      <main className="flex-1 p-6">{children}</main>
-    </div>
-  );
+  return <DashboardLayout>{children}</DashboardLayout>;
 }
