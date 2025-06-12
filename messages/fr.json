@@ -4,5 +4,33 @@
     "usernameLabel": "Nom d'utilisateur",
     "passwordLabel": "Mot de passe",
     "signInButton": "Se connecter"
+  },
+  "DashboardPage": {
+    "title": "Tableau de bord",
+    "description": "Gérez les données et paramètres de votre application."
+  },
+  "ModelListPage": {
+    "createNew": "Créer",
+    "id": "ID",
+    "name": "Nom / Titre",
+    "createdAt": "Créé le",
+    "actions": "Actions",
+    "noItems": "Aucun élément trouvé",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "deleteTitle": "Supprimer l'élément",
+    "deleteConfirm": "Êtes-vous sûr de vouloir supprimer cet élément ? Cette action est irréversible.",
+    "tryAgain": "Réessayer",
+    "save": "Enregistrer"
+  },
+  "SettingsPage": {
+    "title": "Paramètres",
+    "general": "Général",
+    "siteName": "Nom du site",
+    "logo": "URL du logo",
+    "navbarStyle": "Style de la barre",
+    "otp": "Activer l'authentification à deux facteurs",
+    "password": "Changer le mot de passe",
+    "save": "Enregistrer"
   }
 }
