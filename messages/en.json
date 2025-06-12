@@ -4,5 +4,33 @@
     "usernameLabel": "Username",
     "passwordLabel": "Password",
     "signInButton": "Sign In"
+  },
+  "DashboardPage": {
+    "title": "Dashboard",
+    "description": "Manage your application data and settings."
+  },
+  "ModelListPage": {
+    "createNew": "Create New",
+    "id": "ID",
+    "name": "Name / Title",
+    "createdAt": "Created At",
+    "actions": "Actions",
+    "noItems": "No items found",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteTitle": "Delete Item",
+    "deleteConfirm": "Are you sure you want to delete this item? This action cannot be undone.",
+    "tryAgain": "Try Again",
+    "save": "Save"
+  },
+  "SettingsPage": {
+    "title": "Settings",
+    "general": "General",
+    "siteName": "Site Name",
+    "logo": "Logo URL",
+    "navbarStyle": "Navbar Style",
+    "otp": "Enable Two-factor Authentication",
+    "password": "Change Password",
+    "save": "Save Changes"
   }
 }

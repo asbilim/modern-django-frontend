@@ -4,5 +4,33 @@
     "usernameLabel": "Benutzername",
     "passwordLabel": "Passwort",
     "signInButton": "Anmelden"
+  },
+  "DashboardPage": {
+    "title": "Dashboard",
+    "description": "Verwalten Sie Ihre Anwendungsdaten und Einstellungen."
+  },
+  "ModelListPage": {
+    "createNew": "Neu erstellen",
+    "id": "ID",
+    "name": "Name / Titel",
+    "createdAt": "Erstellt am",
+    "actions": "Aktionen",
+    "noItems": "Keine Einträge gefunden",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "deleteTitle": "Eintrag löschen",
+    "deleteConfirm": "Möchten Sie diesen Eintrag wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "tryAgain": "Erneut versuchen",
+    "save": "Speichern"
+  },
+  "SettingsPage": {
+    "title": "Einstellungen",
+    "general": "Allgemein",
+    "siteName": "Seitenname",
+    "logo": "Logo-URL",
+    "navbarStyle": "Navbar-Stil",
+    "otp": "Zwei-Faktor-Authentifizierung aktivieren",
+    "password": "Passwort ändern",
+    "save": "Speichern"
   }
 }

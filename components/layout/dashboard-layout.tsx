@@ -20,6 +20,7 @@ import { DynamicIcon } from "@/components/ui/dynamic-icon";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 // Sidebar animation variants
 const sidebarVariants: Variants = {
@@ -69,6 +70,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileView, setIsMobileView] = useState(false);
+  const [siteName, setSiteName] = useState(dashboardConfig.name);
+  const [logoUrl, setLogoUrl] = useState(dashboardConfig.logoUrl);
+  const [navbarStyle, setNavbarStyle] = useState(
+    typeof window !== "undefined" ? localStorage.getItem("navbarStyle") || "modern" : "modern"
+  );
 
   // Toggle between light and dark mode
   const toggleTheme = () => {
@@ -120,6 +126,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       document.documentElement.classList.add("dark");
     }
 
+    const storedName = localStorage.getItem("siteName");
+    if (storedName) setSiteName(storedName);
+    const storedLogo = localStorage.getItem("logoUrl");
+    if (storedLogo) setLogoUrl(storedLogo);
+    const storedStyle = localStorage.getItem("navbarStyle");
+    if (storedStyle) setNavbarStyle(storedStyle);
+
     // Sidebar state initialization
     const savedSidebarState = localStorage.getItem("sidebarCollapsed");
     if (savedSidebarState === "true") {
@@ -146,6 +159,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         variants={sidebarVariants}
         initial={false}
         animate={isCollapsed ? "collapsed" : "expanded"}
+        data-style={navbarStyle}
         className={cn(
           "bg-sidebar text-sidebar-foreground border-r border-sidebar-border hidden md:flex flex-col z-30",
           isCollapsed ? "items-center" : "items-start"
@@ -158,8 +172,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             animate={isCollapsed ? "collapsed" : "expanded"}
             className="overflow-hidden flex items-center">
             <img
-              src={dashboardConfig.logoUrl}
-              alt={dashboardConfig.name}
+              src={logoUrl}
+              alt={siteName}
               className="h-8 w-8"
             />
             <motion.span
@@ -167,7 +181,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               initial={false}
               animate={isCollapsed ? "collapsed" : "expanded"}
               className="ml-3 font-semibold text-lg">
-              {dashboardConfig.name}
+              {siteName}
             </motion.span>
           </motion.div>
           <Button
@@ -217,6 +231,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         {/* Sidebar Footer */}
         <div className="p-4 border-t border-sidebar-border w-full">
           <div className="flex items-center justify-between">
+            <LanguageSwitcher />
             <Button
               variant="ghost"
               size="icon"
@@ -257,12 +272,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               <SheetContent side="left" className="p-0 bg-sidebar">
                 <div className="h-16 flex items-center px-4 border-b border-sidebar-border">
                   <img
-                    src={dashboardConfig.logoUrl}
-                    alt={dashboardConfig.name}
+                    src={logoUrl}
+                    alt={siteName}
                     className="h-8 w-8"
                   />
                   <span className="ml-3 font-semibold text-lg text-sidebar-foreground">
-                    {dashboardConfig.name}
+                    {siteName}
                   </span>
                 </div>
                 <ScrollArea className="h-[calc(100vh-8rem)]">
@@ -288,6 +303,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 </ScrollArea>
                 <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-sidebar-border">
                   <div className="flex items-center justify-between">
+                    <LanguageSwitcher />
                     <Button
                       variant="ghost"
                       size="icon"
@@ -311,12 +327,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               </SheetContent>
             </Sheet>
             <img
-              src={dashboardConfig.logoUrl}
-              alt={dashboardConfig.name}
+              src={logoUrl}
+              alt={siteName}
               className="h-8 w-8 ml-3"
             />
             <span className="ml-3 font-semibold text-lg">
-              {dashboardConfig.name}
+              {siteName}
             </span>
           </div>
           <Button

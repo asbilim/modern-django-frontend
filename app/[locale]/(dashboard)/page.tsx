@@ -2,6 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { motion, Variant } from "framer-motion";
 import { adminApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
@@ -54,6 +55,7 @@ const fadeInUpVariants = {
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
+  const t = useTranslations("DashboardPage");
   const router = useRouter();
   const [adminConfig, setAdminConfig] = useState<AdminConfig | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -145,10 +147,8 @@ export default function DashboardPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground mt-2">
-          Manage your application data and settings.
-        </p>
+        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+        <p className="text-muted-foreground mt-2">{t("description")}</p>
       </div>
 
       <div className="space-y-8">

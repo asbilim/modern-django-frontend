@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { adminApi } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,7 @@ interface ModelItem {
 }
 
 export default function ModelListPage() {
+  const t = useTranslations("ModelListPage");
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
@@ -200,7 +202,7 @@ export default function ModelListPage() {
         </div>
         <p className="text-destructive mb-4">{error}</p>
         <Button variant="outline" onClick={fetchData}>
-          Try Again
+          {t("tryAgain")}
         </Button>
       </div>
     );
@@ -222,7 +224,7 @@ export default function ModelListPage() {
           onClick={() => router.push(getModelUrl(modelKey, "create"))}
           disabled={isLoading}>
           <PlusIcon className="h-4 w-4 mr-2" />
-          Create New
+          {t("createNew")}
         </Button>
       </div>
 
@@ -232,16 +234,16 @@ export default function ModelListPage() {
             <thead className="bg-muted/50">
               <tr>
                 <th className="p-3 text-left font-medium text-sm text-muted-foreground">
-                  ID
+                {t("id")}
                 </th>
                 <th className="p-3 text-left font-medium text-sm text-muted-foreground">
-                  Name / Title
+                {t("name")}
                 </th>
                 <th className="p-3 text-left font-medium text-sm text-muted-foreground">
-                  Created At
+                {t("createdAt")}
                 </th>
                 <th className="p-3 text-left font-medium text-sm text-muted-foreground">
-                  Actions
+                {t("actions")}
                 </th>
               </tr>
             </thead>
@@ -251,7 +253,7 @@ export default function ModelListPage() {
                   <td
                     colSpan={4}
                     className="p-4 text-center text-muted-foreground">
-                    No items found
+                    {t("noItems")}
                   </td>
                 </tr>
               ) : (
@@ -279,22 +281,21 @@ export default function ModelListPage() {
                             router.push(getModelUrl(modelKey, item.id))
                           }>
                           <Pencil className="h-3.5 w-3.5 mr-1" />
-                          Edit
+                          {t("edit")}
                         </Button>
 
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button variant="destructive" size="sm">
                               <Trash2 className="h-3.5 w-3.5 mr-1" />
-                              Delete
+                              {t("delete")}
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Item</AlertDialogTitle>
+                              <AlertDialogTitle>{t("deleteTitle")}</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete this item? This
-                                action cannot be undone.
+                                {t("deleteConfirm")}
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -305,7 +306,7 @@ export default function ModelListPage() {
                                   handleDelete();
                                 }}
                                 disabled={isDeleting}>
-                                {isDeleting ? "Deleting..." : "Delete"}
+                                {isDeleting ? "Deleting..." : t("delete")}
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
