@@ -23,6 +23,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface Model {
   verbose_name: string;
@@ -34,6 +35,46 @@ interface Model {
     icon?: string;
     description?: string;
     color?: string;
+  };
+}
+
+interface FieldConfig {
+  name: string;
+  verbose_name: string;
+  type: string;
+  ui_component: string;
+  required: boolean;
+  max_length?: number;
+  help_text?: string;
+  is_translation: boolean;
+  related_model?: {
+    app_label: string;
+    model_name: string;
+    api_url: string;
+  };
+}
+
+interface ModelConfig {
+  model_name: string;
+  verbose_name: string;
+  verbose_name_plural: string;
+  fields: Record<string, FieldConfig>;
+  admin_config: {
+    list_display?: string[];
+    search_fields?: string[];
+  };
+  permissions: {
+    add: boolean;
+    change: boolean;
+    delete: boolean;
+    view: boolean;
+  };
+  frontend_config: {
+    icon?: string;
+    category?: string;
+    description?: string;
+    tree_view?: boolean;
+    parent_field?: string;
   };
 }
 
@@ -58,6 +99,7 @@ export default function ModelListPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [adminConfig, setAdminConfig] = useState<AdminConfig | null>(null);
   const [modelItems, setModelItems] = useState<ModelItem[]>([]);
+  const [modelConfig, setModelConfig] = useState<ModelConfig | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [itemToDelete, setItemToDelete] = useState<ModelItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -65,6 +107,7 @@ export default function ModelListPage() {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
+    setModelConfig(null);
 
     if (!session?.accessToken) {
       setError("Authentication required");
@@ -91,6 +134,19 @@ export default function ModelListPage() {
       if (!model) {
         throw new Error(`Model ${modelKey} not found`);
       }
+
+      // Fetch model configuration
+      const configUrl = `/api/admin/models/${modelKey}/config/`;
+      const modelConfigResponse = await adminApi.getModelConfig(
+        session.accessToken,
+        configUrl
+      );
+      if (modelConfigResponse.error) {
+        throw new Error(
+          `Failed to fetch model configuration: ${modelConfigResponse.error.message}`
+        );
+      }
+      setModelConfig(modelConfigResponse.data as ModelConfig);
 
       // Fetch model items
       const modelResponse = await adminApi.getModelList(
@@ -175,6 +231,7 @@ export default function ModelListPage() {
     ? Object.values(adminConfig.models).find((m) => m.model_name === modelKey)
     : undefined;
   const modelIcon = model?.frontend_config?.icon || "file";
+  const displayFields = modelConfig?.admin_config?.list_display || [];
 
   if (isLoading || status === "loading") {
     return (
@@ -236,15 +293,13 @@ export default function ModelListPage() {
           <table className="w-full">
             <thead className="bg-muted/50">
               <tr>
-                <th className="p-3 text-left font-medium text-sm text-muted-foreground">
-                  {t("id")}
-                </th>
-                <th className="p-3 text-left font-medium text-sm text-muted-foreground">
-                  {t("name")}
-                </th>
-                <th className="p-3 text-left font-medium text-sm text-muted-foreground">
-                  {t("createdAt")}
-                </th>
+                {displayFields.map((fieldName) => (
+                  <th
+                    key={fieldName}
+                    className="p-3 text-left font-medium text-sm text-muted-foreground">
+                    {modelConfig?.fields[fieldName]?.verbose_name || fieldName}
+                  </th>
+                ))}
                 <th className="p-3 text-left font-medium text-sm text-muted-foreground">
                   {t("actions")}
                 </th>
@@ -254,7 +309,7 @@ export default function ModelListPage() {
               {modelItems.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={displayFields.length + 1}
                     className="p-4 text-center text-muted-foreground">
                     {t("noItems")}
                   </td>
@@ -264,17 +319,39 @@ export default function ModelListPage() {
                   <tr
                     key={item.id}
                     className="hover:bg-muted/50 transition-colors">
-                    <td className="p-3 text-sm">{item.id}</td>
-                    <td className="p-3 text-sm font-medium">
-                      <a
-                        href={getModelUrl(modelKey, item.id)}
-                        className="hover:text-primary hover:underline">
-                        {item.name || item.title || "-"}
-                      </a>
-                    </td>
-                    <td className="p-3 text-sm text-muted-foreground">
-                      {formatDate(item.created_at)}
-                    </td>
+                    {displayFields.map((fieldName, index) => {
+                      const fieldConfig = modelConfig?.fields[fieldName];
+                      let cellValue: any = item[fieldName];
+
+                      if (
+                        fieldConfig?.type &&
+                        fieldConfig.type.includes("Date")
+                      ) {
+                        cellValue = formatDate(cellValue);
+                      }
+
+                      if (index === 0) {
+                        return (
+                          <td
+                            key={fieldName}
+                            className="p-3 text-sm font-medium">
+                            <a
+                              href={getModelUrl(modelKey, item.id)}
+                              className="hover:text-primary hover:underline">
+                              {cellValue || "-"}
+                            </a>
+                          </td>
+                        );
+                      }
+
+                      return (
+                        <td
+                          key={fieldName}
+                          className="p-3 text-sm text-muted-foreground">
+                          {cellValue?.toString() ?? "-"}
+                        </td>
+                      );
+                    })}
                     <td className="p-3">
                       <div className="flex gap-2">
                         <Button

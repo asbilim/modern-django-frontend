@@ -1,0 +1,155 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# API Field & UI Metadata Guide
+
+This guide provides a detailed explanation of the auto-generated API metadata. It is designed to give a frontend developer everything they need to dynamically build a beautiful and functional admin dashboard without having to guess at API behavior.
+
+**Core Principle: Backend-Driven UI**
+
+The fundamental design of this system is that the **backend dictates the UI**. All data validation, file handling, and business logic are securely managed on the server. The API's metadata response is the "instruction manual" that tells the frontend exactly what form fields, buttons, and layouts to render.
+
+The frontend's job is to:
+
+1.  Fetch the configuration for a model.
+2.  Use that configuration to dynamically render the appropriate UI components.
+3.  Submit data back to the backend's REST endpoints.
+
+The frontend should **not** contain any hardcoded field names, validation rules, or endpoint paths.
+
+## The `/config` Endpoint
+
+For every model exposed through the Admin API, there is a special endpoint that provides its UI "recipe":
+
+```
+GET /api/admin/models/<model-name>/config/
+```
+
+This endpoint doesn't return model _data_; instead, it returns a JSON object containing a complete guide on how to interact with the model.
+
+## Response Structure
+
+Here is an example response for a `category` model, which we will use to break down the structure.
+
+```json
+{
+  "model_name": "category",
+  "verbose_name": "Category",
+  "verbose_name_plural": "Categories",
+  "fields": {
+    // ... field objects ...
+  },
+  "admin_config": {
+    // ... Django admin settings ...
+  },
+  "permissions": {
+    // ... user permissions for this model ...
+  },
+  "frontend_config": {
+    // ... custom frontend hints ...
+  }
+}
+```
+
+### 1. Top-Level Properties
+
+- `model_name`: The machine-readable name of the model (e.g., `category`). Used for constructing API request URLs.
+- `verbose_name`: The human-readable singular name (e.g., `Category`). Perfect for page titles.
+- `verbose_name_plural`: The human-readable plural name (e.g., `Categories`). Perfect for table headers and button labels.
+- `fields`: An object containing metadata for every field in the model.
+- `admin_config`: An object mirroring the model's configuration in Django's admin (`list_display`, `search_fields`, etc.).
+- `permissions`: An object indicating the current user's permissions (`add`, `change`, `delete`, `view`). The frontend should use this to show/hide buttons and UI elements.
+- `frontend_config`: Custom hints for the frontend, defined in the model's `Admin` class in `admin.py`.
+
+### 2. The `fields` Object: The Heart of the UI
+
+This is the most critical section for building forms. Each key is a field name, and its value is an object describing how to render a UI control for that field.
+
+```json
+"fields": {
+    "title": {
+      "name": "title",
+      "verbose_name": "Title",
+      "type": "CharField",
+      "ui_component": "textfield",
+      "required": true,
+      "max_length": 200,
+      "help_text": "The main title of the post.",
+      "is_translation": false
+    },
+    "title_en": {
+      "name": "title_en",
+      "verbose_name": "Title [en]",
+      "type": "TranslationCharField",
+      "ui_component": "textfield",
+      "is_translation": true
+    },
+    "featured_image": {
+        "name": "featured_image",
+        "type": "ImageField",
+        "ui_component": "image_upload",
+        "required": false
+    },
+    "parent": {
+        "name": "parent",
+        "type": "ForeignKey",
+        "ui_component": "foreignkey_select",
+        "related_model": {
+            "app_label": "core",
+            "model_name": "category",
+            "api_url": "/api/admin/models/category/"
+        }
+    }
+}
+```
+
+#### Field Properties Explained:
+
+- `ui_component`: **Your most important key.** This is a direct suggestion for what kind of form control to render. The backend guarantees that the data format will be compatible with this component type.
+  - `textfield`: A standard single-line text input.
+  - `textarea`: A multi-line text area.
+  - `checkbox`: A true/false checkbox.
+  - `select`: A dropdown list. The `choices` property will be populated.
+  - `datetime_picker`: A component for selecting a date and time.
+  - `image_upload` / `file_upload`: A file input. **The frontend only needs to render the input control.** The file upload is a standard `multipart/form-data` POST/PUT request to the backend, which handles the actual storage process (local or cloud).
+  - `foreignkey_select`: A dropdown that should be populated with items from another model. Use the `related_model.api_url` to fetch the list of items.
+- `is_translation`: A boolean that is `true` if this field is for a specific language. The frontend should use this to group translated fields together, for instance, under tabs labeled "English," "German," etc.
+- `required`: Whether the frontend should mark the field as mandatory. Final validation is always done on the backend.
+- `max_length`, `help_text`, `verbose_name`: Use these to enrich the UI with labels, hints, and character counters.
+- `related_model`: For `ForeignKey` fields, this object tells the frontend where to fetch the list of choices for a dropdown.
+
+### 3. `frontend_config`: Custom UI Hints
+
+This object provides extra, high-level guidance for how to display the model's UI.
+
+```json
+"frontend_config": {
+    "icon": "folder",
+    "category": "Configuration",
+    "description": "Organize content with categories",
+    "tree_view": true,
+    "parent_field": "parent"
+}
+```
+
+- `icon`: A suggested icon name from the global icon set.
+- `category`: The UI group this model belongs to. Perfect for organizing navigation menus.
+- `tree_view` & `parent_field`: A hint that this model's data is hierarchical. A frontend can use this to render a tree view instead of a simple table.
+
+## Global Frontend Options
+
+Finally, the root admin endpoint provides globally available choices for building a consistent UI:
+
+```
+GET /api/admin/
+```
+
+In its response, the `frontend_options` key contains:
+
+- `categories`: A list of all available model categories for building navigation.
+- `icons`: A comprehensive list of suggested icon names that can be used throughout the frontend dashboard.
+
+By combining the global options with the per-model `/config/` endpoint, a frontend application has a complete, backend-driven blueprint for building a dynamic, powerful, and user-friendly admin interface.
+
