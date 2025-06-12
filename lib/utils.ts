@@ -10,51 +10,87 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
- * Get the admin model URL path
- *
- * @param modelKey The model key identifier
- * @param id Optional model item ID for editing a specific item
- * @returns The URL path for the model
+ * Get the URL for a model or model item
  */
-export function getModelUrl(modelKey: string, id?: string | number) {
+export function getModelUrl(modelKey: string, id?: string | number): string {
   if (id) {
-    return `/admin/models/${modelKey}/${id}`;
+    // If ID is "create", this is a create new item URL
+    return `/models/${modelKey}/${id}`;
   }
-  return `/admin/models/${modelKey}`;
+  // Otherwise, it's a model list URL
+  return `/models/${modelKey}`;
 }
 
 /**
- * Format a date string to a human-readable format
- *
- * @param dateString The date string to format
- * @param locale The locale to use for formatting
- * @returns The formatted date string
+ * Format a date string consistently
  */
-export function formatDate(dateString: string, locale = "en-US") {
+export function formatDate(dateString?: string | null): string {
   if (!dateString) return "-";
 
   try {
     const date = new Date(dateString);
-    return date.toLocaleDateString(locale, {
+    return new Intl.DateTimeFormat("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
-    });
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(date);
   } catch (error) {
+    console.error("Error formatting date:", error);
     return dateString;
   }
 }
 
 /**
- * Truncate a string to a maximum length
- *
- * @param str The string to truncate
- * @param maxLength The maximum length of the string
- * @returns The truncated string
+ * Format a number with commas
  */
-export function truncateString(str: string, maxLength = 50) {
-  if (!str) return "";
-  if (str.length <= maxLength) return str;
+export function formatNumber(number?: number | null): string {
+  if (number === undefined || number === null) return "-";
+  return number.toLocaleString();
+}
 
-  return `${str.substring(0, maxLength)}...`;
+/**
+ * Truncate text with ellipsis
+ */
+export function truncateText(text: string, maxLength: number): string {
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength) + "...";
+}
+
+/**
+ * Format file size
+ */
+export function formatFileSize(bytes?: number | null): string {
+  if (bytes === undefined || bytes === null) return "-";
+
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  let size = bytes;
+  let unitIndex = 0;
+
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex++;
+  }
+
+  return `${size.toFixed(1)} ${units[unitIndex]}`;
+}
+
+/**
+ * Generate initials from a name
+ */
+export function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((part) => part.charAt(0))
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+/**
+ * Sleep for specified milliseconds
+ */
+export function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
