@@ -25,10 +25,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 interface Model {
-  name: string;
+  verbose_name: string;
   api_url: string;
-  config_url: string;
-  count: number;
+  config_url?: string;
+  count?: number;
+  model_name?: string;
   frontend_config?: {
     icon?: string;
     description?: string;
@@ -84,7 +85,9 @@ export default function ModelListPage() {
       setAdminConfig(config);
 
       // Check if the requested model exists
-      const model = config.models[modelKey];
+      const model = Object.values(config.models).find(
+        (m) => m.model_name === modelKey
+      );
       if (!model) {
         throw new Error(`Model ${modelKey} not found`);
       }
@@ -116,11 +119,7 @@ export default function ModelListPage() {
   }, [modelKey, session, toast]);
 
   const handleDelete = async () => {
-    if (
-      !itemToDelete ||
-      !session?.accessToken ||
-      !adminConfig?.models[modelKey]?.api_url
-    ) {
+    if (!itemToDelete || !session?.accessToken || !model?.api_url) {
       return;
     }
 
@@ -129,7 +128,7 @@ export default function ModelListPage() {
     try {
       const deleteResponse = await adminApi.deleteModelItem(
         session.accessToken,
-        adminConfig.models[modelKey].api_url,
+        model.api_url,
         itemToDelete.id
       );
 
@@ -172,7 +171,9 @@ export default function ModelListPage() {
     }
   }, [session, status, router, fetchData]);
 
-  const model = adminConfig?.models[modelKey];
+  const model = adminConfig
+    ? Object.values(adminConfig.models).find((m) => m.model_name === modelKey)
+    : undefined;
   const modelIcon = model?.frontend_config?.icon || "file";
 
   if (isLoading || status === "loading") {
@@ -215,7 +216,9 @@ export default function ModelListPage() {
           <div className="p-2 rounded-md bg-primary/10">
             <DynamicIcon name={modelIcon} className="h-5 w-5 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold">{model?.name || modelKey}</h1>
+          <h1 className="text-2xl font-bold">
+            {model?.verbose_name || modelKey}
+          </h1>
           <Badge variant="outline" className="ml-2">
             {modelItems.length} item{modelItems.length !== 1 ? "s" : ""}
           </Badge>
@@ -234,16 +237,16 @@ export default function ModelListPage() {
             <thead className="bg-muted/50">
               <tr>
                 <th className="p-3 text-left font-medium text-sm text-muted-foreground">
-                {t("id")}
+                  {t("id")}
                 </th>
                 <th className="p-3 text-left font-medium text-sm text-muted-foreground">
-                {t("name")}
+                  {t("name")}
                 </th>
                 <th className="p-3 text-left font-medium text-sm text-muted-foreground">
-                {t("createdAt")}
+                  {t("createdAt")}
                 </th>
                 <th className="p-3 text-left font-medium text-sm text-muted-foreground">
-                {t("actions")}
+                  {t("actions")}
                 </th>
               </tr>
             </thead>
@@ -293,7 +296,9 @@ export default function ModelListPage() {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>{t("deleteTitle")}</AlertDialogTitle>
+                              <AlertDialogTitle>
+                                {t("deleteTitle")}
+                              </AlertDialogTitle>
                               <AlertDialogDescription>
                                 {t("deleteConfirm")}
                               </AlertDialogDescription>

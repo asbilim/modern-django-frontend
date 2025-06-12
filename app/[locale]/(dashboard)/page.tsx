@@ -21,11 +21,12 @@ import { Badge } from "@/components/ui/badge";
 import { cn, getModelUrl } from "@/lib/utils";
 
 interface Model {
-  name: string;
+  verbose_name: string;
   api_url: string;
-  config_url: string;
-  count: number;
+  config_url?: string;
+  count?: number;
   key?: string;
+  model_name?: string;
   frontend_config?: {
     icon?: string;
     description?: string;
@@ -184,10 +185,12 @@ export default function DashboardPage() {
                                 />
                               </div>
                               <CardTitle className="text-lg">
-                                {model.name}
+                                {model.verbose_name}
                               </CardTitle>
                             </div>
-                            <Badge variant="outline">{model.count}</Badge>
+                            {model.count !== undefined && (
+                              <Badge variant="outline">{model.count}</Badge>
+                            )}
                           </div>
                           {model.frontend_config?.description && (
                             <CardDescription className="mt-2">
@@ -202,9 +205,9 @@ export default function DashboardPage() {
                         </CardContent>
                         <CardFooter>
                           <a
-                            href={getModelUrl(model.key || "unknown")}
+                            href={getModelUrl(model.model_name || "unknown")}
                             className="text-primary hover:underline text-sm font-medium">
-                            View {model.name}
+                            View {model.verbose_name}
                           </a>
                         </CardFooter>
                       </Card>
