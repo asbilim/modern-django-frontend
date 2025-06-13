@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import {
   Select,
   SelectContent,
@@ -7,42 +8,52 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FormLabel } from "./form";
+import { Label } from "./label";
+import { cn } from "@/lib/utils";
 
-export interface FormSelectProps {
+export interface Option {
+  value: any;
   label: string;
-  required?: boolean;
-  className?: string;
-  value?: string;
-  onValueChange: (value: string) => void;
-  options: { value: string; label: string }[];
+}
+
+interface FormSelectProps {
+  label: string;
+  value: any;
+  onChange: (value: any) => void;
+  options: Option[];
   placeholder?: string;
+  required?: boolean;
+  error?: string;
 }
 
 export function FormSelect({
   label,
-  required,
-  className,
   value,
-  onValueChange,
+  onChange,
   options,
-  placeholder,
+  placeholder = "Select an option",
+  required,
+  error,
 }: FormSelectProps) {
   return (
-    <div className={`form-group ${className}`}>
-      <FormLabel required={required}>{label}</FormLabel>
-      <Select onValueChange={onValueChange} value={value}>
-        <SelectTrigger>
-          <SelectValue placeholder={placeholder || "Select an option"} />
+    <div className="w-full space-y-2">
+      <Label>
+        {label}
+        {required && <span className="text-destructive ml-1">*</span>}
+      </Label>
+      <Select onValueChange={onChange} defaultValue={value}>
+        <SelectTrigger className={cn(error && "border-destructive")}>
+          <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>
           {options.map((option) => (
-            <SelectItem key={option.value} value={String(option.value)}>
+            <SelectItem key={option.value} value={option.value}>
               {option.label}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
+      {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
   );
-} 
+}

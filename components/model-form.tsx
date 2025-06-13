@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
-import { adminApi } from "@/lib/api";
+import { useApiClient } from "@/hooks/useApiClient";
 import { useToast } from "@/hooks/use-toast";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { FormDatePicker } from "@/components/ui/form-datepicker";
 import { FormSelect } from "@/components/ui/form-select";
 import { FormFileUpload } from "@/components/ui/form-file-upload";
 import { FormJsonEditor } from "@/components/ui/form-json-editor";
+import { FormMultiSelect } from "@/components/ui/form-multi-select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Form,
@@ -70,6 +71,7 @@ export function ModelForm({
   const router = useRouter();
   const { toast } = useToast();
   const { data: session } = useSession();
+  const apiClient = useApiClient();
   const [relationOptions, setRelationOptions] = useState<Record<string, any[]>>(
     {}
   );
@@ -79,69 +81,63 @@ export function ModelForm({
     defaultValues: initialData || {},
   });
 
-  const fetchRelationOptions = useCallback(async () => {
-    if (!session?.accessToken) return;
-    const fields = Object.values(modelConfig.fields);
-    for (const field of fields) {
-      if (
-        (field.ui_component === "foreignkey_select" ||
-          field.ui_component === "manytomany_select") &&
-        field.related_model
-      ) {
-        const response = await adminApi.getModelList(
-          session.accessToken,
-          field.related_model.api_url
-        );
-        if (response.data?.results) {
-          setRelationOptions((prev) => ({
-            ...prev,
-            [field.name]: response.data.results.map((item: any) => ({
-              value: item.id,
-              label:
-                item.name || item.title || item.username || `ID: ${item.id}`,
-            })),
-          }));
-        }
+  const fetchRelationOptions = useCallback(
+    async (field: FieldConfig) => {
+      if (!session || !field.related_model) return;
+
+      const response = await apiClient.getModelList(
+        field.related_model.api_url
+      );
+      if (response.data?.results) {
+        setRelationOptions((prev) => ({
+          ...prev,
+          [field.name]: response.data.results.map((item: any) => ({
+            value: item.id.toString(),
+            label: item.name || item.title || item.username || `ID: ${item.id}`,
+          })),
+        }));
       }
-    }
-  }, [session, modelConfig.fields]);
+    },
+    [session, apiClient]
+  );
 
   useEffect(() => {
-    fetchRelationOptions();
-  }, [fetchRelationOptions]);
+    Object.values(modelConfig.fields).forEach((field) => {
+      if (
+        field.related_model &&
+        (field.ui_component === "foreignkey_select" ||
+          field.ui_component === "manytomany_select")
+      ) {
+        fetchRelationOptions(field);
+      }
+    });
+  }, [modelConfig.fields, fetchRelationOptions]);
 
   const onSubmit = async (data: Record<string, any>) => {
-    if (!session?.accessToken) return;
+    if (!session) return;
     setIsSaving(true);
 
     const formData = new FormData();
     Object.keys(data).forEach((key) => {
       const value = data[key];
-      if (value instanceof FileList) {
-        if (value.length > 0) {
-          formData.append(key, value[0]);
-        }
-      } else if (value !== null && value !== undefined) {
+      if (value instanceof FileList && value.length > 0) {
+        formData.append(key, value[0]);
+      } else if (Array.isArray(value)) {
+        // Handle array for multi-select
+        value.forEach((item) => formData.append(key, item));
+      } else if (
+        value !== null &&
+        value !== undefined &&
+        !(value instanceof FileList)
+      ) {
         formData.append(key, value);
       }
     });
 
     const api_url = `/api/admin/models/${modelKey}/`;
-    let response;
-    if (itemId) {
-      response = await adminApi.updateModelItem(
-        session.accessToken,
-        api_url,
-        itemId,
-        formData
-      );
-    } else {
-      response = await adminApi.createModelItem(
-        session.accessToken,
-        api_url,
-        formData
-      );
-    }
+    const response = itemId
+      ? await apiClient.updateModelItem(api_url, itemId, formData)
+      : await apiClient.createModelItem(api_url, formData);
 
     setIsSaving(false);
 
@@ -161,6 +157,14 @@ export function ModelForm({
   };
 
   const renderField = (fieldName: string, fieldConfig: FieldConfig) => {
+    // Determine the component based on type and ui_component hint
+    let componentType = fieldConfig.ui_component;
+    if (fieldConfig.type === "JSONField") {
+      componentType = "json_editor";
+    } else if (fieldConfig.type === "ManyToManyField") {
+      componentType = "manytomany_select";
+    }
+
     return (
       <FormField
         control={form.control}
@@ -168,19 +172,16 @@ export function ModelForm({
         key={fieldName}
         render={({ field }) => {
           let component;
-          switch (fieldConfig.ui_component) {
+
+          switch (componentType) {
             case "textarea":
               component = (
-                <FormTextarea
-                  label={fieldConfig.verbose_name}
-                  required={fieldConfig.required}
-                  {...field}
-                />
+                <FormTextarea required={fieldConfig.required} {...field} />
               );
               break;
             case "checkbox":
               component = (
-                <div className="flex items-center space-x-2 my-4">
+                <div className="flex items-center space-x-2">
                   <Checkbox
                     checked={field.value}
                     onCheckedChange={field.onChange}
@@ -205,8 +206,8 @@ export function ModelForm({
                 <FormSelect
                   label={fieldConfig.verbose_name}
                   options={fieldConfig.choices || []}
-                  value={field.value}
                   onValueChange={field.onChange}
+                  value={field.value}
                   required={fieldConfig.required}
                 />
               );
@@ -216,37 +217,39 @@ export function ModelForm({
                 <FormSelect
                   label={fieldConfig.verbose_name}
                   options={relationOptions[fieldName] || []}
-                  value={field.value}
                   onValueChange={field.onChange}
+                  value={String(field.value || "")}
                   required={fieldConfig.required}
-                  placeholder={`Select a ${fieldConfig.verbose_name}`}
+                />
+              );
+              break;
+            case "manytomany_select":
+              component = (
+                <FormMultiSelect
+                  label={fieldConfig.verbose_name}
+                  options={relationOptions[fieldName] || []}
+                  onChange={field.onChange}
+                  value={field.value || []}
+                  required={fieldConfig.required}
                 />
               );
               break;
             case "image_upload":
-              component = (
-                <FormFileUpload
-                  label={fieldConfig.verbose_name}
-                  required={fieldConfig.required}
-                  value={field.value}
-                  onRemove={() => form.setValue(fieldName, null)}
-                  accept="image/*"
-                  {...form.register(fieldName)}
-                />
-              );
-              break;
             case "file_upload":
               component = (
                 <FormFileUpload
                   label={fieldConfig.verbose_name}
                   required={fieldConfig.required}
                   value={field.value}
+                  accept={
+                    componentType === "image_upload" ? "image/*" : undefined
+                  }
                   onRemove={() => form.setValue(fieldName, null)}
                   {...form.register(fieldName)}
                 />
               );
               break;
-            case "json_field":
+            case "json_editor":
               component = (
                 <FormJsonEditor
                   label={fieldConfig.verbose_name}
@@ -256,20 +259,22 @@ export function ModelForm({
                 />
               );
               break;
-            case "textfield":
             default:
               component = (
                 <FormInput
-                  label={fieldConfig.verbose_name}
                   required={fieldConfig.required}
                   {...field}
-                  value={field.value || ""}
+                  value={field.value ?? ""}
                 />
               );
           }
           return (
             <FormItem>
-              <FormControl>{component}</FormControl>
+              {["checkbox"].includes(componentType) ? (
+                component
+              ) : (
+                <FormControl>{component}</FormControl>
+              )}
               {fieldConfig.help_text && (
                 <FormDescription>{fieldConfig.help_text}</FormDescription>
               )}

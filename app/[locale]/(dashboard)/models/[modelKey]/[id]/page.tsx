@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { adminApi } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 import { ModelForm } from "@/components/model-form";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -12,63 +13,40 @@ export default function EditModelPage() {
   const t = useTranslations("ModelListPage");
   const params = useParams();
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const modelKey = params.modelKey as string;
   const itemId = params.id as string;
 
-  const [modelConfig, setModelConfig] = useState(null);
-  const [initialData, setInitialData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    data: modelConfig,
+    isLoading: isLoadingConfig,
+    error: errorConfig,
+  } = useQuery({
+    queryKey: ["modelConfig", modelKey],
+    queryFn: () => api.getModelConfig(`/api/admin/models/${modelKey}/config/`),
+    enabled: status === "authenticated",
+  });
 
-  const fetchData = useCallback(async () => {
-    if (!session?.accessToken) return;
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const configUrl = `/api/admin/models/${modelKey}/config/`;
-      const configResponse = await adminApi.getModelConfig(
-        session.accessToken,
-        configUrl
-      );
-      if (configResponse.error) {
-        throw new Error(
-          `Failed to fetch model config: ${configResponse.error.message}`
-        );
-      }
-      setModelConfig(configResponse.data);
-
-      const itemResponse = await adminApi.getModelItem(
-        session.accessToken,
-        `/api/admin/models/${modelKey}/`,
-        itemId
-      );
-      if (itemResponse.error) {
-        throw new Error(
-          `Failed to fetch model item: ${itemResponse.error.message}`
-        );
-      }
-      setInitialData(itemResponse.data);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "An unknown error occurred";
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [modelKey, itemId, session]);
+  const {
+    data: initialData,
+    isLoading: isLoadingData,
+    error: errorData,
+  } = useQuery({
+    queryKey: ["modelItem", modelKey, itemId],
+    queryFn: () => api.getModelItem(`/api/admin/models/${modelKey}/`, itemId),
+    enabled: status === "authenticated",
+  });
 
   useEffect(() => {
-    if (status === "authenticated") {
-      fetchData();
-    } else if (status === "unauthenticated") {
+    if (status === "unauthenticated") {
       router.push("/login");
     }
-  }, [status, fetchData, router]);
+  }, [status, router]);
 
-  if (isLoading) {
+  const isLoading = isLoadingConfig || isLoadingData;
+  const error = errorConfig || errorData;
+
+  if (isLoading || status === "loading") {
     return (
       <div>
         <Skeleton className="h-8 w-1/4 mb-6" />
@@ -83,7 +61,7 @@ export default function EditModelPage() {
   }
 
   if (error) {
-    return <div className="text-destructive">{error}</div>;
+    return <div className="text-destructive">{error.message}</div>;
   }
 
   if (!modelConfig || !initialData) {

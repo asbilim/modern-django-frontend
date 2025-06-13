@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import { adminApi } from "@/lib/api";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -29,7 +30,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,7 +39,6 @@ import {
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -111,169 +110,94 @@ interface ModelItem {
   [key: string]: any;
 }
 
+interface PaginatedResponse<T> {
+  results: T[];
+  count: number;
+}
+
 export default function ModelListPage() {
   const t = useTranslations("ModelListPage");
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
   const modelKey = params.modelKey as string;
-  const { data: session, status } = useSession();
+  const { status } = useSession();
+  const queryClient = useQueryClient();
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [adminConfig, setAdminConfig] = useState<AdminConfig | null>(null);
-  const [modelItems, setModelItems] = useState<ModelItem[]>([]);
-  const [modelConfig, setModelConfig] = useState<ModelConfig | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [itemToDelete, setItemToDelete] = useState<ModelItem | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
+  const [itemToDelete, setItemToDelete] = useState<ModelItem | null>(null);
 
-  const fetchData = useCallback(
-    async (page = 1) => {
-      setIsLoading(true);
-      setError(null);
-      setModelConfig(null);
+  const { data: adminConfig } = useQuery<AdminConfig>({
+    queryKey: ["adminConfig"],
+    queryFn: api.getAdminConfig,
+    enabled: status === "authenticated",
+  });
 
-      if (!session?.accessToken) {
-        setError("Authentication required");
-        setIsLoading(false);
-        return;
-      }
+  const model = adminConfig?.models
+    ? Object.values(adminConfig.models).find((m) => m.model_name === modelKey)
+    : undefined;
 
-      try {
-        // Fetch admin configuration
-        const configResponse = await adminApi.getAdminConfig(
-          session.accessToken
-        );
-        if (configResponse.error) {
-          throw new Error(
-            `Failed to fetch admin configuration: ${configResponse.error.message}`
-          );
-        }
+  const {
+    data: modelConfig,
+    isLoading: isLoadingConfig,
+    error: errorConfig,
+  } = useQuery<ModelConfig>({
+    queryKey: ["modelConfig", modelKey],
+    queryFn: () => api.getModelConfig(`/api/admin/models/${modelKey}/config/`),
+    enabled: !!model,
+  });
 
-        const config = configResponse.data as AdminConfig;
-        setAdminConfig(config);
+  const {
+    data: modelData,
+    isLoading: isLoadingItems,
+    error: errorItems,
+  } = useQuery<PaginatedResponse<ModelItem>>({
+    queryKey: ["modelItems", modelKey, currentPage],
+    queryFn: () =>
+      api.getModelList(model!.api_url, {
+        page: currentPage.toString(),
+        page_size: PAGE_SIZE.toString(),
+      }),
+    enabled: !!model,
+  });
 
-        // Check if the requested model exists
-        const model = Object.values(config.models).find(
-          (m) => m.model_name === modelKey
-        );
-        if (!model) {
-          throw new Error(`Model ${modelKey} not found`);
-        }
-
-        // Fetch model configuration
-        const configUrl = `/api/admin/models/${modelKey}/config/`;
-        const modelConfigResponse = await adminApi.getModelConfig(
-          session.accessToken,
-          configUrl
-        );
-        if (modelConfigResponse.error) {
-          throw new Error(
-            `Failed to fetch model configuration: ${modelConfigResponse.error.message}`
-          );
-        }
-        setModelConfig(modelConfigResponse.data as ModelConfig);
-
-        // Fetch model items
-        const modelResponse = await adminApi.getModelList(
-          session.accessToken,
-          model.api_url,
-          { page: page.toString(), page_size: PAGE_SIZE.toString() }
-        );
-        if (modelResponse.error) {
-          throw new Error(
-            `Failed to fetch model data: ${modelResponse.error.message}`
-          );
-        }
-
-        setModelItems(modelResponse.data?.results || []);
-        setTotalItems(modelResponse.data?.count || 0);
-        setCurrentPage(page);
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "An unknown error occurred";
-        setError(errorMessage);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: errorMessage,
-        });
-      } finally {
-        setIsLoading(false);
-      }
+  const deleteMutation = useMutation({
+    mutationFn: (id: string | number) =>
+      api.deleteModelItem(model!.api_url, id),
+    onSuccess: (_, deletedId) => {
+      toast({
+        title: "Success",
+        description: `Item ${deletedId} was deleted successfully.`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["modelItems", modelKey] });
     },
-    [modelKey, session, toast]
-  );
-
-  const handleDelete = async () => {
-    if (!itemToDelete || !session?.accessToken || !model?.api_url) {
-      return;
-    }
-
-    setIsDeleting(true);
-
-    try {
-      const deleteResponse = await adminApi.deleteModelItem(
-        session.accessToken,
-        model.api_url,
-        itemToDelete.id
-      );
-
-      if (deleteResponse.error) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: `Failed to delete item: ${deleteResponse.error.message}`,
-        });
-      } else {
-        toast({
-          title: "Success",
-          description: `Item ${itemToDelete.id} was deleted successfully.`,
-        });
-        setModelItems((prev) => prev.filter((i) => i.id !== itemToDelete.id));
-        setTotalItems((prev) => prev - 1);
-      }
-    } catch (error) {
+    onError: (error: Error, deletedId) => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "An error occurred while deleting the item.",
+        description: `Failed to delete item ${deletedId}: ${error.message}`,
       });
-    } finally {
-      setIsDeleting(false);
+    },
+  });
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+    }
+  }, [status, router]);
+
+  const handleDelete = () => {
+    if (itemToDelete) {
+      deleteMutation.mutate(itemToDelete.id);
       setItemToDelete(null);
     }
   };
 
-  useEffect(() => {
-    if (status === "loading") {
-      return;
-    }
-    if (status === "unauthenticated") {
-      router.push("/login");
-      return;
-    }
-
-    if (session) {
-      fetchData(currentPage);
-    }
-  }, [session, status, router, fetchData, currentPage]);
-
-  const model = adminConfig
-    ? Object.values(adminConfig.models).find((m) => m.model_name === modelKey)
-    : undefined;
-  const modelIcon = model?.frontend_config?.icon || "file";
-  const displayFields = modelConfig?.admin_config?.list_display || [];
-
+  const isLoading = isLoadingConfig || isLoadingItems;
+  const error = errorConfig || errorItems;
+  const modelItems = modelData?.results || [];
+  const totalItems = modelData?.count || 0;
   const totalPages = Math.ceil(totalItems / PAGE_SIZE);
-
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      fetchData(page);
-    }
-  };
 
   if (isLoading || status === "loading") {
     return (
@@ -283,11 +207,9 @@ export default function ModelListPage() {
           <Skeleton className="h-10 w-32" />
         </div>
         <div className="space-y-4">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} className="h-10 w-full" />
+          ))}
         </div>
       </div>
     );
@@ -300,13 +222,22 @@ export default function ModelListPage() {
           <AlertCircle className="h-5 w-5 text-destructive" />
           <h2 className="text-xl font-bold text-destructive">Error</h2>
         </div>
-        <p className="text-destructive mb-4">{error}</p>
-        <Button variant="outline" onClick={() => fetchData(currentPage)}>
+        <p className="text-destructive mb-4">{error.message}</p>
+        <Button
+          variant="outline"
+          onClick={() =>
+            queryClient.invalidateQueries({
+              queryKey: ["modelItems", modelKey, currentPage],
+            })
+          }>
           {t("tryAgain")}
         </Button>
       </div>
     );
   }
+
+  const modelIcon = model?.frontend_config?.icon || "file";
+  const displayFields = modelConfig?.admin_config?.list_display || [];
 
   return (
     <div>
@@ -316,7 +247,7 @@ export default function ModelListPage() {
             <DynamicIcon name={modelIcon} className="h-5 w-5 text-primary" />
           </div>
           <h1 className="text-2xl font-bold">
-            {model?.verbose_name || modelKey}
+            {modelConfig?.verbose_name || modelKey}
           </h1>
           <Badge variant="outline" className="ml-2">
             {totalItems} item{totalItems !== 1 ? "s" : ""}
@@ -324,7 +255,7 @@ export default function ModelListPage() {
         </div>
         <Button
           onClick={() => router.push(getModelUrl(modelKey, "create"))}
-          disabled={isLoading}>
+          disabled={deleteMutation.isPending}>
           <PlusIcon className="h-4 w-4 mr-2" />
           {t("createNew")}
         </Button>
@@ -364,21 +295,13 @@ export default function ModelListPage() {
                     {displayFields.map((fieldName, index) => {
                       const fieldConfig = modelConfig?.fields[fieldName];
                       let cellValue: any = item[fieldName];
-
-                      if (
-                        fieldConfig?.type &&
-                        fieldConfig.type.includes("Date")
-                      ) {
+                      if (fieldConfig?.type?.includes("Date")) {
                         cellValue = formatDate(cellValue);
                       }
-
                       const displayValue =
-                        cellValue === null ||
-                        cellValue === undefined ||
-                        cellValue === ""
+                        cellValue === null || cellValue === ""
                           ? "-"
                           : String(cellValue);
-
                       if (index === 0) {
                         return (
                           <td
@@ -392,7 +315,6 @@ export default function ModelListPage() {
                           </td>
                         );
                       }
-
                       return (
                         <td
                           key={fieldName}
@@ -402,7 +324,9 @@ export default function ModelListPage() {
                       );
                     })}
                     <td className="p-3 text-right">
-                      <AlertDialog>
+                      <AlertDialog
+                        open={!!itemToDelete && itemToDelete.id === item.id}
+                        onOpenChange={(open) => !open && setItemToDelete(null)}>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon">
@@ -417,16 +341,16 @@ export default function ModelListPage() {
                               <Pencil className="h-3.5 w-3.5 mr-2" />
                               {t("edit")}
                             </DropdownMenuItem>
-
                             <AlertDialogTrigger asChild>
-                              <DropdownMenuItem className="text-destructive focus:text-destructive">
+                              <DropdownMenuItem
+                                onSelect={() => setItemToDelete(item)}
+                                className="text-destructive focus:text-destructive">
                                 <Trash2 className="h-3.5 w-3.5 mr-2" />
                                 {t("delete")}
                               </DropdownMenuItem>
                             </AlertDialogTrigger>
                           </DropdownMenuContent>
                         </DropdownMenu>
-
                         <AlertDialogContent>
                           <AlertDialogHeader>
                             <AlertDialogTitle>
@@ -439,12 +363,11 @@ export default function ModelListPage() {
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
                             <AlertDialogAction
-                              onClick={() => {
-                                setItemToDelete(item);
-                                handleDelete();
-                              }}
-                              disabled={isDeleting}>
-                              {isDeleting ? "Deleting..." : t("delete")}
+                              onClick={handleDelete}
+                              disabled={deleteMutation.isPending}>
+                              {deleteMutation.isPending
+                                ? "Deleting..."
+                                : t("delete")}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
@@ -465,7 +388,7 @@ export default function ModelListPage() {
                     href="#"
                     onClick={(e) => {
                       e.preventDefault();
-                      handlePageChange(currentPage - 1);
+                      setCurrentPage((p) => Math.max(1, p - 1));
                     }}
                     className={
                       currentPage === 1 ? "pointer-events-none opacity-50" : ""
@@ -479,7 +402,7 @@ export default function ModelListPage() {
                       isActive={currentPage === i + 1}
                       onClick={(e) => {
                         e.preventDefault();
-                        handlePageChange(i + 1);
+                        setCurrentPage(i + 1);
                       }}>
                       {i + 1}
                     </PaginationLink>
@@ -490,7 +413,7 @@ export default function ModelListPage() {
                     href="#"
                     onClick={(e) => {
                       e.preventDefault();
-                      handlePageChange(currentPage + 1);
+                      setCurrentPage((p) => Math.min(totalPages, p + 1));
                     }}
                     className={
                       currentPage === totalPages

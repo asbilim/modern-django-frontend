@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { adminApi } from "@/lib/api";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 import { ModelForm } from "@/components/model-form";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -12,49 +13,26 @@ export default function CreateModelPage() {
   const t = useTranslations("ModelListPage");
   const params = useParams();
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const modelKey = params.modelKey as string;
 
-  const [modelConfig, setModelConfig] = useState<any | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchConfig = useCallback(async () => {
-    if (!session?.accessToken) return;
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const configUrl = `/api/admin/models/${modelKey}/config/`;
-      const configResponse = await adminApi.getModelConfig(
-        session.accessToken,
-        configUrl
-      );
-      if (configResponse.error) {
-        throw new Error(
-          `Failed to fetch model config: ${configResponse.error.message}`
-        );
-      }
-      setModelConfig(configResponse.data);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "An unknown error occurred";
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [modelKey, session]);
+  const {
+    data: modelConfig,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["modelConfig", modelKey],
+    queryFn: () => api.getModelConfig(`/api/admin/models/${modelKey}/config/`),
+    enabled: status === "authenticated",
+  });
 
   useEffect(() => {
-    if (status === "authenticated") {
-      fetchConfig();
-    } else if (status === "unauthenticated") {
+    if (status === "unauthenticated") {
       router.push("/login");
     }
-  }, [status, fetchConfig, router]);
+  }, [status, router]);
 
-  if (isLoading) {
+  if (isLoading || status === "loading") {
     return (
       <div>
         <Skeleton className="h-8 w-1/4 mb-6" />
@@ -69,7 +47,7 @@ export default function CreateModelPage() {
   }
 
   if (error) {
-    return <div className="text-destructive">{error}</div>;
+    return <div className="text-destructive">{error.message}</div>;
   }
 
   if (!modelConfig) {

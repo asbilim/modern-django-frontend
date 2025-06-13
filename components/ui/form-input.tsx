@@ -1,5 +1,9 @@
+"use client";
+
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { Label } from "./label";
+import { Input } from "./input";
 
 export interface FormInputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -7,27 +11,28 @@ export interface FormInputProps
   required?: boolean;
   className?: string;
   error?: string;
+  hideLabel?: boolean;
 }
 
-const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
-  ({ className, label, required, error, ...props }, ref) => {
+export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
+  ({ className, label, required, error, hideLabel, ...props }, ref) => {
     return (
-      <div className="form-group">
-        <label className="form-label" htmlFor={props.id || props.name}>
-          {label} {required && <span className="text-gray-500">*</span>}
-        </label>
-        <input
-          className={cn("form-input", error && "border-red-500", className)}
+      <div className="w-full space-y-2">
+        {!hideLabel && (
+          <Label htmlFor={props.id || props.name}>
+            {label}
+            {required && <span className="text-destructive ml-1">*</span>}
+          </Label>
+        )}
+        <Input
+          className={cn(error && "border-destructive", className)}
           ref={ref}
-          aria-invalid={error ? "true" : "false"}
           {...props}
         />
-        {error && <p className="form-error">{error}</p>}
+        {error && <p className="text-sm text-destructive">{error}</p>}
       </div>
     );
   }
 );
 
 FormInput.displayName = "FormInput";
-
-export { FormInput };
