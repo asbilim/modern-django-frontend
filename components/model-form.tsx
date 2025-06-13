@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { FormDatePicker } from "@/components/ui/form-datepicker";
 import { FormSelect } from "@/components/ui/form-select";
 import { FormFileUpload } from "@/components/ui/form-file-upload";
+import { FormJsonEditor } from "@/components/ui/form-json-editor";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Form,
@@ -48,16 +49,8 @@ interface ModelConfig {
   verbose_name: string;
   verbose_name_plural: string;
   fields: Record<string, FieldConfig>;
-  admin_config: {
-    list_display?: string[];
-    search_fields?: string[];
-  };
-  permissions: {
-    add: boolean;
-    change: boolean;
-    delete: boolean;
-    view: boolean;
-  };
+  admin_config: any;
+  permissions: any;
 }
 
 interface ModelFormProps {
@@ -119,12 +112,20 @@ export function ModelForm({
 
   const onSubmit = async (data: Record<string, any>) => {
     if (!session?.accessToken) return;
-
     setIsSaving(true);
 
-    // Note: react-hook-form doesn't directly support FormData with file uploads well out of the box.
-    // We will send as JSON and handle file uploads separately if needed, or use a different strategy.
-    // For now, assuming JSON submission. If file uploads are needed, this part needs more work.
+    const formData = new FormData();
+    Object.keys(data).forEach((key) => {
+      const value = data[key];
+      if (value instanceof FileList) {
+        if (value.length > 0) {
+          formData.append(key, value[0]);
+        }
+      } else if (value !== null && value !== undefined) {
+        formData.append(key, value);
+      }
+    });
+
     const api_url = `/api/admin/models/${modelKey}/`;
     let response;
     if (itemId) {
@@ -132,13 +133,13 @@ export function ModelForm({
         session.accessToken,
         api_url,
         itemId,
-        data
+        formData
       );
     } else {
       response = await adminApi.createModelItem(
         session.accessToken,
         api_url,
-        data
+        formData
       );
     }
 
@@ -223,18 +224,35 @@ export function ModelForm({
               );
               break;
             case "image_upload":
-            case "file_upload":
-              // react-hook-form's `field` is not directly compatible with file inputs.
-              // A common workaround is to use `register` for file inputs.
-              const { ref, ...rest } = field;
               component = (
                 <FormFileUpload
                   label={fieldConfig.verbose_name}
                   required={fieldConfig.required}
-                  helpText={
-                    field.value ? `Current: ${String(field.value)}` : ""
-                  }
+                  value={field.value}
+                  onRemove={() => form.setValue(fieldName, null)}
+                  accept="image/*"
                   {...form.register(fieldName)}
+                />
+              );
+              break;
+            case "file_upload":
+              component = (
+                <FormFileUpload
+                  label={fieldConfig.verbose_name}
+                  required={fieldConfig.required}
+                  value={field.value}
+                  onRemove={() => form.setValue(fieldName, null)}
+                  {...form.register(fieldName)}
+                />
+              );
+              break;
+            case "json_field":
+              component = (
+                <FormJsonEditor
+                  label={fieldConfig.verbose_name}
+                  required={fieldConfig.required}
+                  value={field.value}
+                  onChange={field.onChange}
                 />
               );
               break;
@@ -245,6 +263,7 @@ export function ModelForm({
                   label={fieldConfig.verbose_name}
                   required={fieldConfig.required}
                   {...field}
+                  value={field.value || ""}
                 />
               );
           }
@@ -263,7 +282,8 @@ export function ModelForm({
   };
 
   const nonTranslatedFields = Object.entries(modelConfig.fields).filter(
-    ([_, fieldConfig]) => !fieldConfig.is_translation && fieldConfig.editable
+    ([fieldName, fieldConfig]) =>
+      fieldName !== "id" && !fieldConfig.is_translation && fieldConfig.editable
   );
 
   const translationFields = Object.entries(modelConfig.fields)
@@ -280,7 +300,10 @@ export function ModelForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-8"
+        encType="multipart/form-data">
         <div className="space-y-6">
           {nonTranslatedFields.map(([fieldName, fieldConfig]) =>
             renderField(fieldName, fieldConfig)
