@@ -47,6 +47,7 @@ interface FormMultiSelectProps {
   creatableApiUrl?: string;
   onNewItemsCreated?: () => void;
   displayField?: string;
+  disabled?: boolean;
 }
 
 export function FormMultiSelect({
@@ -57,6 +58,7 @@ export function FormMultiSelect({
   creatableApiUrl,
   onNewItemsCreated,
   displayField = "name",
+  disabled,
 }: FormMultiSelectProps) {
   const [open, setOpen] = React.useState(false);
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -128,7 +130,8 @@ export function FormMultiSelect({
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-full justify-between h-auto min-h-10">
+            className="w-full justify-between h-auto min-h-10"
+            disabled={disabled}>
             <div className="flex flex-wrap gap-1">
               {selectedOptions.length > 0 ? (
                 selectedOptions.map((option) => (
@@ -194,6 +197,7 @@ export function FormMultiSelect({
                   return (
                     <CommandItem
                       key={option.value}
+                      disabled={disabled}
                       onSelect={() => {
                         if (isSelected) {
                           onChange(value.filter((v) => v !== option.value));

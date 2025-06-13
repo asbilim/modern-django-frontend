@@ -2,50 +2,124 @@
 
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useRouter } from "next/navigation";
-import { DynamicIcon } from "@/components/ui/dynamic-icon";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import { cn, getModelUrl } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { useEffect } from "react";
+import {
+  Bar,
+  BarChart,
+  Area,
+  AreaChart,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+} from "recharts";
+import { DynamicIcon } from "@/components/ui/dynamic-icon";
+import { AlertCircle } from "lucide-react";
 
-interface Model {
-  verbose_name: string;
-  api_url: string;
-  config_url?: string;
-  count?: number;
-  key?: string;
-  model_name?: string;
-  frontend_config?: {
-    icon?: string;
-    description?: string;
-    color?: string;
-  };
+interface Stat {
+  title: string;
+  value: string;
+  change: string;
+  icon: string;
+  description?: string;
 }
 
-interface AdminConfig {
-  models: Record<string, Model>;
-  categories: Record<string, string[]>;
-  frontend_options: {
-    categories: string[];
-    icons: string[];
-  };
+interface Activity {
+  type: string;
+  title: string;
+  user: string;
+  timestamp: string;
 }
 
-const fadeInUpVariants = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
+interface DashboardData {
+  stats: Stat[];
+  user_signups_over_time: { date: string; count: number }[];
+  content_creation_stats: { name: string; value: number }[];
+  activity_feed: Activity[];
+}
+
+// Mock data for immediate UI development
+const mockData: DashboardData = {
+  stats: [
+    {
+      title: "New Users",
+      value: "1,234",
+      change: "+56",
+      icon: "users",
+      description: "Since last 30 days",
+    },
+    {
+      title: "Sales",
+      value: "$54,321",
+      change: "-432",
+      icon: "dollar-sign",
+      description: "Since last 30 days",
+    },
+    {
+      title: "Pending Tasks",
+      value: "23",
+      change: "+5",
+      icon: "clock",
+      description: "In the last week",
+    },
+    {
+      title: "Total Projects",
+      value: "78",
+      change: "+2",
+      icon: "briefcase",
+      description: "In the last week",
+    },
+  ],
+  user_signups_over_time: [
+    { date: "Jan", count: 65 },
+    { date: "Feb", count: 59 },
+    { date: "Mar", count: 80 },
+    { date: "Apr", count: 81 },
+    { date: "May", count: 56 },
+    { date: "Jun", count: 55 },
+    { date: "Jul", count: 40 },
+  ],
+  content_creation_stats: [
+    { name: "Projects", value: 400 },
+    { name: "Tasks", value: 300 },
+    { name: "Users", value: 200 },
+    { name: "Categories", value: 278 },
+    { name: "Tags", value: 189 },
+  ],
+  activity_feed: [
+    {
+      type: "new_post",
+      title: 'New Post: "The Future of AI in Web Development"',
+      user: "admin",
+      timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 minutes ago
+    },
+    {
+      type: "new_comment",
+      title: 'New comment on "The Future of AI"',
+      user: "JaneDoe",
+      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
+    },
+    {
+      type: "new_user",
+      title: "New user signed up: john.doe@example.com",
+      user: "system",
+      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), // 5 hours ago
+    },
+  ],
 };
 
 export default function DashboardPage() {
@@ -54,12 +128,12 @@ export default function DashboardPage() {
   const router = useRouter();
 
   const {
-    data: adminConfig,
+    data: dashboardData,
     isLoading,
     error,
-  } = useQuery<AdminConfig>({
-    queryKey: ["adminConfig"],
-    queryFn: api.getAdminConfig,
+  } = useQuery<DashboardData>({
+    queryKey: ["dashboardStats"],
+    queryFn: api.getDashboardStats,
     enabled: status === "authenticated",
   });
 
@@ -69,6 +143,8 @@ export default function DashboardPage() {
     }
   }, [status, router]);
 
+  const data = dashboardData || mockData;
+
   if (isLoading || status === "loading") {
     return <DashboardSkeleton />;
   }
@@ -76,34 +152,19 @@ export default function DashboardPage() {
   if (error) {
     return (
       <div className="p-6 bg-destructive/10 border border-destructive rounded-lg">
-        <h2 className="text-xl font-bold text-destructive mb-2">Error</h2>
-        <p className="text-destructive">{error.message}</p>
+        <div className="flex items-center gap-3 mb-2">
+          <AlertCircle className="h-5 w-5 text-destructive" />
+          <h2 className="text-xl font-bold text-destructive">
+            Failed to load dashboard data
+          </h2>
+        </div>
+        <p className="text-destructive mb-4">{error.message}</p>
+        <p className="text-sm text-muted-foreground">
+          Displaying mock data as a fallback. Please ensure your backend
+          endpoint at `/api/admin/dashboard-stats/` is configured correctly.
+        </p>
       </div>
     );
-  }
-
-  // Group models by category
-  const modelsByCategory: Record<string, Model[]> = {};
-
-  if (adminConfig?.categories) {
-    // First initialize all categories with empty arrays
-    Object.keys(adminConfig.categories).forEach((category) => {
-      modelsByCategory[category] = [];
-    });
-
-    // Then populate models into their categories
-    Object.entries(adminConfig.models).forEach(([key, model]) => {
-      // Find which category this model belongs to
-      for (const [category, modelKeys] of Object.entries(
-        adminConfig.categories
-      )) {
-        if (modelKeys.includes(key)) {
-          const modelWithKey = { ...model, key };
-          modelsByCategory[category].push(modelWithKey);
-          break;
-        }
-      }
-    });
   }
 
   return (
@@ -113,74 +174,186 @@ export default function DashboardPage() {
         <p className="text-muted-foreground mt-2">{t("description")}</p>
       </div>
 
-      <div className="space-y-8">
-        {Object.entries(modelsByCategory).map(
-          ([category, models], categoryIndex) => (
-            <div key={category} className="space-y-4">
-              <h2 className="text-xl font-semibold tracking-tight">
-                {category}
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {models.map((model, modelIndex) => {
-                  const icon = model.frontend_config?.icon || "file";
-                  return (
-                    <motion.div
-                      key={model.api_url}
-                      variants={fadeInUpVariants}
-                      initial="initial"
-                      animate="animate"
-                      transition={{
-                        duration: 0.5,
-                        delay: (categoryIndex * 10 + modelIndex) * 0.05,
-                        ease: "easeOut",
-                      }}
-                      whileHover={{ y: -5, transition: { duration: 0.2 } }}>
-                      <Card className="h-full overflow-hidden transition-all hover:shadow-md hover:border-primary/50">
-                        <CardHeader className="pb-2">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                              <div className="p-2 rounded-md bg-primary/10">
-                                <DynamicIcon
-                                  name={icon}
-                                  className="h-5 w-5 text-primary"
-                                />
-                              </div>
-                              <CardTitle className="text-lg">
-                                {model.verbose_name}
-                              </CardTitle>
-                            </div>
-                            {model.count !== undefined && (
-                              <Badge variant="outline">{model.count}</Badge>
-                            )}
-                          </div>
-                          {model.frontend_config?.description && (
-                            <CardDescription className="mt-2">
-                              {model.frontend_config.description}
-                            </CardDescription>
-                          )}
-                        </CardHeader>
-                        <CardContent className="pb-2">
-                          <div className="h-16 overflow-hidden text-muted-foreground text-sm">
-                            {/* Optional additional content */}
-                          </div>
-                        </CardContent>
-                        <CardFooter>
-                          <a
-                            href={getModelUrl(model.model_name || "unknown")}
-                            className="text-primary hover:underline text-sm font-medium">
-                            View {model.verbose_name}
-                          </a>
-                        </CardFooter>
-                      </Card>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </div>
-          )
-        )}
+      {/* Stat Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+        {data.stats.map((stat) => (
+          <StatCard key={stat.title} {...stat} />
+        ))}
+      </div>
+
+      {/* Charts & Activity */}
+      <div className="grid grid-cols-1 xl:grid-cols-5 gap-4">
+        <div className="xl:col-span-3 grid gap-4">
+          <AreaChartCard data={data.user_signups_over_time} />
+          <BarChartCard data={data.content_creation_stats} />
+        </div>
+        <div className="xl:col-span-2">
+          <ActivityFeedCard data={data.activity_feed} />
+        </div>
       </div>
     </div>
+  );
+}
+
+function StatCard({ title, value, change, icon, description }: Stat) {
+  const isPositive = change.startsWith("+");
+  const isNegative = change.startsWith("-");
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        <DynamicIcon name={icon} className="h-4 w-4 text-muted-foreground" />
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{value}</div>
+        <p
+          className={cn(
+            "text-xs text-muted-foreground",
+            isPositive && "text-green-500",
+            isNegative && "text-red-500"
+          )}>
+          <span className="font-semibold">{change}</span> {description}
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function AreaChartCard({ data }: { data: any[] }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>User Signups</CardTitle>
+        <CardDescription>Monthly new user registrations.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ResponsiveContainer width="100%" height={300}>
+          <AreaChart data={data}>
+            <defs>
+              <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
+                <stop
+                  offset="5%"
+                  stopColor="var(--color-primary)"
+                  stopOpacity={0.8}
+                />
+                <stop
+                  offset="95%"
+                  stopColor="var(--color-primary)"
+                  stopOpacity={0}
+                />
+              </linearGradient>
+            </defs>
+            <XAxis dataKey="date" stroke="#888888" fontSize={12} />
+            <YAxis stroke="#888888" fontSize={12} />
+            <CartesianGrid strokeDasharray="3 3" className="opacity-50" />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "var(--color-background)",
+                border: "1px solid var(--color-border)",
+              }}
+            />
+            <Area
+              type="monotone"
+              dataKey="count"
+              stroke="var(--color-primary)"
+              fillOpacity={1}
+              fill="url(#colorUv)"
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
+  );
+}
+
+function BarChartCard({ data }: { data: any[] }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Content Overview</CardTitle>
+        <CardDescription>Total items per model.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ResponsiveContainer width="100%" height={250}>
+          <BarChart data={data}>
+            <XAxis dataKey="name" stroke="#888888" fontSize={12} />
+            <YAxis stroke="#888888" fontSize={12} />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "var(--color-background)",
+                border: "1px solid var(--color-border)",
+              }}
+            />
+            <Legend wrapperStyle={{ fontSize: "12px" }} />
+            <Bar
+              dataKey="value"
+              fill="var(--color-primary)"
+              radius={[4, 4, 0, 0]}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ActivityFeedCard({ data }: { data: Activity[] }) {
+  const t = useTranslations("Time");
+
+  const timeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+    let interval = seconds / 31536000;
+    if (interval > 1) return t("years", { count: Math.floor(interval) });
+    interval = seconds / 2592000;
+    if (interval > 1) return t("months", { count: Math.floor(interval) });
+    interval = seconds / 86400;
+    if (interval > 1) return t("days", { count: Math.floor(interval) });
+    interval = seconds / 3600;
+    if (interval > 1) return t("hours", { count: Math.floor(interval) });
+    interval = seconds / 60;
+    if (interval > 1) return t("minutes", { count: Math.floor(interval) });
+    return t("seconds", { count: Math.floor(seconds) });
+  };
+
+  const getIcon = (type: string) => {
+    switch (type) {
+      case "new_post":
+        return "file-plus";
+      case "new_comment":
+        return "message-square";
+      case "new_user":
+        return "user-plus";
+      default:
+        return "bell";
+    }
+  };
+
+  return (
+    <Card className="h-full">
+      <CardHeader>
+        <CardTitle>Recent Activity</CardTitle>
+        <CardDescription>What's new in your project.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          {data.map((activity, index) => (
+            <div key={index} className="flex items-start space-x-3">
+              <DynamicIcon
+                name={getIcon(activity.type)}
+                className="h-5 w-5 text-muted-foreground mt-1"
+              />
+              <div className="flex-1">
+                <p className="text-sm font-medium">{activity.title}</p>
+                <p className="text-xs text-muted-foreground">
+                  by {activity.user} &middot; {timeAgo(activity.timestamp)}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -191,25 +364,61 @@ function DashboardSkeleton() {
         <Skeleton className="h-8 w-64 mb-2" />
         <Skeleton className="h-4 w-96" />
       </div>
-      <div className="space-y-8">
-        {[1, 2, 3].map((category) => (
-          <div key={category} className="space-y-4">
-            <Skeleton className="h-6 w-48" />
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[1, 2, 3].map((model) => (
-                <div key={model} className="border rounded-lg p-6 space-y-4">
-                  <div className="flex items-center space-x-2">
-                    <Skeleton className="h-8 w-8" />
-                    <Skeleton className="h-5 w-32" />
-                  </div>
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-4 w-24 mt-4" />
-                </div>
-              ))}
-            </div>
-          </div>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i}>
+            <CardHeader>
+              <Skeleton className="h-5 w-3/4" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-7 w-1/2 mb-2" />
+              <Skeleton className="h-3 w-1/2" />
+            </CardContent>
+          </Card>
         ))}
+      </div>
+      <div className="grid grid-cols-1 xl:grid-cols-5 gap-4">
+        <div className="xl:col-span-3 grid gap-4">
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-5 w-1/2" />
+              <Skeleton className="h-4 w-3/4" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-[300px] w-full" />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-5 w-1/2" />
+              <Skeleton className="h-4 w-3/4" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-[250px] w-full" />
+            </CardContent>
+          </Card>
+        </div>
+        <div className="xl:col-span-2">
+          <Card className="h-full">
+            <CardHeader>
+              <Skeleton className="h-5 w-1/2" />
+              <Skeleton className="h-4 w-3/4" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="flex items-start space-x-3">
+                    <Skeleton className="h-5 w-5 rounded-full mt-1" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-3 w-2/3" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

@@ -15,11 +15,11 @@
     "name": "Name / Title",
     "createdAt": "Created At",
     "actions": "Actions",
-    "noItems": "No items found",
+    "noItems": "No items found for this model.",
     "edit": "Edit",
     "delete": "Delete",
-    "deleteTitle": "Delete Item",
-    "deleteConfirm": "Are you sure you want to delete this item? This action cannot be undone.",
+    "deleteTitle": "Are you sure?",
+    "deleteConfirm": "This action cannot be undone. This will permanently delete the item.",
     "tryAgain": "Try Again",
     "save": "Save"
   },
@@ -32,5 +32,13 @@
     "otp": "Enable Two-factor Authentication",
     "password": "Change Password",
     "save": "Save Changes"
+  },
+  "Time": {
+    "years": "{count, plural, =1 {# year ago} other {# years ago}}",
+    "months": "{count, plural, =1 {# month ago} other {# months ago}}",
+    "days": "{count, plural, =1 {# day ago} other {# days ago}}",
+    "hours": "{count, plural, =1 {# hour ago} other {# hours ago}}",
+    "minutes": "{count, plural, =1 {# minute ago} other {# minutes ago}}",
+    "seconds": "{count, plural, =1 {# second ago} other {# seconds ago}}"
   }
 }

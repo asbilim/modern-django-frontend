@@ -19,6 +19,8 @@ import { FormFileUpload } from "@/components/ui/form-file-upload";
 import { FormJsonEditor } from "@/components/ui/form-json-editor";
 import { FormMultiSelect } from "@/components/ui/form-multi-select";
 import { AiGenerateButton } from "@/components/ai-generate-button";
+import { FormMarkdownEditor } from "@/components/ui/form-markdown-editor";
+import { FormUuidInput } from "@/components/ui/form-uuid-input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Form,
@@ -165,6 +167,7 @@ export function ModelForm({
           fieldName={fieldName}
           fieldConfig={fieldConfig}
           formControl={form.control}
+          disabled={!fieldConfig.editable}
         />
       );
     }
@@ -186,11 +189,21 @@ export function ModelForm({
           let component;
 
           switch (componentType) {
+            case "uuid":
+              component = (
+                <FormUuidInput
+                  label={fieldConfig.verbose_name}
+                  disabled={!fieldConfig.editable}
+                  {...field}
+                />
+              );
+              break;
             case "textarea":
               component = (
                 <FormTextarea
                   label={fieldConfig.verbose_name}
                   required={fieldConfig.required}
+                  disabled={!fieldConfig.editable}
                   {...field}
                 />
               );
@@ -202,6 +215,7 @@ export function ModelForm({
                     id={fieldName}
                     checked={field.value}
                     onCheckedChange={field.onChange}
+                    disabled={!fieldConfig.editable}
                   />
                   <label
                     htmlFor={fieldName}
@@ -219,6 +233,7 @@ export function ModelForm({
                   value={field.value ? new Date(field.value) : undefined}
                   onChange={field.onChange}
                   required={fieldConfig.required}
+                  disabled={!fieldConfig.editable}
                 />
               );
               break;
@@ -230,6 +245,7 @@ export function ModelForm({
                   onChange={field.onChange}
                   value={field.value}
                   required={fieldConfig.required}
+                  disabled={!fieldConfig.editable}
                 />
               );
               break;
@@ -248,6 +264,7 @@ export function ModelForm({
                     componentType === "image_upload" ? "image/*" : undefined
                   }
                   onRemove={() => form.setValue(fieldName, null)}
+                  disabled={!fieldConfig.editable}
                   {...form.register(fieldName)}
                 />
               );
@@ -259,6 +276,18 @@ export function ModelForm({
                   required={fieldConfig.required}
                   value={field.value}
                   onChange={field.onChange}
+                  disabled={!fieldConfig.editable}
+                />
+              );
+              break;
+            case "markdown_editor":
+              component = (
+                <FormMarkdownEditor
+                  label={fieldConfig.verbose_name}
+                  required={fieldConfig.required}
+                  disabled={!fieldConfig.editable}
+                  value={field.value}
+                  onChange={field.onChange}
                 />
               );
               break;
@@ -267,6 +296,7 @@ export function ModelForm({
                 <FormInput
                   label={fieldConfig.verbose_name}
                   required={fieldConfig.required}
+                  disabled={!fieldConfig.editable}
                   {...field}
                 />
               );
@@ -352,10 +382,12 @@ function RelationField({
   fieldName,
   fieldConfig,
   formControl,
+  disabled,
 }: {
   fieldName: string;
   fieldConfig: FieldConfig;
   formControl: any;
+  disabled?: boolean;
 }) {
   const { status } = useSession();
   const { data: options, isLoading } = useQuery({
@@ -387,6 +419,7 @@ function RelationField({
               onChange={field.onChange}
               value={String(field.value || "")}
               required={fieldConfig.required}
+              disabled={disabled}
             />
           ) : (
             <FormMultiSelect
@@ -395,6 +428,7 @@ function RelationField({
               onChange={field.onChange}
               value={field.value || []}
               required={fieldConfig.required}
+              disabled={disabled}
             />
           )}
           {fieldConfig.help_text && (
