@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import * as React from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
-import { useApiClient } from "@/hooks/useApiClient";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -16,6 +18,7 @@ import { FormSelect } from "@/components/ui/form-select";
 import { FormFileUpload } from "@/components/ui/form-file-upload";
 import { FormJsonEditor } from "@/components/ui/form-json-editor";
 import { FormMultiSelect } from "@/components/ui/form-multi-select";
+import { AiGenerateButton } from "@/components/ai-generate-button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Form,
@@ -70,93 +73,102 @@ export function ModelForm({
   const t = useTranslations("ModelListPage");
   const router = useRouter();
   const { toast } = useToast();
-  const { data: session } = useSession();
-  const apiClient = useApiClient();
-  const [relationOptions, setRelationOptions] = useState<Record<string, any[]>>(
-    {}
-  );
-  const [isSaving, setIsSaving] = useState(false);
+  const { status } = useSession();
+  const queryClient = useQueryClient();
+
+  const defaultValues = React.useMemo(() => {
+    const defaults: Record<string, any> = {};
+    if (modelConfig && modelConfig.fields) {
+      for (const fieldName in modelConfig.fields) {
+        const config = modelConfig.fields[fieldName];
+        if (config.ui_component === "checkbox") {
+          defaults[fieldName] = false;
+        } else if (config.ui_component === "manytomany_select") {
+          defaults[fieldName] = [];
+        } else if (config.type === "JSONField") {
+          defaults[fieldName] = null;
+        } else {
+          defaults[fieldName] = "";
+        }
+      }
+    }
+    return { ...defaults, ...(initialData || {}) };
+  }, [modelConfig, initialData]);
 
   const form = useForm({
-    defaultValues: initialData || {},
+    defaultValues,
   });
 
-  const fetchRelationOptions = useCallback(
-    async (field: FieldConfig) => {
-      if (!session || !field.related_model) return;
-
-      const response = await apiClient.getModelList(
-        field.related_model.api_url
-      );
-      if (response.data?.results) {
-        setRelationOptions((prev) => ({
-          ...prev,
-          [field.name]: response.data.results.map((item: any) => ({
-            value: item.id.toString(),
-            label: item.name || item.title || item.username || `ID: ${item.id}`,
-          })),
-        }));
+  const mutation = useMutation({
+    mutationFn: (data: Record<string, any> | FormData) => {
+      const api_url = `/api/admin/models/${modelKey}/`;
+      if (itemId) {
+        return api.updateModelItem(api_url, itemId, data);
       }
+      return api.createModelItem(api_url, data);
     },
-    [session, apiClient]
-  );
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: `Item ${itemId ? "updated" : "created"} successfully.`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["modelItems", modelKey] });
+      queryClient.invalidateQueries({ queryKey: ["adminConfig"] }); // Invalidate dashboard counts
+      router.push(`/models/${modelKey}`);
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message,
+      });
+    },
+  });
 
-  useEffect(() => {
-    Object.values(modelConfig.fields).forEach((field) => {
-      if (
-        field.related_model &&
-        (field.ui_component === "foreignkey_select" ||
-          field.ui_component === "manytomany_select")
-      ) {
-        fetchRelationOptions(field);
-      }
-    });
-  }, [modelConfig.fields, fetchRelationOptions]);
-
-  const onSubmit = async (data: Record<string, any>) => {
-    if (!session) return;
-    setIsSaving(true);
-
+  const onSubmit = (data: Record<string, any>) => {
     const formData = new FormData();
     Object.keys(data).forEach((key) => {
       const value = data[key];
       if (value instanceof FileList && value.length > 0) {
         formData.append(key, value[0]);
       } else if (Array.isArray(value)) {
-        // Handle array for multi-select
-        value.forEach((item) => formData.append(key, item));
+        value.forEach((item) => formData.append(key, String(item)));
       } else if (
         value !== null &&
         value !== undefined &&
         !(value instanceof FileList)
       ) {
-        formData.append(key, value);
+        formData.append(key, String(value));
       }
     });
 
-    const api_url = `/api/admin/models/${modelKey}/`;
-    const response = itemId
-      ? await apiClient.updateModelItem(api_url, itemId, formData)
-      : await apiClient.createModelItem(api_url, formData);
-
-    setIsSaving(false);
-
-    if (response.error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: response.error.message,
-      });
-    } else {
-      toast({
-        title: "Success",
-        description: `Item ${itemId ? "updated" : "created"} successfully.`,
-      });
-      router.push(`/models/${modelKey}`);
+    // Check if there are any files to upload. If not, send as JSON.
+    let hasFiles = false;
+    for (const value of formData.values()) {
+      if (value instanceof File) {
+        hasFiles = true;
+        break;
+      }
     }
+
+    mutation.mutate(hasFiles ? formData : data);
   };
 
   const renderField = (fieldName: string, fieldConfig: FieldConfig) => {
+    if (
+      fieldConfig.related_model &&
+      (fieldConfig.ui_component === "foreignkey_select" ||
+        fieldConfig.ui_component === "manytomany_select")
+    ) {
+      return (
+        <RelationField
+          fieldName={fieldName}
+          fieldConfig={fieldConfig}
+          formControl={form.control}
+        />
+      );
+    }
+
     // Determine the component based on type and ui_component hint
     let componentType = fieldConfig.ui_component;
     if (fieldConfig.type === "JSONField") {
@@ -176,17 +188,26 @@ export function ModelForm({
           switch (componentType) {
             case "textarea":
               component = (
-                <FormTextarea required={fieldConfig.required} {...field} />
+                <FormTextarea
+                  label={fieldConfig.verbose_name}
+                  required={fieldConfig.required}
+                  {...field}
+                />
               );
               break;
             case "checkbox":
               component = (
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 pt-2">
                   <Checkbox
+                    id={fieldName}
                     checked={field.value}
                     onCheckedChange={field.onChange}
                   />
-                  <FormLabel>{fieldConfig.verbose_name}</FormLabel>
+                  <label
+                    htmlFor={fieldName}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    {fieldConfig.verbose_name}
+                  </label>
                 </div>
               );
               break;
@@ -206,33 +227,15 @@ export function ModelForm({
                 <FormSelect
                   label={fieldConfig.verbose_name}
                   options={fieldConfig.choices || []}
-                  onValueChange={field.onChange}
+                  onChange={field.onChange}
                   value={field.value}
                   required={fieldConfig.required}
                 />
               );
               break;
-            case "foreignkey_select":
-              component = (
-                <FormSelect
-                  label={fieldConfig.verbose_name}
-                  options={relationOptions[fieldName] || []}
-                  onValueChange={field.onChange}
-                  value={String(field.value || "")}
-                  required={fieldConfig.required}
-                />
-              );
-              break;
-            case "manytomany_select":
-              component = (
-                <FormMultiSelect
-                  label={fieldConfig.verbose_name}
-                  options={relationOptions[fieldName] || []}
-                  onChange={field.onChange}
-                  value={field.value || []}
-                  required={fieldConfig.required}
-                />
-              );
+            case "foreignkey_select": // This is now handled by RelationField, but keeping as fallback
+            case "manytomany_select": // This is now handled by RelationField, but keeping as fallback
+              component = <p>Loading options...</p>;
               break;
             case "image_upload":
             case "file_upload":
@@ -262,19 +265,15 @@ export function ModelForm({
             default:
               component = (
                 <FormInput
+                  label={fieldConfig.verbose_name}
                   required={fieldConfig.required}
                   {...field}
-                  value={field.value ?? ""}
                 />
               );
           }
           return (
             <FormItem>
-              {["checkbox"].includes(componentType) ? (
-                component
-              ) : (
-                <FormControl>{component}</FormControl>
-              )}
+              <FormControl>{component}</FormControl>
               {fieldConfig.help_text && (
                 <FormDescription>{fieldConfig.help_text}</FormDescription>
               )}
@@ -286,82 +285,124 @@ export function ModelForm({
     );
   };
 
-  const nonTranslatedFields = Object.entries(modelConfig.fields).filter(
-    ([fieldName, fieldConfig]) =>
-      fieldName !== "id" && !fieldConfig.is_translation && fieldConfig.editable
+  // Main form rendering logic
+  const nonTranslationFields = Object.entries(modelConfig.fields).filter(
+    ([fieldName, config]) =>
+      fieldName !== "id" && !config.is_translation && config.editable
   );
-
-  const translationFields = Object.entries(modelConfig.fields)
-    .filter(([_, fieldConfig]) => fieldConfig.is_translation)
-    .reduce((acc, [fieldName, fieldConfig]) => {
-      const baseName = fieldName.substring(0, fieldName.lastIndexOf("_"));
-      const lang = fieldName.substring(fieldName.lastIndexOf("_") + 1);
-      if (!acc[baseName]) {
-        acc[baseName] = { baseConfig: null, translations: {} };
-      }
-      acc[baseName].translations[lang] = { fieldName, fieldConfig };
-      return acc;
-    }, {} as Record<string, any>);
+  const translationFields = Object.entries(modelConfig.fields).filter(
+    ([, config]) => config.is_translation && config.editable
+  );
+  const languages = [
+    ...new Set(
+      translationFields.map(([, config]) => config.name.split("_").pop())
+    ),
+  ];
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-8"
-        encType="multipart/form-data">
-        <div className="space-y-6">
-          {nonTranslatedFields.map(([fieldName, fieldConfig]) =>
-            renderField(fieldName, fieldConfig)
-          )}
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <div className="flex justify-end">
+          <AiGenerateButton modelConfig={modelConfig} form={form} />
         </div>
 
-        {Object.keys(translationFields).length > 0 && (
-          <Tabs defaultValue="en">
+        <div className="p-6 border rounded-lg space-y-6">
+          {nonTranslationFields.map(([fieldName, fieldConfig]) => (
+            <React.Fragment key={fieldName}>
+              {renderField(fieldName, fieldConfig)}
+            </React.Fragment>
+          ))}
+        </div>
+
+        {translationFields.length > 0 && (
+          <Tabs defaultValue={languages[0] || "en"}>
             <TabsList>
-              <TabsTrigger value="en">English</TabsTrigger>
-              <TabsTrigger value="de">German</TabsTrigger>
-              <TabsTrigger value="fr">French</TabsTrigger>
+              {languages.map((lang) => (
+                <TabsTrigger key={lang} value={lang!}>
+                  {lang!.toUpperCase()}
+                </TabsTrigger>
+              ))}
             </TabsList>
-            {Object.entries(translationFields).map(([baseName, group]) => {
-              const baseFieldConfig =
-                modelConfig.fields[baseName] ||
-                group.translations.en.fieldConfig;
-              return (
-                <div key={baseName} className="mt-4">
-                  <h3 className="text-lg font-medium mb-2">
-                    {baseFieldConfig.verbose_name}
-                  </h3>
-                  <TabsContent value="en">
-                    {group.translations.en &&
-                      renderField(
-                        group.translations.en.fieldName,
-                        group.translations.en.fieldConfig
-                      )}
-                  </TabsContent>
-                  <TabsContent value="de">
-                    {group.translations.de &&
-                      renderField(
-                        group.translations.de.fieldName,
-                        group.translations.de.fieldConfig
-                      )}
-                  </TabsContent>
-                  <TabsContent value="fr">
-                    {group.translations.fr &&
-                      renderField(
-                        group.translations.fr.fieldName,
-                        group.translations.fr.fieldConfig
-                      )}
-                  </TabsContent>
+            {languages.map((lang) => (
+              <TabsContent key={lang} value={lang!} className="pt-4">
+                <div className="p-6 border rounded-lg space-y-6">
+                  {translationFields
+                    .filter(([, config]) => config.name.endsWith(`_${lang}`))
+                    .map(([fieldName, fieldConfig]) => (
+                      <React.Fragment key={fieldName}>
+                        {renderField(fieldName, fieldConfig)}
+                      </React.Fragment>
+                    ))}
                 </div>
-              );
-            })}
+              </TabsContent>
+            ))}
           </Tabs>
         )}
 
-        <Button type="submit" disabled={isSaving}>
-          {isSaving ? "Saving..." : t("save")}
+        <Button type="submit" disabled={mutation.isPending}>
+          {mutation.isPending ? "Saving..." : t("save")}
         </Button>
       </form>
     </Form>
+  );
+}
+
+// A new component to handle fetching relation options
+function RelationField({
+  fieldName,
+  fieldConfig,
+  formControl,
+}: {
+  fieldName: string;
+  fieldConfig: FieldConfig;
+  formControl: any;
+}) {
+  const { status } = useSession();
+  const { data: options, isLoading } = useQuery({
+    queryKey: ["relationOptions", fieldConfig.related_model?.api_url],
+    queryFn: () =>
+      api.getModelList(fieldConfig.related_model!.api_url).then((res) =>
+        res.results.map((item: any) => ({
+          value: item.id.toString(),
+          label: item.name || item.title || item.username || `ID: ${item.id}`,
+        }))
+      ),
+    enabled: status === "authenticated" && !!fieldConfig.related_model?.api_url,
+  });
+
+  if (isLoading) {
+    return <p>Loading options for {fieldConfig.verbose_name}...</p>;
+  }
+
+  return (
+    <FormField
+      control={formControl}
+      name={fieldName}
+      render={({ field }) => (
+        <FormItem>
+          {fieldConfig.ui_component === "foreignkey_select" ? (
+            <FormSelect
+              label={fieldConfig.verbose_name}
+              options={options || []}
+              onChange={field.onChange}
+              value={String(field.value || "")}
+              required={fieldConfig.required}
+            />
+          ) : (
+            <FormMultiSelect
+              label={fieldConfig.verbose_name}
+              options={options || []}
+              onChange={field.onChange}
+              value={field.value || []}
+              required={fieldConfig.required}
+            />
+          )}
+          {fieldConfig.help_text && (
+            <FormDescription>{fieldConfig.help_text}</FormDescription>
+          )}
+          <FormMessage />
+        </FormItem>
+      )}
+    />
   );
 }

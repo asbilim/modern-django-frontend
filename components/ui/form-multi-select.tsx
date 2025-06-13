@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Check, ChevronsUpDown, PlusCircle, X } from "lucide-react";
+import { Check, ChevronsUpDown, PlusCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,8 +29,8 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { useApiClient } from "@/hooks/useApiClient";
-import { useSession } from "next-auth/react";
+import { api } from "@/lib/api";
+import { useMutation } from "@tanstack/react-query";
 
 export interface Option {
   value: any;
@@ -41,6 +41,8 @@ interface FormMultiSelectProps {
   options: Option[];
   value: any[];
   onChange: (value: any[]) => void;
+  label: string;
+  required?: boolean;
   placeholder?: string;
   creatableApiUrl?: string;
   onNewItemsCreated?: () => void;
@@ -59,10 +61,19 @@ export function FormMultiSelect({
   const [open, setOpen] = React.useState(false);
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [newItemsInput, setNewItemsInput] = React.useState("");
-  const [isCreating, setIsCreating] = React.useState(false);
   const { toast } = useToast();
-  const { data: session } = useSession();
-  const apiClient = useApiClient();
+
+  const createMutation = useMutation({
+    mutationFn: (itemName: string) =>
+      api.createModelItem(creatableApiUrl!, { [displayField]: itemName }),
+    onError: (error: Error, itemName) => {
+      toast({
+        variant: "destructive",
+        title: `Error creating "${itemName}"`,
+        description: error.message,
+      });
+    },
+  });
 
   const handleCreateNewItems = async () => {
     if (!creatableApiUrl) {
@@ -74,57 +85,34 @@ export function FormMultiSelect({
       return;
     }
 
-    setIsCreating(true);
     const itemNames = newItemsInput
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
 
-    try {
-      const createPromises = itemNames.map((name) =>
-        apiClient.createModelItem(creatableApiUrl, {
-          [displayField]: name,
-        })
-      );
-
-      const results = await Promise.all(createPromises);
-
-      const createdItems = results
-        .map((res) => res.data)
-        .filter(Boolean)
-        .map((item) => item.id);
-
-      if (createdItems.length > 0) {
-        toast({
-          title: "Success",
-          description: `${createdItems.length} new item(s) created.`,
-        });
-
-        onNewItemsCreated?.();
-        onChange([...value, ...createdItems]);
-      }
-
-      results.forEach((res, index) => {
-        if (res.error) {
-          toast({
-            variant: "destructive",
-            title: `Error creating "${itemNames[index]}"`,
-            description: res.error.message,
-          });
+    const createdItems: any[] = [];
+    for (const name of itemNames) {
+      try {
+        const newItem = await createMutation.mutateAsync(name);
+        if (newItem?.id) {
+          createdItems.push(newItem.id);
         }
-      });
-
-      setDialogOpen(false);
-      setNewItemsInput("");
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Creation Failed",
-        description: "An unexpected error occurred.",
-      });
-    } finally {
-      setIsCreating(false);
+      } catch (e) {
+        // Errors are handled by the mutation's onError callback
+      }
     }
+
+    if (createdItems.length > 0) {
+      toast({
+        title: "Success",
+        description: `${createdItems.length} new item(s) created.`,
+      });
+      onNewItemsCreated?.();
+      onChange([...value, ...createdItems]);
+    }
+
+    setDialogOpen(false);
+    setNewItemsInput("");
   };
 
   const selectedValues = new Set(value);
@@ -193,8 +181,8 @@ export function FormMultiSelect({
                       </Button>
                       <Button
                         onClick={handleCreateNewItems}
-                        disabled={isCreating}>
-                        {isCreating ? "Creating..." : "Create"}
+                        disabled={createMutation.isPending}>
+                        {createMutation.isPending ? "Creating..." : "Create"}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
