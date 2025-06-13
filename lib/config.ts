@@ -63,6 +63,11 @@ export const dashboardConfig: DashboardConfig = {
       icon: "tag",
     },
     {
+      name: "AI Tools",
+      href: "/ai-tools",
+      icon: "sparkles",
+    },
+    {
       name: "Settings",
       href: "/settings",
       icon: "settings",

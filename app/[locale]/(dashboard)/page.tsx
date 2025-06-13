@@ -1,11 +1,10 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { motion, Variant } from "framer-motion";
-import { adminApi } from "@/lib/api";
-import { useToast } from "@/hooks/use-toast";
+import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { DynamicIcon } from "@/components/ui/dynamic-icon";
 import {
@@ -19,13 +18,15 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { cn, getModelUrl } from "@/lib/utils";
+import { useEffect } from "react";
 
 interface Model {
-  name: string;
+  verbose_name: string;
   api_url: string;
-  config_url: string;
-  count: number;
+  config_url?: string;
+  count?: number;
   key?: string;
+  model_name?: string;
   frontend_config?: {
     icon?: string;
     description?: string;
@@ -43,69 +44,30 @@ interface AdminConfig {
 }
 
 const fadeInUpVariants = {
-  initial: {
-    opacity: 0,
-    y: 20,
-  },
-  animate: {
-    opacity: 1,
-    y: 0,
-  },
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
 };
 
 export default function DashboardPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const t = useTranslations("DashboardPage");
   const router = useRouter();
-  const [adminConfig, setAdminConfig] = useState<AdminConfig | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
+
+  const {
+    data: adminConfig,
+    isLoading,
+    error,
+  } = useQuery<AdminConfig>({
+    queryKey: ["adminConfig"],
+    queryFn: api.getAdminConfig,
+    enabled: status === "authenticated",
+  });
 
   useEffect(() => {
-    if (status === "loading") {
-      return;
-    }
     if (status === "unauthenticated") {
       router.push("/login");
-      return;
     }
-
-    async function fetchData() {
-      setIsLoading(true);
-      if (!session?.accessToken) {
-        setError("Authentication required");
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const response = await adminApi.getAdminConfig(session.accessToken);
-        if (response.error) {
-          throw new Error(
-            `Failed to fetch admin configuration: ${response.error.message}`
-          );
-        }
-
-        setAdminConfig(response.data as AdminConfig);
-      } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "An unknown error occurred";
-        setError(errorMessage);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: errorMessage,
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    if (session) {
-      fetchData();
-    }
-  }, [session, status, toast, router]);
+  }, [status, router]);
 
   if (isLoading || status === "loading") {
     return <DashboardSkeleton />;
@@ -115,7 +77,7 @@ export default function DashboardPage() {
     return (
       <div className="p-6 bg-destructive/10 border border-destructive rounded-lg">
         <h2 className="text-xl font-bold text-destructive mb-2">Error</h2>
-        <p className="text-destructive">{error}</p>
+        <p className="text-destructive">{error.message}</p>
       </div>
     );
   }
@@ -184,10 +146,12 @@ export default function DashboardPage() {
                                 />
                               </div>
                               <CardTitle className="text-lg">
-                                {model.name}
+                                {model.verbose_name}
                               </CardTitle>
                             </div>
-                            <Badge variant="outline">{model.count}</Badge>
+                            {model.count !== undefined && (
+                              <Badge variant="outline">{model.count}</Badge>
+                            )}
                           </div>
                           {model.frontend_config?.description && (
                             <CardDescription className="mt-2">
@@ -202,9 +166,9 @@ export default function DashboardPage() {
                         </CardContent>
                         <CardFooter>
                           <a
-                            href={getModelUrl(model.key || "unknown")}
+                            href={getModelUrl(model.model_name || "unknown")}
                             className="text-primary hover:underline text-sm font-medium">
-                            View {model.name}
+                            View {model.verbose_name}
                           </a>
                         </CardFooter>
                       </Card>

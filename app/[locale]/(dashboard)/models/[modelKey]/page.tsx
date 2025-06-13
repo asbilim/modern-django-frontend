@@ -3,12 +3,19 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import { adminApi } from "@/lib/api";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useParams, useRouter } from "next/navigation";
-import { PlusIcon, Trash2, Pencil, AlertCircle } from "lucide-react";
+import {
+  PlusIcon,
+  Trash2,
+  Pencil,
+  AlertCircle,
+  MoreHorizontal,
+} from "lucide-react";
 import { getModelUrl, formatDate } from "@/lib/utils";
 import { DynamicIcon } from "@/components/ui/dynamic-icon";
 import {
@@ -23,16 +30,73 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+
+const PAGE_SIZE = 15;
 
 interface Model {
-  name: string;
+  verbose_name: string;
   api_url: string;
-  config_url: string;
-  count: number;
+  config_url?: string;
+  count?: number;
+  model_name?: string;
   frontend_config?: {
     icon?: string;
     description?: string;
     color?: string;
+  };
+}
+
+interface FieldConfig {
+  name: string;
+  verbose_name: string;
+  type: string;
+  ui_component: string;
+  required: boolean;
+  max_length?: number;
+  help_text?: string;
+  is_translation: boolean;
+  related_model?: {
+    app_label: string;
+    model_name: string;
+    api_url: string;
+  };
+}
+
+interface ModelConfig {
+  model_name: string;
+  verbose_name: string;
+  verbose_name_plural: string;
+  fields: Record<string, FieldConfig>;
+  admin_config: {
+    list_display?: string[];
+    search_fields?: string[];
+  };
+  permissions: {
+    add: boolean;
+    change: boolean;
+    delete: boolean;
+    view: boolean;
+  };
+  frontend_config: {
+    icon?: string;
+    category?: string;
+    description?: string;
+    tree_view?: boolean;
+    parent_field?: string;
   };
 }
 
@@ -46,134 +110,94 @@ interface ModelItem {
   [key: string]: any;
 }
 
+interface PaginatedResponse<T> {
+  results: T[];
+  count: number;
+}
+
 export default function ModelListPage() {
   const t = useTranslations("ModelListPage");
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
   const modelKey = params.modelKey as string;
-  const { data: session, status } = useSession();
+  const { status } = useSession();
+  const queryClient = useQueryClient();
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [adminConfig, setAdminConfig] = useState<AdminConfig | null>(null);
-  const [modelItems, setModelItems] = useState<ModelItem[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const [itemToDelete, setItemToDelete] = useState<ModelItem | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
 
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  const { data: adminConfig } = useQuery<AdminConfig>({
+    queryKey: ["adminConfig"],
+    queryFn: api.getAdminConfig,
+    enabled: status === "authenticated",
+  });
 
-    if (!session?.accessToken) {
-      setError("Authentication required");
-      setIsLoading(false);
-      return;
-    }
+  const model = adminConfig?.models
+    ? Object.values(adminConfig.models).find((m) => m.model_name === modelKey)
+    : undefined;
 
-    try {
-      // Fetch admin configuration
-      const configResponse = await adminApi.getAdminConfig(session.accessToken);
-      if (configResponse.error) {
-        throw new Error(
-          `Failed to fetch admin configuration: ${configResponse.error.message}`
-        );
-      }
+  const {
+    data: modelConfig,
+    isLoading: isLoadingConfig,
+    error: errorConfig,
+  } = useQuery<ModelConfig>({
+    queryKey: ["modelConfig", modelKey],
+    queryFn: () => api.getModelConfig(`/api/admin/models/${modelKey}/config/`),
+    enabled: !!model,
+  });
 
-      const config = configResponse.data as AdminConfig;
-      setAdminConfig(config);
+  const {
+    data: modelData,
+    isLoading: isLoadingItems,
+    error: errorItems,
+  } = useQuery<PaginatedResponse<ModelItem>>({
+    queryKey: ["modelItems", modelKey, currentPage],
+    queryFn: () =>
+      api.getModelList(model!.api_url, {
+        page: currentPage.toString(),
+        page_size: PAGE_SIZE.toString(),
+      }),
+    enabled: !!model,
+  });
 
-      // Check if the requested model exists
-      const model = config.models[modelKey];
-      if (!model) {
-        throw new Error(`Model ${modelKey} not found`);
-      }
-
-      // Fetch model items
-      const modelResponse = await adminApi.getModelList(
-        session.accessToken,
-        model.api_url
-      );
-      if (modelResponse.error) {
-        throw new Error(
-          `Failed to fetch model data: ${modelResponse.error.message}`
-        );
-      }
-
-      setModelItems(modelResponse.data?.results || []);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "An unknown error occurred";
-      setError(errorMessage);
+  const deleteMutation = useMutation({
+    mutationFn: (id: string | number) =>
+      api.deleteModelItem(model!.api_url, id),
+    onSuccess: (_, deletedId) => {
+      toast({
+        title: "Success",
+        description: `Item ${deletedId} was deleted successfully.`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["modelItems", modelKey] });
+    },
+    onError: (error: Error, deletedId) => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: errorMessage,
+        description: `Failed to delete item ${deletedId}: ${error.message}`,
       });
-    } finally {
-      setIsLoading(false);
+    },
+  });
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
     }
-  }, [modelKey, session, toast]);
+  }, [status, router]);
 
-  const handleDelete = async () => {
-    if (
-      !itemToDelete ||
-      !session?.accessToken ||
-      !adminConfig?.models[modelKey]?.api_url
-    ) {
-      return;
-    }
-
-    setIsDeleting(true);
-
-    try {
-      const deleteResponse = await adminApi.deleteModelItem(
-        session.accessToken,
-        adminConfig.models[modelKey].api_url,
-        itemToDelete.id
-      );
-
-      if (deleteResponse.error) {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: `Failed to delete item: ${deleteResponse.error.message}`,
-        });
-      } else {
-        toast({
-          title: "Success",
-          description: `Item ${itemToDelete.id} was deleted successfully.`,
-        });
-        setModelItems((prev) => prev.filter((i) => i.id !== itemToDelete.id));
-      }
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "An error occurred while deleting the item.",
-      });
-    } finally {
-      setIsDeleting(false);
+  const handleDelete = () => {
+    if (itemToDelete) {
+      deleteMutation.mutate(itemToDelete.id);
       setItemToDelete(null);
     }
   };
 
-  useEffect(() => {
-    if (status === "loading") {
-      return;
-    }
-    if (status === "unauthenticated") {
-      router.push("/login");
-      return;
-    }
-
-    if (session) {
-      fetchData();
-    }
-  }, [session, status, router, fetchData]);
-
-  const model = adminConfig?.models[modelKey];
-  const modelIcon = model?.frontend_config?.icon || "file";
+  const isLoading = isLoadingConfig || isLoadingItems;
+  const error = errorConfig || errorItems;
+  const modelItems = modelData?.results || [];
+  const totalItems = modelData?.count || 0;
+  const totalPages = Math.ceil(totalItems / PAGE_SIZE);
 
   if (isLoading || status === "loading") {
     return (
@@ -183,11 +207,9 @@ export default function ModelListPage() {
           <Skeleton className="h-10 w-32" />
         </div>
         <div className="space-y-4">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} className="h-10 w-full" />
+          ))}
         </div>
       </div>
     );
@@ -200,13 +222,22 @@ export default function ModelListPage() {
           <AlertCircle className="h-5 w-5 text-destructive" />
           <h2 className="text-xl font-bold text-destructive">Error</h2>
         </div>
-        <p className="text-destructive mb-4">{error}</p>
-        <Button variant="outline" onClick={fetchData}>
+        <p className="text-destructive mb-4">{error.message}</p>
+        <Button
+          variant="outline"
+          onClick={() =>
+            queryClient.invalidateQueries({
+              queryKey: ["modelItems", modelKey, currentPage],
+            })
+          }>
           {t("tryAgain")}
         </Button>
       </div>
     );
   }
+
+  const modelIcon = model?.frontend_config?.icon || "file";
+  const displayFields = modelConfig?.admin_config?.list_display || [];
 
   return (
     <div>
@@ -215,14 +246,16 @@ export default function ModelListPage() {
           <div className="p-2 rounded-md bg-primary/10">
             <DynamicIcon name={modelIcon} className="h-5 w-5 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold">{model?.name || modelKey}</h1>
+          <h1 className="text-2xl font-bold">
+            {modelConfig?.verbose_name || modelKey}
+          </h1>
           <Badge variant="outline" className="ml-2">
-            {modelItems.length} item{modelItems.length !== 1 ? "s" : ""}
+            {totalItems} item{totalItems !== 1 ? "s" : ""}
           </Badge>
         </div>
         <Button
           onClick={() => router.push(getModelUrl(modelKey, "create"))}
-          disabled={isLoading}>
+          disabled={deleteMutation.isPending}>
           <PlusIcon className="h-4 w-4 mr-2" />
           {t("createNew")}
         </Button>
@@ -233,17 +266,15 @@ export default function ModelListPage() {
           <table className="w-full">
             <thead className="bg-muted/50">
               <tr>
+                {displayFields.map((fieldName) => (
+                  <th
+                    key={fieldName}
+                    className="p-3 text-left font-medium text-sm text-muted-foreground">
+                    {modelConfig?.fields[fieldName]?.verbose_name || fieldName}
+                  </th>
+                ))}
                 <th className="p-3 text-left font-medium text-sm text-muted-foreground">
-                {t("id")}
-                </th>
-                <th className="p-3 text-left font-medium text-sm text-muted-foreground">
-                {t("name")}
-                </th>
-                <th className="p-3 text-left font-medium text-sm text-muted-foreground">
-                {t("createdAt")}
-                </th>
-                <th className="p-3 text-left font-medium text-sm text-muted-foreground">
-                {t("actions")}
+                  {t("actions")}
                 </th>
               </tr>
             </thead>
@@ -251,7 +282,7 @@ export default function ModelListPage() {
               {modelItems.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={displayFields.length + 1}
                     className="p-4 text-center text-muted-foreground">
                     {t("noItems")}
                   </td>
@@ -261,57 +292,86 @@ export default function ModelListPage() {
                   <tr
                     key={item.id}
                     className="hover:bg-muted/50 transition-colors">
-                    <td className="p-3 text-sm">{item.id}</td>
-                    <td className="p-3 text-sm font-medium">
-                      <a
-                        href={getModelUrl(modelKey, item.id)}
-                        className="hover:text-primary hover:underline">
-                        {item.name || item.title || "-"}
-                      </a>
-                    </td>
-                    <td className="p-3 text-sm text-muted-foreground">
-                      {formatDate(item.created_at)}
-                    </td>
-                    <td className="p-3">
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            router.push(getModelUrl(modelKey, item.id))
-                          }>
-                          <Pencil className="h-3.5 w-3.5 mr-1" />
-                          {t("edit")}
-                        </Button>
-
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="destructive" size="sm">
-                              <Trash2 className="h-3.5 w-3.5 mr-1" />
-                              {t("delete")}
+                    {displayFields.map((fieldName, index) => {
+                      const fieldConfig = modelConfig?.fields[fieldName];
+                      let cellValue: any = item[fieldName];
+                      if (fieldConfig?.type?.includes("Date")) {
+                        cellValue = formatDate(cellValue);
+                      }
+                      const displayValue =
+                        cellValue === null || cellValue === ""
+                          ? "-"
+                          : String(cellValue);
+                      if (index === 0) {
+                        return (
+                          <td
+                            key={fieldName}
+                            className="p-3 text-sm font-medium">
+                            <a
+                              href={getModelUrl(modelKey, item.id)}
+                              className="hover:text-primary hover:underline">
+                              {displayValue}
+                            </a>
+                          </td>
+                        );
+                      }
+                      return (
+                        <td
+                          key={fieldName}
+                          className="p-3 text-sm text-muted-foreground">
+                          {displayValue}
+                        </td>
+                      );
+                    })}
+                    <td className="p-3 text-right">
+                      <AlertDialog
+                        open={!!itemToDelete && itemToDelete.id === item.id}
+                        onOpenChange={(open) => !open && setItemToDelete(null)}>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
                             </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>{t("deleteTitle")}</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                {t("deleteConfirm")}
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => {
-                                  setItemToDelete(item);
-                                  handleDelete();
-                                }}
-                                disabled={isDeleting}>
-                                {isDeleting ? "Deleting..." : t("delete")}
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() =>
+                                router.push(getModelUrl(modelKey, item.id))
+                              }>
+                              <Pencil className="h-3.5 w-3.5 mr-2" />
+                              {t("edit")}
+                            </DropdownMenuItem>
+                            <AlertDialogTrigger asChild>
+                              <DropdownMenuItem
+                                onSelect={() => setItemToDelete(item)}
+                                className="text-destructive focus:text-destructive">
+                                <Trash2 className="h-3.5 w-3.5 mr-2" />
+                                {t("delete")}
+                              </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              {t("deleteTitle")}
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              {t("deleteConfirm")}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={handleDelete}
+                              disabled={deleteMutation.isPending}>
+                              {deleteMutation.isPending
+                                ? "Deleting..."
+                                : t("delete")}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </td>
                   </tr>
                 ))
@@ -319,6 +379,53 @@ export default function ModelListPage() {
             </tbody>
           </table>
         </div>
+        {totalPages > 1 && (
+          <div className="p-4">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setCurrentPage((p) => Math.max(1, p - 1));
+                    }}
+                    className={
+                      currentPage === 1 ? "pointer-events-none opacity-50" : ""
+                    }
+                  />
+                </PaginationItem>
+                {Array.from({ length: totalPages }, (_, i) => (
+                  <PaginationItem key={i}>
+                    <PaginationLink
+                      href="#"
+                      isActive={currentPage === i + 1}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setCurrentPage(i + 1);
+                      }}>
+                      {i + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                <PaginationItem>
+                  <PaginationNext
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setCurrentPage((p) => Math.min(totalPages, p + 1));
+                    }}
+                    className={
+                      currentPage === totalPages
+                        ? "pointer-events-none opacity-50"
+                        : ""
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -9,20 +9,31 @@ import { api } from "@/lib/api";
 import { ModelForm } from "@/components/model-form";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function CreateModelPage() {
+export default function EditModelPage() {
   const t = useTranslations("ModelListPage");
   const params = useParams();
   const router = useRouter();
   const { status } = useSession();
   const modelKey = params.modelKey as string;
+  const itemId = params.id as string;
 
   const {
     data: modelConfig,
-    isLoading,
-    error,
+    isLoading: isLoadingConfig,
+    error: errorConfig,
   } = useQuery({
     queryKey: ["modelConfig", modelKey],
     queryFn: () => api.getModelConfig(`/api/admin/models/${modelKey}/config/`),
+    enabled: status === "authenticated",
+  });
+
+  const {
+    data: initialData,
+    isLoading: isLoadingData,
+    error: errorData,
+  } = useQuery({
+    queryKey: ["modelItem", modelKey, itemId],
+    queryFn: () => api.getModelItem(`/api/admin/models/${modelKey}/`, itemId),
     enabled: status === "authenticated",
   });
 
@@ -31,6 +42,9 @@ export default function CreateModelPage() {
       router.push("/login");
     }
   }, [status, router]);
+
+  const isLoading = isLoadingConfig || isLoadingData;
+  const error = errorConfig || errorData;
 
   if (isLoading || status === "loading") {
     return (
@@ -50,16 +64,21 @@ export default function CreateModelPage() {
     return <div className="text-destructive">{error.message}</div>;
   }
 
-  if (!modelConfig) {
-    return <div>Failed to load model configuration.</div>;
+  if (!modelConfig || !initialData) {
+    return <div>Failed to load model data.</div>;
   }
 
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">
-        {t("createNew")} {modelConfig.verbose_name}
+        {t("edit")} {modelConfig.verbose_name}: #{itemId}
       </h1>
-      <ModelForm modelKey={modelKey} modelConfig={modelConfig} />
+      <ModelForm
+        modelKey={modelKey}
+        modelConfig={modelConfig}
+        initialData={initialData}
+        itemId={itemId}
+      />
     </div>
   );
 }

@@ -67,27 +67,71 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { toast } = useToast();
 
+  const [isMounted, setIsMounted] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileView, setIsMobileView] = useState(false);
   const [siteName, setSiteName] = useState(dashboardConfig.name);
   const [logoUrl, setLogoUrl] = useState(dashboardConfig.logoUrl);
-  const [navbarStyle, setNavbarStyle] = useState(
-    typeof window !== "undefined" ? localStorage.getItem("navbarStyle") || "modern" : "modern"
-  );
+  const [navbarStyle, setNavbarStyle] = useState("modern");
+
+  // Initialize theme and sidebar state from localStorage
+  useEffect(() => {
+    setIsMounted(true);
+
+    // Theme initialization
+    const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
+    const initialTheme = savedTheme || (prefersDark ? "dark" : "light");
+    setTheme(initialTheme);
+    if (initialTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+
+    const storedName = localStorage.getItem("siteName");
+    if (storedName) setSiteName(storedName);
+    const storedLogo = localStorage.getItem("logoUrl");
+    if (storedLogo) setLogoUrl(storedLogo);
+    const storedStyle = localStorage.getItem("navbarStyle");
+    if (storedStyle) setNavbarStyle(storedStyle);
+
+    // Sidebar state initialization
+    const savedSidebarState = localStorage.getItem("sidebarCollapsed");
+    if (savedSidebarState === "true") {
+      setIsCollapsed(true);
+    }
+
+    // Check if mobile view
+    const checkIfMobile = () => {
+      const isMobile = window.innerWidth < 768;
+      setIsMobileView(isMobile);
+      if (isMobile) {
+        setIsCollapsed(true);
+      }
+    };
+
+    checkIfMobile();
+    window.addEventListener("resize", checkIfMobile);
+    return () => window.removeEventListener("resize", checkIfMobile);
+  }, []);
 
   // Toggle between light and dark mode
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
-    document.documentElement.classList.toggle("dark");
+    document.documentElement.classList.toggle("dark", newTheme === "dark");
     localStorage.setItem("theme", newTheme);
   };
 
   // Toggle sidebar expand/collapse
   const toggleSidebar = () => {
-    setIsCollapsed(!isCollapsed);
-    localStorage.setItem("sidebarCollapsed", String(!isCollapsed));
+    const newCollapsedState = !isCollapsed;
+    setIsCollapsed(newCollapsedState);
+    localStorage.setItem("sidebarCollapsed", String(newCollapsedState));
   };
 
   // Handle sign out
@@ -112,45 +156,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     return pathname?.startsWith(path);
   };
 
-  // Initialize theme and sidebar state from localStorage
-  useEffect(() => {
-    // Theme initialization
-    const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
-    if (savedTheme) {
-      setTheme(savedTheme);
-      if (savedTheme === "dark") {
-        document.documentElement.classList.add("dark");
-      }
-    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setTheme("dark");
-      document.documentElement.classList.add("dark");
-    }
-
-    const storedName = localStorage.getItem("siteName");
-    if (storedName) setSiteName(storedName);
-    const storedLogo = localStorage.getItem("logoUrl");
-    if (storedLogo) setLogoUrl(storedLogo);
-    const storedStyle = localStorage.getItem("navbarStyle");
-    if (storedStyle) setNavbarStyle(storedStyle);
-
-    // Sidebar state initialization
-    const savedSidebarState = localStorage.getItem("sidebarCollapsed");
-    if (savedSidebarState === "true") {
-      setIsCollapsed(true);
-    }
-
-    // Check if mobile view
-    const checkIfMobile = () => {
-      setIsMobileView(window.innerWidth < 768);
-      if (window.innerWidth < 768) {
-        setIsCollapsed(true);
-      }
-    };
-
-    checkIfMobile();
-    window.addEventListener("resize", checkIfMobile);
-    return () => window.removeEventListener("resize", checkIfMobile);
-  }, []);
+  if (!isMounted) {
+    return null; // or a loading skeleton
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
@@ -171,11 +179,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             initial={false}
             animate={isCollapsed ? "collapsed" : "expanded"}
             className="overflow-hidden flex items-center">
-            <img
-              src={logoUrl}
-              alt={siteName}
-              className="h-8 w-8"
-            />
+            <img src={logoUrl} alt={siteName} className="h-8 w-8" />
             <motion.span
               variants={itemVariants}
               initial={false}
@@ -271,11 +275,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               </SheetTrigger>
               <SheetContent side="left" className="p-0 bg-sidebar">
                 <div className="h-16 flex items-center px-4 border-b border-sidebar-border">
-                  <img
-                    src={logoUrl}
-                    alt={siteName}
-                    className="h-8 w-8"
-                  />
+                  <img src={logoUrl} alt={siteName} className="h-8 w-8" />
                   <span className="ml-3 font-semibold text-lg text-sidebar-foreground">
                     {siteName}
                   </span>
@@ -326,14 +326,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 </div>
               </SheetContent>
             </Sheet>
-            <img
-              src={logoUrl}
-              alt={siteName}
-              className="h-8 w-8 ml-3"
-            />
-            <span className="ml-3 font-semibold text-lg">
-              {siteName}
-            </span>
+            <img src={logoUrl} alt={siteName} className="h-8 w-8 ml-3" />
+            <span className="ml-3 font-semibold text-lg">{siteName}</span>
           </div>
           <Button
             variant="ghost"

@@ -4,6 +4,7 @@ import { getMessages } from "next-intl/server";
 import { Toaster } from "@/components/ui/toaster";
 import { dashboardConfig } from "@/lib/config";
 import { Providers } from "@/components/providers";
+import { QueryProvider } from "@/components/query-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,10 +27,12 @@ export default async function LocaleLayout({
       </head>
       <body className={inter.className}>
         <Providers>
-          <NextIntlClientProvider messages={messages}>
-            {children}
-            <Toaster />
-          </NextIntlClientProvider>
+          <QueryProvider>
+            <NextIntlClientProvider messages={messages}>
+              {children}
+              <Toaster />
+            </NextIntlClientProvider>
+          </QueryProvider>
         </Providers>
       </body>
     </html>

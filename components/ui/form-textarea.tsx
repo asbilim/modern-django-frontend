@@ -1,5 +1,9 @@
+"use client";
+
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { Label } from "./label";
+import { Textarea } from "./textarea";
 
 export interface FormTextareaProps
   extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
@@ -9,26 +13,25 @@ export interface FormTextareaProps
   error?: string;
 }
 
-const FormTextarea = React.forwardRef<HTMLTextAreaElement, FormTextareaProps>(
-  ({ className, label, required, error, ...props }, ref) => {
-    return (
-      <div className="form-group">
-        <label className="form-label" htmlFor={props.id || props.name}>
-          {label} {required && <span className="text-gray-500">*</span>}
-        </label>
-        <textarea
-          className={cn("form-textarea", error && "border-red-500", className)}
-          ref={ref}
-          rows={5}
-          aria-invalid={error ? "true" : "false"}
-          {...props}
-        />
-        {error && <p className="form-error">{error}</p>}
-      </div>
-    );
-  }
-);
+export const FormTextarea = React.forwardRef<
+  HTMLTextAreaElement,
+  FormTextareaProps
+>(({ className, label, required, error, ...props }, ref) => {
+  return (
+    <div className="w-full space-y-2">
+      <Label htmlFor={props.id || props.name}>
+        {label}
+        {required && <span className="text-destructive ml-1">*</span>}
+      </Label>
+      <Textarea
+        className={cn(error && "border-destructive", className)}
+        ref={ref}
+        rows={5}
+        {...props}
+      />
+      {error && <p className="text-sm text-destructive">{error}</p>}
+    </div>
+  );
+});
 
 FormTextarea.displayName = "FormTextarea";
-
-export { FormTextarea };

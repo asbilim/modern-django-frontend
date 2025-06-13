@@ -1,45 +1,93 @@
+import { getSession, signOut } from "next-auth/react";
 import { dashboardConfig } from "@/lib/config";
 import { toast } from "@/hooks/use-toast";
 
-interface FetchOptions extends RequestInit {
-  token?: string;
-  params?: Record<string, string>;
-}
+const REFRESH_ATTEMPT_LIMIT = 3;
+const REFRESH_ATTEMPT_WINDOW_MS = 30000;
 
-interface ApiResponse<T> {
-  data: T | null;
-  error: Error | null;
-  status: number;
-}
+const refreshManager = {
+  refreshPromise: null as Promise<string> | null,
+  failureCount: 0,
+  lastFailureTimestamp: 0,
 
-/**
- * Enhanced fetch function with error handling, debugging, and authentication
- */
-export async function apiFetch<T>(
-  endpoint: string,
-  options: FetchOptions = {}
-): Promise<ApiResponse<T>> {
-  const { token, params, ...fetchOptions } = options;
-  const baseUrl = dashboardConfig.api.baseUrl;
+  async handleRefresh(): Promise<string> {
+    const now = Date.now();
 
-  // Build URL with query parameters if provided
-  let url = `${baseUrl}${endpoint}`;
-  if (params) {
-    const searchParams = new URLSearchParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) {
-        searchParams.append(key, value);
-      }
-    });
-    const queryString = searchParams.toString();
-    if (queryString) {
-      url += `?${queryString}`;
+    if (now - this.lastFailureTimestamp > REFRESH_ATTEMPT_WINDOW_MS) {
+      this.failureCount = 0;
     }
+
+    if (this.failureCount >= REFRESH_ATTEMPT_LIMIT) {
+      throw new Error("Token refresh attempt limit reached.");
+    }
+
+    if (!this.refreshPromise) {
+      this.refreshPromise = this.performRefreshToken()
+        .then((newAccessToken) => {
+          this.failureCount = 0;
+          return newAccessToken;
+        })
+        .catch((err) => {
+          this.failureCount++;
+          this.lastFailureTimestamp = Date.now();
+          throw err;
+        })
+        .finally(() => {
+          this.refreshPromise = null;
+        });
+    }
+    return this.refreshPromise;
+  },
+
+  async performRefreshToken(): Promise<string> {
+    const session = await getSession();
+    if (!session?.refreshToken) {
+      throw new Error("No refresh token available.");
+    }
+
+    const apiUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/token/refresh/`;
+    const res = await fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh: session.refreshToken }),
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to refresh token from API");
+    }
+
+    const { access } = await res.json();
+    if (!access) {
+      throw new Error("No new access token in refresh response");
+    }
+
+    // Note: getSession() does not automatically update the session.
+    // The new token will be used for subsequent requests in this flow,
+    // but the session in React components might not be updated until the next session poll.
+    // This is generally fine as we are managing the token flow here.
+    return access;
+  },
+};
+
+async function apiFetch<T>(
+  endpoint: string,
+  options: RequestInit = {},
+  isRetry = false
+): Promise<T> {
+  let session = await getSession();
+  let token = session?.accessToken;
+
+  if (isRetry && !token) {
+    // If it's a retry, we must have a token from the refresh flow.
+    // If not, something is wrong, so we bail.
+    throw new Error("Authentication failed after token refresh.");
   }
 
-  // Prepare headers
-  const headers = new Headers(fetchOptions.headers);
-  if (!headers.has("Content-Type") && !fetchOptions.body) {
+  const url = `${dashboardConfig.api.baseUrl}${endpoint}`;
+  const headers = new Headers(options.headers);
+  const isFormData = options.body instanceof FormData;
+
+  if (!isFormData && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
 
@@ -47,199 +95,100 @@ export async function apiFetch<T>(
     headers.set("Authorization", `Bearer ${token}`);
   }
 
-  // Prepare the fetch options
-  const finalOptions: RequestInit = {
-    ...fetchOptions,
-    headers,
-  };
+  const finalOptions: RequestInit = { ...options, headers };
 
-  // Debug logging in development
-  if (dashboardConfig.api.debugMode) {
-    console.group(`API Request: ${endpoint}`);
-    console.log("URL:", url);
-    console.log("Method:", finalOptions.method || "GET");
-    console.log("Headers:", Object.fromEntries(headers.entries()));
-    if (finalOptions.body) {
-      console.log(
-        "Body:",
-        finalOptions.body instanceof FormData
-          ? "FormData"
-          : typeof finalOptions.body === "string"
-          ? JSON.parse(finalOptions.body)
-          : finalOptions.body
-      );
+  const response = await fetch(url, finalOptions);
+
+  if (response.status === 401 && !isRetry) {
+    try {
+      const newAccessToken = await refreshManager.handleRefresh();
+      // Manually update the token for the retry
+      headers.set("Authorization", `Bearer ${newAccessToken}`);
+      return await apiFetch<T>(endpoint, { ...options, headers }, true);
+    } catch (refreshError) {
+      // If refresh fails (including too many retries), sign out
+      await signOut({ redirect: false });
+      window.location.href = "/login";
+      toast({
+        variant: "destructive",
+        title: "Session Expired",
+        description: "Your session has expired. Please log in again.",
+      });
+      throw new Error("Session expired. Please log in again.");
     }
-    console.groupEnd();
   }
 
-  try {
-    const response = await fetch(url, finalOptions);
-    let data: T | null = null;
-
-    // Try to parse the response as JSON
-    if (response.headers.get("Content-Type")?.includes("application/json")) {
-      try {
-        data = await response.json();
-      } catch (e) {
-        // If parsing fails, leave data as null
-        console.error("Failed to parse JSON response", e);
-      }
+  if (!response.ok) {
+    let errorDetail = `API Error: ${response.status} ${response.statusText}`;
+    try {
+      const errorData = await response.json();
+      errorDetail = errorData.detail || JSON.stringify(errorData);
+    } catch (e) {
+      // Ignore if response is not JSON
     }
-
-    // Debug logging in development
-    if (dashboardConfig.api.debugMode) {
-      console.group(`API Response: ${endpoint}`);
-      console.log("Status:", response.status);
-      console.log("Data:", data);
-      console.groupEnd();
-    }
-
-    // Handle error responses
-    if (!response.ok) {
-      const error = new Error(
-        data && typeof data === "object" && "detail" in data
-          ? String(data.detail)
-          : `API Error: ${response.status} ${response.statusText}`
-      );
-
-      return {
-        data: null,
-        error,
-        status: response.status,
-      };
-    }
-
-    return {
-      data,
-      error: null,
-      status: response.status,
-    };
-  } catch (error) {
-    // Handle network errors
-    if (dashboardConfig.api.debugMode) {
-      console.error("API Network Error:", error);
-    }
-
-    return {
-      data: null,
-      error: error instanceof Error ? error : new Error(String(error)),
-      status: 0, // 0 indicates network error
-    };
+    throw new Error(errorDetail);
   }
+
+  if (response.headers.get("Content-Type")?.includes("application/json")) {
+    return (await response.json()) as T;
+  }
+  // For DELETE requests or other non-JSON responses
+  return null as T;
 }
 
-/**
- * Admin API client with typed methods for common operations
- */
-export const adminApi = {
-  /**
-   * Get the admin configuration with available models
-   */
-  getAdminConfig: async (token: string) => {
-    return apiFetch<any>("/api/admin/", { token });
-  },
-
-  /**
-   * Get configuration for a specific model
-   */
-  getModelConfig: async (token: string, configUrl: string) => {
-    // If configUrl is a full URL, extract the path
+export const api = {
+  getAdminConfig: () => apiFetch<any>("/api/admin/"),
+  getModelConfig: (configUrl: string) => {
     const url = configUrl.startsWith("http")
       ? new URL(configUrl).pathname
       : configUrl;
-
-    return apiFetch<any>(url, { token });
+    return apiFetch<any>(url);
   },
-
-  /**
-   * Get a list of items for a model
-   */
-  getModelList: async (
-    token: string,
-    modelUrl: string,
-    params?: Record<string, string>
-  ) => {
-    // If modelUrl is a full URL, extract the path
+  getModelList: (modelUrl: string, params?: Record<string, string>) => {
+    const url = new URL(
+      `${dashboardConfig.api.baseUrl}${
+        modelUrl.startsWith("http") ? new URL(modelUrl).pathname : modelUrl
+      }`
+    );
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        url.searchParams.append(key, value);
+      });
+    }
+    return apiFetch<any>(`${url.pathname}${url.search}`);
+  },
+  getModelItem: (modelUrl: string, id: string | number) => {
     const url = modelUrl.startsWith("http")
       ? new URL(modelUrl).pathname
       : modelUrl;
-
-    return apiFetch<any>(url, { token, params });
+    return apiFetch<any>(`${url}${id}/`);
   },
-
-  /**
-   * Get a single model item by ID
-   */
-  getModelItem: async (
-    token: string,
-    modelUrl: string,
-    id: string | number
-  ) => {
-    // If modelUrl is a full URL, extract the path
+  createModelItem: (modelUrl: string, data: Record<string, any> | FormData) => {
     const url = modelUrl.startsWith("http")
       ? new URL(modelUrl).pathname
       : modelUrl;
-
-    return apiFetch<any>(`${url}${id}/`, { token });
-  },
-
-  /**
-   * Create a new model item
-   */
-  createModelItem: async (
-    token: string,
-    modelUrl: string,
-    data: Record<string, any>
-  ) => {
-    // If modelUrl is a full URL, extract the path
-    const url = modelUrl.startsWith("http")
-      ? new URL(modelUrl).pathname
-      : modelUrl;
-
     return apiFetch<any>(url, {
       method: "POST",
-      body: JSON.stringify(data),
-      token,
+      body: data instanceof FormData ? data : JSON.stringify(data),
     });
   },
-
-  /**
-   * Update an existing model item
-   */
-  updateModelItem: async (
-    token: string,
+  updateModelItem: (
     modelUrl: string,
     id: string | number,
-    data: Record<string, any>
+    data: Record<string, any> | FormData
   ) => {
-    // If modelUrl is a full URL, extract the path
     const url = modelUrl.startsWith("http")
       ? new URL(modelUrl).pathname
       : modelUrl;
-
     return apiFetch<any>(`${url}${id}/`, {
       method: "PATCH",
-      body: JSON.stringify(data),
-      token,
+      body: data instanceof FormData ? data : JSON.stringify(data),
     });
   },
-
-  /**
-   * Delete a model item
-   */
-  deleteModelItem: async (
-    token: string,
-    modelUrl: string,
-    id: string | number
-  ) => {
-    // If modelUrl is a full URL, extract the path
+  deleteModelItem: (modelUrl: string, id: string | number) => {
     const url = modelUrl.startsWith("http")
       ? new URL(modelUrl).pathname
       : modelUrl;
-
-    return apiFetch<void>(`${url}${id}/`, {
-      method: "DELETE",
-      token,
-    });
+    return apiFetch<void>(`${url}${id}/`, { method: "DELETE" });
   },
 };
