@@ -24,6 +24,7 @@ interface FormSelectProps {
   placeholder?: string;
   required?: boolean;
   error?: string;
+  disabled?: boolean;
 }
 
 export function FormSelect({
@@ -34,6 +35,7 @@ export function FormSelect({
   placeholder = "Select an option",
   required,
   error,
+  disabled,
 }: FormSelectProps) {
   return (
     <div className="w-full space-y-2">
@@ -41,7 +43,7 @@ export function FormSelect({
         {label}
         {required && <span className="text-destructive ml-1">*</span>}
       </Label>
-      <Select onValueChange={onChange} defaultValue={value}>
+      <Select onValueChange={onChange} defaultValue={value} disabled={disabled}>
         <SelectTrigger className={cn(error && "border-destructive")}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>

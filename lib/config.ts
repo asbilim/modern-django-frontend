@@ -14,7 +14,6 @@ export interface DashboardConfig {
   description: string;
   logoUrl: string;
   favicon: string;
-  navigation: NavigationItem[];
   api: {
     baseUrl: string;
     debugMode: boolean;
@@ -22,59 +21,13 @@ export interface DashboardConfig {
 }
 
 export const dashboardConfig: DashboardConfig = {
-  name: "Modern Admin",
+  name: "Django Modern Admin",
   description: "A modern admin dashboard for Django",
-  logoUrl: "/logo.svg", // Path to your logo
+  logoUrl: "/logo.svg",
   favicon: "/favicon.ico",
-  navigation: [
-    {
-      name: "Dashboard",
-      href: "/",
-      icon: "home",
-    },
-    {
-      name: "Users",
-      href: "/models/user",
-      icon: "user",
-    },
-    {
-      name: "Groups",
-      href: "/models/group",
-      icon: "users",
-    },
-    {
-      name: "Projects",
-      href: "/models/project",
-      icon: "briefcase",
-    },
-    {
-      name: "Tasks",
-      href: "/models/task",
-      icon: "check-square",
-    },
-    {
-      name: "Categories",
-      href: "/models/category",
-      icon: "folder",
-    },
-    {
-      name: "Tags",
-      href: "/models/tag",
-      icon: "tag",
-    },
-    {
-      name: "AI Tools",
-      href: "/ai-tools",
-      icon: "sparkles",
-    },
-    {
-      name: "Settings",
-      href: "/settings",
-      icon: "settings",
-    },
-  ],
   api: {
-    baseUrl: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000",
+    baseUrl:
+      process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api/admin",
     debugMode: process.env.NODE_ENV === "development",
   },
 };

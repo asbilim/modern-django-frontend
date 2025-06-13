@@ -19,6 +19,7 @@ export interface FormJsonEditorProps {
   value?: string; // Expects a JSON string
   onChange: (value: string) => void;
   helpText?: string;
+  disabled?: boolean;
 }
 
 export function FormJsonEditor({
@@ -27,6 +28,7 @@ export function FormJsonEditor({
   value,
   onChange,
   helpText,
+  disabled,
 }: FormJsonEditorProps) {
   const [items, setItems] = useState<KeyValue[]>([]);
 
@@ -84,7 +86,7 @@ export function FormJsonEditor({
   };
 
   return (
-    <div className="form-group space-y-2">
+    <div className={cn("form-group space-y-2", disabled && "opacity-50")}>
       <FormLabel required={required}>{label}</FormLabel>
       <div className="space-y-3 p-4 border rounded-md">
         {items.map((item) => (
@@ -96,6 +98,7 @@ export function FormJsonEditor({
               value={item.key}
               onChange={(e) => handleItemChange(item.id, "key", e.target.value)}
               className="flex-1"
+              disabled={disabled}
             />
             <FormInput
               label="Value"
@@ -106,17 +109,24 @@ export function FormJsonEditor({
                 handleItemChange(item.id, "value", e.target.value)
               }
               className="flex-1"
+              disabled={disabled}
             />
             <Button
               variant="ghost"
               size="icon"
               onClick={() => removeItem(item.id)}
-              type="button">
+              type="button"
+              disabled={disabled}>
               <Trash2 className="h-4 w-4 text-destructive" />
             </Button>
           </div>
         ))}
-        <Button variant="outline" size="sm" onClick={addItem} type="button">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={addItem}
+          type="button"
+          disabled={disabled}>
           <Plus className="h-4 w-4 mr-2" />
           Add Item
         </Button>

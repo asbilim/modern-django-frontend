@@ -138,6 +138,7 @@ async function apiFetch<T>(
 
 export const api = {
   getAdminConfig: () => apiFetch<any>("/api/admin/"),
+  getDashboardStats: () => apiFetch<any>("/api/admin/dashboard-stats/"),
   getModelConfig: (configUrl: string) => {
     const url = configUrl.startsWith("http")
       ? new URL(configUrl).pathname

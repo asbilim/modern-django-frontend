@@ -19,6 +19,7 @@ export interface FormDatePickerProps {
   className?: string;
   value?: Date;
   onChange: (date?: Date) => void;
+  disabled?: boolean;
 }
 
 export function FormDatePicker({
@@ -27,6 +28,7 @@ export function FormDatePicker({
   className,
   value,
   onChange,
+  disabled,
 }: FormDatePickerProps) {
   return (
     <div className={cn("form-group", className)}>
@@ -37,6 +39,7 @@ export function FormDatePicker({
         <PopoverTrigger asChild>
           <Button
             variant={"outline"}
+            disabled={disabled}
             className={cn(
               "w-full justify-start text-left font-normal",
               !value && "text-muted-foreground"

@@ -21,6 +21,8 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
 
 // Sidebar animation variants
 const sidebarVariants: Variants = {
@@ -62,6 +64,30 @@ const logoVariants: Variants = {
   },
 };
 
+interface ModelInfo {
+  app_label: string;
+  model_name: string;
+  verbose_name: string;
+  verbose_name_plural: string;
+  category: string;
+  frontend_config: {
+    icon?: string;
+    color?: string;
+    description?: string;
+    include_in_dashboard?: boolean;
+  };
+  api_url: string;
+}
+
+interface AdminConfig {
+  models: Record<string, ModelInfo>;
+  categories: Record<string, string[]>;
+  frontend_options: {
+    categories: string[];
+    icons: string[];
+  };
+}
+
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
   const pathname = usePathname();
@@ -74,6 +100,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [siteName, setSiteName] = useState(dashboardConfig.name);
   const [logoUrl, setLogoUrl] = useState(dashboardConfig.logoUrl);
   const [navbarStyle, setNavbarStyle] = useState("modern");
+
+  const { data: adminConfig } = useQuery<AdminConfig>({
+    queryKey: ["adminConfig"],
+    queryFn: api.getAdminConfig,
+    enabled: !!session,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
 
   // Initialize theme and sidebar state from localStorage
   useEffect(() => {
@@ -205,19 +238,83 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         {/* Navigation Links */}
         <ScrollArea className="flex-1 w-full py-4">
           <nav className="px-2 space-y-1">
-            {dashboardConfig.navigation.map((item) => (
+            <Link
+              href="/"
+              className={cn(
+                "flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                isActive("/")
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent/50",
+                isCollapsed ? "justify-center" : "justify-start"
+              )}>
+              <DynamicIcon name="home" className="h-5 w-5 flex-shrink-0" />
+              <motion.span
+                variants={itemVariants}
+                initial={false}
+                animate={isCollapsed ? "collapsed" : "expanded"}
+                className="ml-3">
+                Dashboard
+              </motion.span>
+            </Link>
+
+            {adminConfig &&
+              Object.entries(adminConfig.categories).map(
+                ([category, modelKeys]) => (
+                  <div key={category} className="my-2">
+                    {!isCollapsed && (
+                      <h3 className="px-3 py-2 text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wider">
+                        {category}
+                      </h3>
+                    )}
+                    {modelKeys.map((modelKey) => {
+                      const model = adminConfig.models[modelKey];
+                      if (!model) return null;
+                      const href = `/models/${model.model_name}`;
+                      return (
+                        <Link
+                          key={href}
+                          href={href}
+                          className={cn(
+                            "flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                            isActive(href)
+                              ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                              : "text-sidebar-foreground hover:bg-sidebar-accent/50",
+                            isCollapsed ? "justify-center" : "justify-start"
+                          )}>
+                          <DynamicIcon
+                            name={model.frontend_config?.icon || "file-text"}
+                            className="h-5 w-5 flex-shrink-0"
+                          />
+                          <motion.span
+                            variants={itemVariants}
+                            initial={false}
+                            animate={isCollapsed ? "collapsed" : "expanded"}
+                            className="ml-3">
+                            {model.verbose_name_plural}
+                          </motion.span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )
+              )}
+            <div className="my-2">
+              {!isCollapsed && (
+                <h3 className="px-3 py-2 text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wider">
+                  System
+                </h3>
+              )}
               <Link
-                key={item.href}
-                href={item.href}
+                href="/settings"
                 className={cn(
                   "flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                  isActive(item.href)
+                  isActive("/settings")
                     ? "bg-sidebar-accent text-sidebar-accent-foreground"
                     : "text-sidebar-foreground hover:bg-sidebar-accent/50",
                   isCollapsed ? "justify-center" : "justify-start"
                 )}>
                 <DynamicIcon
-                  name={item.icon}
+                  name="settings"
                   className="h-5 w-5 flex-shrink-0"
                 />
                 <motion.span
@@ -225,10 +322,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   initial={false}
                   animate={isCollapsed ? "collapsed" : "expanded"}
                   className="ml-3">
-                  {item.name}
+                  Settings
                 </motion.span>
               </Link>
-            ))}
+            </div>
           </nav>
         </ScrollArea>
 
@@ -282,23 +379,74 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 </div>
                 <ScrollArea className="h-[calc(100vh-8rem)]">
                   <nav className="px-2 py-4">
-                    {dashboardConfig.navigation.map((item) => (
+                    <Link
+                      href="/"
+                      className={cn(
+                        "flex items-center px-3 py-3 mb-1 rounded-md text-sm font-medium transition-colors",
+                        isActive("/")
+                          ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                          : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+                      )}>
+                      <DynamicIcon
+                        name="home"
+                        className="h-5 w-5 flex-shrink-0 mr-3"
+                      />
+                      Dashboard
+                    </Link>
+
+                    {adminConfig &&
+                      Object.entries(adminConfig.categories).map(
+                        ([category, modelKeys]) => (
+                          <div key={category} className="my-2">
+                            <h3 className="px-3 py-2 text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wider">
+                              {category}
+                            </h3>
+                            {modelKeys.map((modelKey) => {
+                              const model = adminConfig.models[modelKey];
+                              if (!model) return null;
+                              const href = `/models/${model.model_name}`;
+                              return (
+                                <Link
+                                  key={href}
+                                  href={href}
+                                  className={cn(
+                                    "flex items-center px-3 py-3 mb-1 rounded-md text-sm font-medium transition-colors",
+                                    isActive(href)
+                                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                                      : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+                                  )}>
+                                  <DynamicIcon
+                                    name={
+                                      model.frontend_config?.icon || "file-text"
+                                    }
+                                    className="h-5 w-5 flex-shrink-0 mr-3"
+                                  />
+                                  {model.verbose_name_plural}
+                                </Link>
+                              );
+                            })}
+                          </div>
+                        )
+                      )}
+                    <div className="my-2">
+                      <h3 className="px-3 py-2 text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wider">
+                        System
+                      </h3>
                       <Link
-                        key={item.href}
-                        href={item.href}
+                        href="/settings"
                         className={cn(
                           "flex items-center px-3 py-3 mb-1 rounded-md text-sm font-medium transition-colors",
-                          isActive(item.href)
+                          isActive("/settings")
                             ? "bg-sidebar-accent text-sidebar-accent-foreground"
                             : "text-sidebar-foreground hover:bg-sidebar-accent/50"
                         )}>
                         <DynamicIcon
-                          name={item.icon}
+                          name="settings"
                           className="h-5 w-5 flex-shrink-0 mr-3"
                         />
-                        {item.name}
+                        Settings
                       </Link>
-                    ))}
+                    </div>
                   </nav>
                 </ScrollArea>
                 <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-sidebar-border">

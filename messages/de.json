@@ -15,11 +15,11 @@
     "name": "Name / Titel",
     "createdAt": "Erstellt am",
     "actions": "Aktionen",
-    "noItems": "Keine Einträge gefunden",
+    "noItems": "Keine Einträge für dieses Modell gefunden.",
     "edit": "Bearbeiten",
     "delete": "Löschen",
-    "deleteTitle": "Eintrag löschen",
-    "deleteConfirm": "Möchten Sie diesen Eintrag wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "deleteTitle": "Sind Sie sicher?",
+    "deleteConfirm": "Diese Aktion kann nicht rückgängig gemacht werden. Dies wird das Element dauerhaft löschen.",
     "tryAgain": "Erneut versuchen",
     "save": "Speichern"
   },
@@ -32,5 +32,13 @@
     "otp": "Zwei-Faktor-Authentifizierung aktivieren",
     "password": "Passwort ändern",
     "save": "Speichern"
+  },
+  "Time": {
+    "years": "vor {count, plural, =1 {# Jahr} other {# Jahren}}",
+    "months": "vor {count, plural, =1 {# Monat} other {# Monaten}}",
+    "days": "vor {count, plural, =1 {# Tag} other {# Tagen}}",
+    "hours": "vor {count, plural, =1 {# Stunde} other {# Stunden}}",
+    "minutes": "vor {count, plural, =1 {# Minute} other {# Minuten}}",
+    "seconds": "vor {count, plural, =1 {# Sekunde} other {# Sekunden}}"
   }
 }
