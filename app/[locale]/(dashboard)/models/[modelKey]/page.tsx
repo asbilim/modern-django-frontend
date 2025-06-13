@@ -8,7 +8,13 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useParams, useRouter } from "next/navigation";
-import { PlusIcon, Trash2, Pencil, AlertCircle } from "lucide-react";
+import {
+  PlusIcon,
+  Trash2,
+  Pencil,
+  AlertCircle,
+  MoreHorizontal,
+} from "lucide-react";
 import { getModelUrl, formatDate } from "@/lib/utils";
 import { DynamicIcon } from "@/components/ui/dynamic-icon";
 import {
@@ -24,6 +30,23 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+
+const PAGE_SIZE = 15;
 
 interface Model {
   verbose_name: string;
@@ -103,76 +126,86 @@ export default function ModelListPage() {
   const [error, setError] = useState<string | null>(null);
   const [itemToDelete, setItemToDelete] = useState<ModelItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    setModelConfig(null);
+  const fetchData = useCallback(
+    async (page = 1) => {
+      setIsLoading(true);
+      setError(null);
+      setModelConfig(null);
 
-    if (!session?.accessToken) {
-      setError("Authentication required");
-      setIsLoading(false);
-      return;
-    }
+      if (!session?.accessToken) {
+        setError("Authentication required");
+        setIsLoading(false);
+        return;
+      }
 
-    try {
-      // Fetch admin configuration
-      const configResponse = await adminApi.getAdminConfig(session.accessToken);
-      if (configResponse.error) {
-        throw new Error(
-          `Failed to fetch admin configuration: ${configResponse.error.message}`
+      try {
+        // Fetch admin configuration
+        const configResponse = await adminApi.getAdminConfig(
+          session.accessToken
         );
-      }
+        if (configResponse.error) {
+          throw new Error(
+            `Failed to fetch admin configuration: ${configResponse.error.message}`
+          );
+        }
 
-      const config = configResponse.data as AdminConfig;
-      setAdminConfig(config);
+        const config = configResponse.data as AdminConfig;
+        setAdminConfig(config);
 
-      // Check if the requested model exists
-      const model = Object.values(config.models).find(
-        (m) => m.model_name === modelKey
-      );
-      if (!model) {
-        throw new Error(`Model ${modelKey} not found`);
-      }
-
-      // Fetch model configuration
-      const configUrl = `/api/admin/models/${modelKey}/config/`;
-      const modelConfigResponse = await adminApi.getModelConfig(
-        session.accessToken,
-        configUrl
-      );
-      if (modelConfigResponse.error) {
-        throw new Error(
-          `Failed to fetch model configuration: ${modelConfigResponse.error.message}`
+        // Check if the requested model exists
+        const model = Object.values(config.models).find(
+          (m) => m.model_name === modelKey
         );
-      }
-      setModelConfig(modelConfigResponse.data as ModelConfig);
+        if (!model) {
+          throw new Error(`Model ${modelKey} not found`);
+        }
 
-      // Fetch model items
-      const modelResponse = await adminApi.getModelList(
-        session.accessToken,
-        model.api_url
-      );
-      if (modelResponse.error) {
-        throw new Error(
-          `Failed to fetch model data: ${modelResponse.error.message}`
+        // Fetch model configuration
+        const configUrl = `/api/admin/models/${modelKey}/config/`;
+        const modelConfigResponse = await adminApi.getModelConfig(
+          session.accessToken,
+          configUrl
         );
-      }
+        if (modelConfigResponse.error) {
+          throw new Error(
+            `Failed to fetch model configuration: ${modelConfigResponse.error.message}`
+          );
+        }
+        setModelConfig(modelConfigResponse.data as ModelConfig);
 
-      setModelItems(modelResponse.data?.results || []);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "An unknown error occurred";
-      setError(errorMessage);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: errorMessage,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [modelKey, session, toast]);
+        // Fetch model items
+        const modelResponse = await adminApi.getModelList(
+          session.accessToken,
+          model.api_url,
+          { page: page.toString(), page_size: PAGE_SIZE.toString() }
+        );
+        if (modelResponse.error) {
+          throw new Error(
+            `Failed to fetch model data: ${modelResponse.error.message}`
+          );
+        }
+
+        setModelItems(modelResponse.data?.results || []);
+        setTotalItems(modelResponse.data?.count || 0);
+        setCurrentPage(page);
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "An unknown error occurred";
+        setError(errorMessage);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: errorMessage,
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [modelKey, session, toast]
+  );
 
   const handleDelete = async () => {
     if (!itemToDelete || !session?.accessToken || !model?.api_url) {
@@ -200,6 +233,7 @@ export default function ModelListPage() {
           description: `Item ${itemToDelete.id} was deleted successfully.`,
         });
         setModelItems((prev) => prev.filter((i) => i.id !== itemToDelete.id));
+        setTotalItems((prev) => prev - 1);
       }
     } catch (error) {
       toast({
@@ -223,15 +257,23 @@ export default function ModelListPage() {
     }
 
     if (session) {
-      fetchData();
+      fetchData(currentPage);
     }
-  }, [session, status, router, fetchData]);
+  }, [session, status, router, fetchData, currentPage]);
 
   const model = adminConfig
     ? Object.values(adminConfig.models).find((m) => m.model_name === modelKey)
     : undefined;
   const modelIcon = model?.frontend_config?.icon || "file";
   const displayFields = modelConfig?.admin_config?.list_display || [];
+
+  const totalPages = Math.ceil(totalItems / PAGE_SIZE);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      fetchData(page);
+    }
+  };
 
   if (isLoading || status === "loading") {
     return (
@@ -259,7 +301,7 @@ export default function ModelListPage() {
           <h2 className="text-xl font-bold text-destructive">Error</h2>
         </div>
         <p className="text-destructive mb-4">{error}</p>
-        <Button variant="outline" onClick={fetchData}>
+        <Button variant="outline" onClick={() => fetchData(currentPage)}>
           {t("tryAgain")}
         </Button>
       </div>
@@ -277,7 +319,7 @@ export default function ModelListPage() {
             {model?.verbose_name || modelKey}
           </h1>
           <Badge variant="outline" className="ml-2">
-            {modelItems.length} item{modelItems.length !== 1 ? "s" : ""}
+            {totalItems} item{totalItems !== 1 ? "s" : ""}
           </Badge>
         </div>
         <Button
@@ -330,6 +372,13 @@ export default function ModelListPage() {
                         cellValue = formatDate(cellValue);
                       }
 
+                      const displayValue =
+                        cellValue === null ||
+                        cellValue === undefined ||
+                        cellValue === ""
+                          ? "-"
+                          : String(cellValue);
+
                       if (index === 0) {
                         return (
                           <td
@@ -338,7 +387,7 @@ export default function ModelListPage() {
                             <a
                               href={getModelUrl(modelKey, item.id)}
                               className="hover:text-primary hover:underline">
-                              {cellValue || "-"}
+                              {displayValue}
                             </a>
                           </td>
                         );
@@ -348,52 +397,58 @@ export default function ModelListPage() {
                         <td
                           key={fieldName}
                           className="p-3 text-sm text-muted-foreground">
-                          {cellValue?.toString() ?? "-"}
+                          {displayValue}
                         </td>
                       );
                     })}
-                    <td className="p-3">
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            router.push(getModelUrl(modelKey, item.id))
-                          }>
-                          <Pencil className="h-3.5 w-3.5 mr-1" />
-                          {t("edit")}
-                        </Button>
-
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="destructive" size="sm">
-                              <Trash2 className="h-3.5 w-3.5 mr-1" />
-                              {t("delete")}
+                    <td className="p-3 text-right">
+                      <AlertDialog>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
                             </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>
-                                {t("deleteTitle")}
-                              </AlertDialogTitle>
-                              <AlertDialogDescription>
-                                {t("deleteConfirm")}
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => {
-                                  setItemToDelete(item);
-                                  handleDelete();
-                                }}
-                                disabled={isDeleting}>
-                                {isDeleting ? "Deleting..." : t("delete")}
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() =>
+                                router.push(getModelUrl(modelKey, item.id))
+                              }>
+                              <Pencil className="h-3.5 w-3.5 mr-2" />
+                              {t("edit")}
+                            </DropdownMenuItem>
+
+                            <AlertDialogTrigger asChild>
+                              <DropdownMenuItem className="text-destructive focus:text-destructive">
+                                <Trash2 className="h-3.5 w-3.5 mr-2" />
+                                {t("delete")}
+                              </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              {t("deleteTitle")}
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              {t("deleteConfirm")}
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => {
+                                setItemToDelete(item);
+                                handleDelete();
+                              }}
+                              disabled={isDeleting}>
+                              {isDeleting ? "Deleting..." : t("delete")}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </td>
                   </tr>
                 ))
@@ -401,6 +456,53 @@ export default function ModelListPage() {
             </tbody>
           </table>
         </div>
+        {totalPages > 1 && (
+          <div className="p-4">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handlePageChange(currentPage - 1);
+                    }}
+                    className={
+                      currentPage === 1 ? "pointer-events-none opacity-50" : ""
+                    }
+                  />
+                </PaginationItem>
+                {Array.from({ length: totalPages }, (_, i) => (
+                  <PaginationItem key={i}>
+                    <PaginationLink
+                      href="#"
+                      isActive={currentPage === i + 1}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handlePageChange(i + 1);
+                      }}>
+                      {i + 1}
+                    </PaginationLink>
+                  </PaginationItem>
+                ))}
+                <PaginationItem>
+                  <PaginationNext
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handlePageChange(currentPage + 1);
+                    }}
+                    className={
+                      currentPage === totalPages
+                        ? "pointer-events-none opacity-50"
+                        : ""
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </div>
     </div>
   );

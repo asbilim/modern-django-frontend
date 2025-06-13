@@ -8,18 +8,20 @@ import { adminApi } from "@/lib/api";
 import { ModelForm } from "@/components/model-form";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function CreateModelPage() {
+export default function EditModelPage() {
   const t = useTranslations("ModelListPage");
   const params = useParams();
   const router = useRouter();
   const { data: session, status } = useSession();
   const modelKey = params.modelKey as string;
+  const itemId = params.id as string;
 
-  const [modelConfig, setModelConfig] = useState<any | null>(null);
+  const [modelConfig, setModelConfig] = useState(null);
+  const [initialData, setInitialData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchConfig = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     if (!session?.accessToken) return;
 
     setIsLoading(true);
@@ -37,6 +39,18 @@ export default function CreateModelPage() {
         );
       }
       setModelConfig(configResponse.data);
+
+      const itemResponse = await adminApi.getModelItem(
+        session.accessToken,
+        `/api/admin/models/${modelKey}/`,
+        itemId
+      );
+      if (itemResponse.error) {
+        throw new Error(
+          `Failed to fetch model item: ${itemResponse.error.message}`
+        );
+      }
+      setInitialData(itemResponse.data);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "An unknown error occurred";
@@ -44,15 +58,15 @@ export default function CreateModelPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [modelKey, session]);
+  }, [modelKey, itemId, session]);
 
   useEffect(() => {
     if (status === "authenticated") {
-      fetchConfig();
+      fetchData();
     } else if (status === "unauthenticated") {
       router.push("/login");
     }
-  }, [status, fetchConfig, router]);
+  }, [status, fetchData, router]);
 
   if (isLoading) {
     return (
@@ -72,16 +86,21 @@ export default function CreateModelPage() {
     return <div className="text-destructive">{error}</div>;
   }
 
-  if (!modelConfig) {
-    return <div>Failed to load model configuration.</div>;
+  if (!modelConfig || !initialData) {
+    return <div>Failed to load model data.</div>;
   }
 
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">
-        {t("createNew")} {modelConfig.verbose_name}
+        {t("edit")} {modelConfig.verbose_name}: #{itemId}
       </h1>
-      <ModelForm modelKey={modelKey} modelConfig={modelConfig} />
+      <ModelForm
+        modelKey={modelKey}
+        modelConfig={modelConfig}
+        initialData={initialData}
+        itemId={itemId}
+      />
     </div>
   );
 }
