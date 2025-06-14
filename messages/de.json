@@ -160,6 +160,7 @@
       "title": "Text-Zusammenfasser",
       "description": "Langen Text auf Kernpunkte reduzieren.",
       "textLabel": "Zusammenzufassender Text",
+      "textPlaceholder": "Geben Sie hier den Text ein, den Sie zusammenfassen möchten...",
       "button": "Zusammenfassen",
       "buttonLoading": "Wird zusammengefasst..."
     },
@@ -167,6 +168,7 @@
       "title": "Sprachübersetzer",
       "description": "Text zwischen Sprachen übersetzen.",
       "textLabel": "Zu übersetzender Text",
+      "textPlaceholder": "Geben Sie hier den zu übersetzenden Text ein...",
       "languageLabel": "Zielsprache",
       "languagePlaceholder": "z.B. Französisch, Spanisch, Deutsch",
       "button": "Übersetzen",

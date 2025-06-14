@@ -160,6 +160,7 @@
       "title": "Text Summarizer",
       "description": "Condense long text into key points.",
       "textLabel": "Text to Summarize",
+      "textPlaceholder": "Enter the text you want to summarize here...",
       "button": "Summarize",
       "buttonLoading": "Summarizing..."
     },
@@ -167,6 +168,7 @@
       "title": "Language Translator",
       "description": "Translate text between languages.",
       "textLabel": "Text to Translate",
+      "textPlaceholder": "Enter the text to translate here...",
       "languageLabel": "Target Language",
       "languagePlaceholder": "e.g., French, Spanish, German",
       "button": "Translate",
