@@ -51,7 +51,7 @@ export default function CreateModelPage() {
   }
 
   if (!modelConfig) {
-    return <div>{t("loadModelConfigFailed")}</div>;
+    return <div>{t("loadModelConfigFailed", { modelName: modelKey })}</div>;
   }
 
   return (

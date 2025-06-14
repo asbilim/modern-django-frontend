@@ -449,6 +449,7 @@ function UserNav({
   isCollapsed: boolean;
 }) {
   const t = useTranslations("DashboardLayout");
+  const tSettings = useTranslations("SettingsPage");
 
   if (!user) {
     return (
@@ -517,7 +518,7 @@ function UserNav({
           <DropdownMenuItem asChild>
             <Link href="/settings">
               <Settings className="mr-2 h-4 w-4" />
-              <span>{t("settings")}</span>
+              <span>{tSettings("title")}</span>
             </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>

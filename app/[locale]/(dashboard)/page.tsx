@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import {
   Bar,
   BarChart,
@@ -52,80 +52,82 @@ interface DashboardData {
   activity_feed: Activity[];
 }
 
-// Mock data for immediate UI development
-const mockData: DashboardData = {
-  stats: [
-    {
-      title: "New Users",
-      value: "1,234",
-      change: "+56",
-      icon: "users",
-      description: "Since last 30 days",
-    },
-    {
-      title: "Sales",
-      value: "$54,321",
-      change: "-432",
-      icon: "dollar-sign",
-      description: "Since last 30 days",
-    },
-    {
-      title: "Pending Tasks",
-      value: "23",
-      change: "+5",
-      icon: "clock",
-      description: "In the last week",
-    },
-    {
-      title: "Total Projects",
-      value: "78",
-      change: "+2",
-      icon: "briefcase",
-      description: "In the last week",
-    },
-  ],
-  user_signups_over_time: [
-    { date: "Jan", count: 65 },
-    { date: "Feb", count: 59 },
-    { date: "Mar", count: 80 },
-    { date: "Apr", count: 81 },
-    { date: "May", count: 56 },
-    { date: "Jun", count: 55 },
-    { date: "Jul", count: 40 },
-  ],
-  content_creation_stats: [
-    { name: "Projects", value: 400 },
-    { name: "Tasks", value: 300 },
-    { name: "Users", value: 200 },
-    { name: "Categories", value: 278 },
-    { name: "Tags", value: 189 },
-  ],
-  activity_feed: [
-    {
-      type: "new_post",
-      title: 'New Post: "The Future of AI in Web Development"',
-      user: "admin",
-      timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 minutes ago
-    },
-    {
-      type: "new_comment",
-      title: 'New comment on "The Future of AI"',
-      user: "JaneDoe",
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
-    },
-    {
-      type: "new_user",
-      title: "New user signed up: john.doe@example.com",
-      user: "system",
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), // 5 hours ago
-    },
-  ],
-};
-
 export default function DashboardPage() {
   const { status } = useSession();
   const t = useTranslations("DashboardPage");
   const router = useRouter();
+
+  const mockData: DashboardData = useMemo(
+    () => ({
+      stats: [
+        {
+          title: t("mock.stats.newUsers.title"),
+          value: "1,234",
+          change: "+56",
+          icon: "users",
+          description: t("mock.stats.newUsers.description"),
+        },
+        {
+          title: t("mock.stats.sales.title"),
+          value: "$54,321",
+          change: "-432",
+          icon: "dollar-sign",
+          description: t("mock.stats.sales.description"),
+        },
+        {
+          title: t("mock.stats.pendingTasks.title"),
+          value: "23",
+          change: "+5",
+          icon: "clock",
+          description: t("mock.stats.pendingTasks.description"),
+        },
+        {
+          title: t("mock.stats.totalProjects.title"),
+          value: "78",
+          change: "+2",
+          icon: "briefcase",
+          description: t("mock.stats.totalProjects.description"),
+        },
+      ],
+      user_signups_over_time: [
+        { date: t("mock.months.jan"), count: 65 },
+        { date: t("mock.months.feb"), count: 59 },
+        { date: t("mock.months.mar"), count: 80 },
+        { date: t("mock.months.apr"), count: 81 },
+        { date: t("mock.months.may"), count: 56 },
+        { date: t("mock.months.jun"), count: 55 },
+        { date: t("mock.months.jul"), count: 40 },
+      ],
+      content_creation_stats: [
+        { name: t("mock.content.projects"), value: 400 },
+        { name: t("mock.content.tasks"), value: 300 },
+        { name: t("mock.content.users"), value: 200 },
+        { name: t("mock.content.categories"), value: 278 },
+        { name: t("mock.content.tags"), value: 189 },
+      ],
+      activity_feed: [
+        {
+          type: "new_post",
+          title: t("mock.feed.newPost"),
+          user: "admin",
+          timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+        },
+        {
+          type: "new_comment",
+          title: t("mock.feed.newComment"),
+          user: "JaneDoe",
+          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+        },
+        {
+          type: "new_user",
+          title: t("mock.feed.newUser"),
+          user: "system",
+          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
+        },
+      ],
+    }),
+    [t]
+  );
 
   const {
     data: dashboardData,

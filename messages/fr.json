@@ -1,19 +1,71 @@
 {
   "LoginPage": {
-    "title": "Connectez-vous à votre compte",
+    "title": "Content de vous revoir",
     "usernameLabel": "Nom d'utilisateur",
     "passwordLabel": "Mot de passe",
     "signInButton": "Se connecter",
-    "toastErrorTitle": "Échec de l'authentification",
-    "toastErrorDescription": "Veuillez vérifier vos identifiants et réessayer.",
-    "toastSuccessTitle": "Succès",
-    "toastSuccessDescription": "Vous avez été connecté avec succès.",
+    "toastErrorTitle": "Échec de la connexion",
+    "toastErrorDescription": "Nom d'utilisateur ou mot de passe invalide. Veuillez réessayer.",
+    "toastSuccessTitle": "Connexion réussie",
+    "toastSuccessDescription": "Bienvenue ! Redirection vers le tableau de bord.",
+    "toastUnexpectedErrorTitle": "Une erreur inattendue est survenue",
+    "toastUnexpectedErrorDescription": "Quelque chose s'est mal passé. Veuillez réessayer plus tard.",
     "toastOtpInvalidTitle": "OTP invalide",
-    "toastOtpInvalidDescription": "Le code OTP est incorrect. Veuillez réessayer."
+    "toastOtpInvalidDescription": "Le mot de passe à usage unique que vous avez entré est incorrect."
   },
   "DashboardPage": {
     "title": "Tableau de bord",
-    "description": "Un aperçu de l'activité de votre projet."
+    "description": "Content de vous revoir ! Voici un résumé de votre projet.",
+    "loadErrorTitle": "Erreur du tableau de bord",
+    "loadErrorDescription": "Un problème est survenu lors du chargement des données du tableau de bord. Certaines informations peuvent être manquantes. Utilisation de données fictives en secours.",
+    "userSignupsCardTitle": "Inscriptions d'utilisateurs",
+    "userSignupsCardDescription": "Un graphique montrant les inscriptions d'utilisateurs au cours des derniers mois.",
+    "contentOverviewCardTitle": "Aperçu du contenu",
+    "contentOverviewCardDescription": "Un résumé des différents types de contenu.",
+    "activityFeedCardTitle": "Fil d'activité",
+    "activityFeedCardDescription": "Un journal des activités récentes.",
+    "activityByUser": "par {user}",
+    "mock": {
+      "stats": {
+        "newUsers": {
+          "title": "Nouveaux utilisateurs",
+          "description": "depuis le mois dernier"
+        },
+        "sales": {
+          "title": "Ventes",
+          "description": "depuis la semaine dernière"
+        },
+        "pendingTasks": {
+          "title": "Tâches en attente",
+          "description": "en cours"
+        },
+        "totalProjects": {
+          "title": "Projets totaux",
+          "description": "actuellement actifs"
+        }
+      },
+      "months": {
+        "jan": "Janv",
+        "feb": "Févr",
+        "mar": "Mars",
+        "apr": "Avr",
+        "may": "Mai",
+        "jun": "Juin",
+        "jul": "Juil"
+      },
+      "content": {
+        "projects": "Projets",
+        "tasks": "Tâches",
+        "users": "Utilisateurs",
+        "categories": "Catégories",
+        "tags": "Tags"
+      },
+      "feed": {
+        "newPost": "Nouveau billet de blog publié : 'L'avenir de l'IA'",
+        "newComment": "Nouveau commentaire sur 'Débuter avec Django'",
+        "newUser": "Nouvel utilisateur enregistré : John.Doe"
+      }
+    }
   },
   "ModelListPage": {
     "createNew": "Créer",
@@ -27,17 +79,32 @@
     "deleteTitle": "Êtes-vous absolument sûr ?",
     "deleteConfirm": "Cette action est irréversible. Cela supprimera définitivement l'élément.",
     "tryAgain": "Réessayer",
-    "save": "Enregistrer les modifications"
+    "save": "Enregistrer les modifications",
+    "errorTitle": "Erreur de chargement des données",
+    "itemCount": "{count, plural, one {# élément} other {# éléments}}",
+    "export": "Exporter",
+    "import": "Importer",
+    "exportAsCsv": "Exporter en CSV",
+    "exportAsJson": "Exporter en JSON",
+    "cancel": "Annuler",
+    "deleting": "Suppression...",
+    "deleteSuccessTitle": "Élément supprimé",
+    "deleteSuccessDescription": "L'élément avec l'ID {id} a été supprimé.",
+    "deleteErrorTitle": "Échec de la suppression",
+    "deleteErrorDescription": "Échec de la suppression de l'élément {id}: {message}",
+    "exportPreparingTitle": "Préparation de l'exportation",
+    "exportPreparingDescription": "Préparation de l'exportation de {totalItems} éléments. Cela peut prendre un moment.",
+    "exportReadyTitle": "Exportation prête",
+    "exportReadyDescription": "Votre fichier {format} est prêt à être téléchargé.",
+    "exportFailedTitle": "Échec de l'exportation",
+    "exportFailedDescription": "Une erreur s'est produite lors de l'exportation: {message}",
+    "editTitle": "Modifier {modelName}: {id}",
+    "createTitle": "Créer un nouveau {modelName}",
+    "loadModelConfigFailed": "Échec du chargement de la configuration pour le modèle: {modelName}",
+    "loadModelDataFailed": "Échec du chargement des données pour le modèle: {modelName}"
   },
   "SettingsPage": {
     "title": "Paramètres",
-    "general": "Général",
-    "siteName": "Nom du site",
-    "logo": "URL du logo",
-    "navbarStyle": "Style de la barre de navigation",
-    "otp": "Authentification à deux facteurs",
-    "password": "Mot de passe",
-    "save": "Enregistrer les modifications",
     "profileUpdateSuccess": "Profil mis à jour avec succès.",
     "profileUpdateError": "Échec de la mise à jour du profil.",
     "profileTitle": "Profil utilisateur",
@@ -46,6 +113,7 @@
     "lastName": "Nom de famille",
     "email": "Adresse e-mail",
     "saving": "Enregistrement...",
+    "save": "Enregistrer les modifications",
     "passwordUpdateSuccess": "Mot de passe mis à jour avec succès.",
     "passwordUpdateError": "Échec de la mise à jour du mot de passe.",
     "passwordTitle": "Changer le mot de passe",
@@ -53,70 +121,60 @@
     "currentPassword": "Mot de passe actuel",
     "newPassword": "Nouveau mot de passe",
     "confirmNewPassword": "Confirmer le nouveau mot de passe",
-    "savePassword": "Mettre à jour le mot de passe",
+    "savePassword": "Enregistrer le mot de passe",
     "twoFactorTitle": "Authentification à deux facteurs (2FA)",
     "twoFactorDescription": "Ajoutez une couche de sécurité supplémentaire à votre compte.",
     "twoFactorEnabled": "La 2FA est actuellement activée sur votre compte.",
-    "disabling": "Désactivation...",
+    "twoFactorDisabled": "La 2FA est actuellement désactivée sur votre compte.",
+    "enable2FA": "Activer la 2FA",
+    "enabling": "Activation...",
     "disable2FA": "Désactiver la 2FA",
+    "disabling": "Désactivation...",
     "scanQrCode": "Scannez le code QR ci-dessous avec votre application d'authentification.",
     "secretKey": "Ou entrez cette clé secrète manuellement",
     "verificationCode": "Code de vérification",
+    "otpPlaceholder": "code à 6 chiffres",
     "cancel": "Annuler",
     "verifying": "Vérification...",
     "verifyAndActivate": "Vérifier et activer",
-    "twoFactorDisabled": "La 2FA est actuellement désactivée.",
-    "enabling": "Activation...",
-    "enable2FA": "Activer la 2FA"
-  },
-  "Time": {
-    "years": "{count, plural, one {il y a # an} other {il y a # ans}}",
-    "months": "{count, plural, one {il y a # mois} other {il y a # mois}}",
-    "days": "{count, plural, one {il y a # jour} other {il y a # jours}}",
-    "hours": "{count, plural, one {il y a # heure} other {il y a # heures}}",
-    "minutes": "{count, plural, one {il y a # minute} other {il y a # minutes}}",
-    "seconds": "{count, plural, one {il y a # seconde} other {il y a # secondes}}"
-  },
-  "OtpDialog": {
-    "title": "Saisir le code de vérification",
-    "description": "Un code de vérification a été envoyé à votre application d'authentification.",
-    "placeholder": "Code à 6 chiffres",
-    "cancel": "Annuler",
-    "verify": "Vérifier",
-    "verifying": "Vérification..."
-  },
-  "DashboardLayout": {
-    "dashboard": "Tableau de bord",
-    "settings": "Paramètres",
-    "signOut": "Se déconnecter",
-    "signOutSuccessTitle": "Déconnecté",
-    "signOutSuccessDescription": "Vous avez été déconnecté avec succès.",
-    "system": "Système",
-    "tools": "Outils",
-    "aiTools": "Outils d'IA"
+    "disable2faPasswordPlaceholder": "Entrez votre mot de passe pour désactiver la 2FA",
+    "twoFactorEnableErrorTitle": "Échec de l'activation de la 2FA",
+    "twoFactorVerifyErrorTitle": "Échec de la vérification de l'OTP",
+    "twoFactorEnableSuccessTitle": "2FA activée",
+    "twoFactorEnableSuccessDescription": "L'authentification à deux facteurs a été activée avec succès.",
+    "twoFactorDisableErrorTitle": "Échec de la désactivation de la 2FA",
+    "twoFactorDisableSuccessTitle": "2FA désactivée",
+    "validation": {
+      "invalidEmail": "Adresse e-mail invalide.",
+      "oldPasswordRequired": "Le mot de passe actuel est requis.",
+      "newPasswordLength": "Le nouveau mot de passe doit comporter au moins 8 caractères.",
+      "passwordsDontMatch": "Les mots de passe ne correspondent pas.",
+      "otpLength": "Votre mot de passe à usage unique doit comporter 6 caractères.",
+      "passwordRequiredFor2FA": "Votre mot de passe est requis pour désactiver la 2FA."
+    }
   },
   "AiToolsPage": {
-    "title": "Boîte à outils IA",
-    "resultTitle": "Résultat :",
+    "title": "Outils d'IA",
+    "resultTitle": "Résultat généré",
     "summarizer": {
-      "title": "Résumé de texte",
-      "description": "Résumez rapidement de longs passages.",
+      "title": "Résumeur de texte",
+      "description": "Condensez un long texte en points clés.",
       "textLabel": "Texte à résumer",
       "button": "Résumer",
       "buttonLoading": "Résumé en cours..."
     },
     "translator": {
-      "title": "Traducteur",
-      "description": "Traduisez du texte dans une autre langue.",
-      "textLabel": "Texte",
+      "title": "Traducteur de langue",
+      "description": "Traduisez du texte entre les langues.",
+      "textLabel": "Texte à traduire",
       "languageLabel": "Langue cible",
-      "languagePlaceholder": "ex: espagnol, français, japonais",
+      "languagePlaceholder": "ex: français, espagnol, allemand",
       "button": "Traduire",
       "buttonLoading": "Traduction en cours..."
     },
     "emailDrafter": {
-      "title": "Générateur de brouillons d'e-mails",
-      "description": "Laissez l'IA rédiger un brouillon rapide.",
+      "title": "Rédacteur d'e-mails",
+      "description": "Rédigez rapidement des e-mails professionnels.",
       "topicLabel": "Sujet de l'e-mail",
       "topicPlaceholder": "ex: mise à jour du projet, demande de réunion",
       "button": "Générer",
@@ -165,5 +223,37 @@
       "copySuccess": "Copié !",
       "copyDescription": "Mot de passe copié dans le presse-papiers."
     }
+  },
+  "AuthErrorPage": {
+    "credentialsSigninTitle": "Échec de la connexion",
+    "credentialsSigninDescription": "L'e-mail ou le mot de passe que vous avez entré est incorrect. Veuillez vérifier vos informations d'identification et réessayer.",
+    "accessDeniedTitle": "Accès refusé",
+    "accessDeniedDescription": "Vous n'avez pas la permission d'accéder à cette page. Veuillez contacter un administrateur si vous pensez qu'il s'agit d'une erreur.",
+    "configurationTitle": "Erreur de configuration du serveur",
+    "configurationDescription": "Il y a un problème avec la configuration d'authentification du serveur. Veuillez contacter le support.",
+    "defaultTitle": "Une erreur est survenue",
+    "defaultDescription": "Une erreur d'authentification inconnue s'est produite. Veuillez réessayer ou contacter le support si le problème persiste.",
+    "backToLogin": "Retour à la connexion"
+  },
+  "ErrorPage": {
+    "title": "Quelque chose s'est mal passé",
+    "description": "Nous sommes désolés, mais une erreur inattendue s'est produite. Veuillez réessayer.",
+    "details": "Détails de l'erreur",
+    "tryAgain": "Réessayer"
+  },
+  "DashboardLayout": {
+    "dashboard": "Tableau de bord",
+    "tools": "Outils",
+    "aiTools": "Outils d'IA",
+    "settings": "Paramètres",
+    "signOut": "Se déconnecter"
+  },
+  "Time": {
+    "years": "{count, plural, one {il y a # an} other {il y a # ans}}",
+    "months": "{count, plural, one {il y a # mois} other {il y a # mois}}",
+    "days": "{count, plural, one {il y a # jour} other {il y a # jours}}",
+    "hours": "{count, plural, one {il y a # heure} other {il y a # heures}}",
+    "minutes": "{count, plural, one {il y a # minute} other {il y a # minutes}}",
+    "seconds": "{count, plural, one {il y a # seconde} other {il y a # secondes}}"
   }
 }

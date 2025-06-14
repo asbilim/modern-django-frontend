@@ -205,6 +205,7 @@ export default function ModelListPage() {
   const handleExport = async (format: "csv" | "json") => {
     if (!model) return;
 
+    const totalItems = modelData?.count || 0;
     toast({
       title: t("exportPreparingTitle"),
       description: t("exportPreparingDescription", { totalItems }),
