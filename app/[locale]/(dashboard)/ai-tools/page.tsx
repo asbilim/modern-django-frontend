@@ -1,47 +1,187 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useCompletion } from "@ai-sdk/react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Copy } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  Copy,
+  KeyRound,
+  FileText,
+  Languages,
+  Mail,
+  Lightbulb,
+  Newspaper,
+  LifeBuoy,
+  Share2,
+  Sparkles,
+} from "lucide-react";
 
 export default function AiToolsPage() {
+  const t = useTranslations("AiToolsPage");
+
+  const toolDefinitions = useMemo(
+    () => [
+      {
+        id: "summarizer",
+        title: t("summarizer.title"),
+        description: t("summarizer.description"),
+        icon: <FileText className="h-6 w-6" />,
+        component: TextSummarizer,
+      },
+      {
+        id: "translator",
+        title: t("translator.title"),
+        description: t("translator.description"),
+        icon: <Languages className="h-6 w-6" />,
+        component: Translator,
+      },
+      {
+        id: "email_drafter",
+        title: t("emailDrafter.title"),
+        description: t("emailDrafter.description"),
+        icon: <Mail className="h-6 w-6" />,
+        component: EmailDraftGenerator,
+      },
+      {
+        id: "support_reply",
+        title: t("supportReply.title"),
+        description: t("supportReply.description"),
+        icon: <LifeBuoy className="h-6 w-6" />,
+        component: SupportReplyGenerator,
+      },
+      {
+        id: "social_post",
+        title: t("socialPost.title"),
+        description: t("socialPost.description"),
+        icon: <Share2 className="h-6 w-6" />,
+        component: SocialPostIdeas,
+      },
+      {
+        id: "marketing_ideas",
+        title: t("marketingIdeas.title"),
+        description: t("marketingIdeas.description"),
+        icon: <Lightbulb className="h-6 w-6" />,
+        component: MarketingIdeas,
+      },
+      {
+        id: "newsletter_themes",
+        title: t("newsletterThemes.title"),
+        description: t("newsletterThemes.description"),
+        icon: <Newspaper className="h-6 w-6" />,
+        component: NewsletterThemeSuggester,
+      },
+      {
+        id: "password_generator",
+        title: t("passwordGenerator.title"),
+        description: t("passwordGenerator.description"),
+        icon: <KeyRound className="h-6 w-6" />,
+        component: SecurePasswordGenerator,
+      },
+    ],
+    [t]
+  );
+
+  const [selectedToolId, setSelectedToolId] = useState(toolDefinitions[0].id);
+
+  const SelectedToolComponent = useMemo(() => {
+    return toolDefinitions.find((tool) => tool.id === selectedToolId)
+      ?.component;
+  }, [selectedToolId, toolDefinitions]);
+
   return (
-    <div className="space-y-8">
-      <h1 className="text-2xl font-bold">AI Tools</h1>
-      <p className="text-muted-foreground">
-        A collection of AI-powered utilities to help you work more efficiently.
-      </p>
-      <div className="grid gap-6 md:grid-cols-2">
-        <SecurePasswordGenerator />
-        <TextSummarizer />
-        <Translator />
-        <EmailDraftGenerator />
-        <MarketingIdeas />
-        <NewsletterThemeSuggester />
-        <SupportReplyGenerator />
-        <SocialPostIdeas />
+    <div className="flex flex-col md:flex-row h-[calc(100vh-120px)] gap-6">
+      <aside className="w-full md:w-1/3 lg:w-1/4 xl:w-1/5 border rounded-lg p-4 flex flex-col">
+        <div className="flex items-center gap-2 mb-4">
+          <Sparkles className="h-6 w-6 text-primary" />
+          <h1 className="text-xl font-bold">{t("title")}</h1>
+        </div>
+        <div className="space-y-2 overflow-y-auto">
+          {toolDefinitions.map((tool) => (
+            <button
+              key={tool.id}
+              onClick={() => setSelectedToolId(tool.id)}
+              className={cn(
+                "w-full flex items-center gap-3 p-3 rounded-md text-left transition-all duration-200",
+                selectedToolId === tool.id
+                  ? "bg-primary/10 text-primary scale-105 shadow-sm"
+                  : "hover:bg-muted/50"
+              )}>
+              <div
+                className={cn(
+                  "p-2 rounded-md",
+                  selectedToolId === tool.id
+                    ? "bg-primary/20"
+                    : "bg-muted text-muted-foreground"
+                )}>
+                {tool.icon}
+              </div>
+              <div>
+                <p className="font-semibold">{tool.title}</p>
+                <p className="text-xs text-muted-foreground">
+                  {tool.description}
+                </p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </aside>
+      <main className="flex-1 border rounded-lg p-6 overflow-y-auto">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={selectedToolId}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}>
+            {SelectedToolComponent && <SelectedToolComponent />}
+          </motion.div>
+        </AnimatePresence>
+      </main>
+    </div>
+  );
+}
+
+function AiOutput({
+  completion,
+  onCopy,
+}: {
+  completion: string | null;
+  onCopy?: () => void;
+}) {
+  const t = useTranslations("AiToolsPage");
+  if (!completion) return null;
+  return (
+    <div className="mt-6">
+      <h3 className="font-semibold mb-2">{t("resultTitle")}</h3>
+      <div className="bg-muted p-4 rounded-md relative group">
+        <p className="whitespace-pre-wrap text-sm">{completion}</p>
+        {onCopy && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onCopy}
+            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Copy className="h-4 w-4" />
+          </Button>
+        )}
       </div>
     </div>
   );
 }
 
 function SecurePasswordGenerator() {
+  const t = useTranslations("AiToolsPage.passwordGenerator");
+  const { toast } = useToast();
   const [length, setLength] = useState(16);
   const [includeNumbers, setIncludeNumbers] = useState(true);
   const [includeSymbols, setIncludeSymbols] = useState(true);
-  const { toast } = useToast();
 
   const { completion, complete, isLoading } = useCompletion({
     api: "/api/ai/generate",
@@ -49,345 +189,292 @@ function SecurePasswordGenerator() {
 
   const generatePassword = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const prompt = `
-      Generate a secure, random password with the following criteria:
-      - Length: ${length} characters
-      - Must include lowercase and uppercase letters.
-      - ${
-        includeNumbers
-          ? "Must include numbers (0-9)."
-          : "Do not include numbers."
-      }
-      - ${
-        includeSymbols
-          ? "Must include symbols (e.g., !@#$%^&*)."
-          : "Do not include symbols."
-      }
-      Only output the password itself, with no additional text, explanation, or markdown.
-    `;
-    complete(prompt);
+    complete(
+      `Generate a secure, random password with length ${length}, ${
+        includeNumbers ? "including numbers" : "no numbers"
+      }, and ${
+        includeSymbols ? "including symbols" : "no symbols"
+      }. Output only the password.`
+    );
   };
 
   const copyToClipboard = () => {
     if (completion) {
       navigator.clipboard.writeText(completion);
-      toast({ title: "Copied!", description: "Password copied to clipboard." });
+      toast({ title: t("copySuccess"), description: t("copyDescription") });
     }
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Secure Password Generator</CardTitle>
-        <CardDescription>
-          Create a strong, random password using AI.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={generatePassword} className="space-y-4">
-          <div>
-            <Label htmlFor="length">Password Length</Label>
-            <Input
-              id="length"
-              type="number"
-              value={length}
-              onChange={(e) => setLength(parseInt(e.target.value, 10))}
-              min="8"
-              max="128"
-            />
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="includeNumbers"
-              checked={includeNumbers}
-              onCheckedChange={(checked) => setIncludeNumbers(Boolean(checked))}
-            />
-            <Label htmlFor="includeNumbers">Include Numbers</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="includeSymbols"
-              checked={includeSymbols}
-              onCheckedChange={(checked) => setIncludeSymbols(Boolean(checked))}
-            />
-            <Label htmlFor="includeSymbols">Include Symbols</Label>
-          </div>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Generating..." : "Generate Password"}
-          </Button>
-        </form>
-        {completion && (
-          <div className="mt-4 p-3 bg-muted rounded-md flex items-center justify-between">
-            <code className="font-mono text-sm break-all">{completion}</code>
-            <Button variant="ghost" size="icon" onClick={copyToClipboard}>
-              <Copy className="h-4 w-4" />
-            </Button>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <form onSubmit={generatePassword} className="space-y-4">
+        <div>
+          <Label htmlFor="length">{t("lengthLabel")}</Label>
+          <Input
+            id="length"
+            type="number"
+            value={length}
+            onChange={(e) => setLength(parseInt(e.target.value, 10))}
+            min="8"
+            max="128"
+          />
+        </div>
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="includeNumbers"
+            checked={includeNumbers}
+            onCheckedChange={(checked) => setIncludeNumbers(Boolean(checked))}
+          />
+          <Label htmlFor="includeNumbers">{t("numbersLabel")}</Label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="includeSymbols"
+            checked={includeSymbols}
+            onCheckedChange={(checked) => setIncludeSymbols(Boolean(checked))}
+          />
+          <Label htmlFor="includeSymbols">{t("symbolsLabel")}</Label>
+        </div>
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? t("buttonLoading") : t("button")}
+        </Button>
+      </form>
+      <AiOutput completion={completion} onCopy={copyToClipboard} />
+    </div>
   );
 }
 
 function TextSummarizer() {
+  const t = useTranslations("AiToolsPage.summarizer");
   const [text, setText] = useState("");
-  const { completion, complete, isLoading } = useCompletion({ api: "/api/ai/generate" });
+  const { completion, complete, isLoading } = useCompletion({
+    api: "/api/ai/generate",
+  });
 
   const summarize = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const prompt = `Summarize the following text in a concise paragraph:\n${text}`;
-    complete(prompt);
+    complete(`Summarize this text concisely:\n${text}`);
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Text Summarizer</CardTitle>
-        <CardDescription>Quickly summarize long passages of text.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={summarize} className="space-y-4">
-          <div>
-            <Label htmlFor="summary-text">Text to Summarize</Label>
-            <textarea
-              id="summary-text"
-              className="w-full rounded-md border p-2"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-            />
-          </div>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Summarizing..." : "Summarize"}
-          </Button>
-        </form>
-        {completion && (
-          <p className="mt-4 whitespace-pre-wrap text-sm">{completion}</p>
-        )}
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <form onSubmit={summarize} className="space-y-4">
+        <div>
+          <Label htmlFor="summary-text">{t("textLabel")}</Label>
+          <textarea
+            id="summary-text"
+            className="w-full rounded-md border p-2 min-h-[150px]"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
+        </div>
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? t("buttonLoading") : t("button")}
+        </Button>
+      </form>
+      <AiOutput completion={completion} />
+    </div>
   );
 }
 
 function Translator() {
+  const t = useTranslations("AiToolsPage.translator");
   const [text, setText] = useState("");
-  const [targetLang, setTargetLang] = useState("es");
-  const { completion, complete, isLoading } = useCompletion({ api: "/api/ai/generate" });
+  const [targetLang, setTargetLang] = useState("Spanish");
+  const { completion, complete, isLoading } = useCompletion({
+    api: "/api/ai/generate",
+  });
 
   const translate = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const prompt = `Translate the following text to ${targetLang}:\n${text}`;
-    complete(prompt);
+    complete(`Translate to ${targetLang}:\n${text}`);
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Translator</CardTitle>
-        <CardDescription>Translate text into another language.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={translate} className="space-y-4">
-          <div>
-            <Label htmlFor="translate-text">Text</Label>
-            <textarea
-              id="translate-text"
-              className="w-full rounded-md border p-2"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-            />
-          </div>
-          <div>
-            <Label htmlFor="targetLang">Target Language</Label>
-            <Input
-              id="targetLang"
-              value={targetLang}
-              onChange={(e) => setTargetLang(e.target.value)}
-            />
-          </div>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Translating..." : "Translate"}
-          </Button>
-        </form>
-        {completion && (
-          <p className="mt-4 whitespace-pre-wrap text-sm">{completion}</p>
-        )}
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <form onSubmit={translate} className="space-y-4">
+        <div>
+          <Label htmlFor="translate-text">{t("textLabel")}</Label>
+          <textarea
+            id="translate-text"
+            className="w-full rounded-md border p-2 min-h-[100px]"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          />
+        </div>
+        <div>
+          <Label htmlFor="targetLang">{t("languageLabel")}</Label>
+          <Input
+            id="targetLang"
+            value={targetLang}
+            onChange={(e) => setTargetLang(e.target.value)}
+            placeholder={t("languagePlaceholder")}
+          />
+        </div>
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? t("buttonLoading") : t("button")}
+        </Button>
+      </form>
+      <AiOutput completion={completion} />
+    </div>
   );
 }
 
 function EmailDraftGenerator() {
+  const t = useTranslations("AiToolsPage.emailDrafter");
   const [topic, setTopic] = useState("");
-  const { completion, complete, isLoading } = useCompletion({ api: "/api/ai/generate" });
+  const { completion, complete, isLoading } = useCompletion({
+    api: "/api/ai/generate",
+  });
 
   const generate = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const prompt = `Write a professional email about: ${topic}`;
-    complete(prompt);
+    complete(`Write a professional email about: ${topic}`);
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Email Draft Generator</CardTitle>
-        <CardDescription>Let AI craft a quick email draft.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={generate} className="space-y-4">
-          <Input
-            placeholder="Email topic"
-            value={topic}
-            onChange={(e) => setTopic(e.target.value)}
-          />
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Generating..." : "Generate"}
-          </Button>
-        </form>
-        {completion && (
-          <p className="mt-4 whitespace-pre-wrap text-sm">{completion}</p>
-        )}
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <form onSubmit={generate} className="space-y-4">
+        <Label htmlFor="email-topic">{t("topicLabel")}</Label>
+        <Input
+          id="email-topic"
+          placeholder={t("topicPlaceholder")}
+          value={topic}
+          onChange={(e) => setTopic(e.target.value)}
+        />
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? t("buttonLoading") : t("button")}
+        </Button>
+      </form>
+      <AiOutput completion={completion} />
+    </div>
   );
 }
 
 function MarketingIdeas() {
+  const t = useTranslations("AiToolsPage.marketingIdeas");
   const [product, setProduct] = useState("");
-  const { completion, complete, isLoading } = useCompletion({ api: "/api/ai/generate" });
+  const { completion, complete, isLoading } = useCompletion({
+    api: "/api/ai/generate",
+  });
 
   const generate = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const prompt = `Provide creative marketing campaign ideas for: ${product}`;
-    complete(prompt);
+    complete(`Provide creative marketing campaign ideas for: ${product}`);
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Marketing Ideas</CardTitle>
-        <CardDescription>Brainstorm promotional campaigns.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={generate} className="space-y-4">
-          <Input
-            placeholder="Product or service"
-            value={product}
-            onChange={(e) => setProduct(e.target.value)}
-          />
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Generating..." : "Generate"}
-          </Button>
-        </form>
-        {completion && (
-          <p className="mt-4 whitespace-pre-wrap text-sm">{completion}</p>
-        )}
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <form onSubmit={generate} className="space-y-4">
+        <Label htmlFor="product">{t("productLabel")}</Label>
+        <Input
+          id="product"
+          placeholder={t("productPlaceholder")}
+          value={product}
+          onChange={(e) => setProduct(e.target.value)}
+        />
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? t("buttonLoading") : t("button")}
+        </Button>
+      </form>
+      <AiOutput completion={completion} />
+    </div>
   );
 }
 
 function NewsletterThemeSuggester() {
+  const t = useTranslations("AiToolsPage.newsletterThemes");
   const [audience, setAudience] = useState("");
-  const { completion, complete, isLoading } = useCompletion({ api: "/api/ai/generate" });
+  const { completion, complete, isLoading } = useCompletion({
+    api: "/api/ai/generate",
+  });
 
   const suggest = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const prompt = `Suggest five engaging newsletter themes for an audience of: ${audience}`;
-    complete(prompt);
+    complete(
+      `Suggest 5 engaging newsletter themes for an audience of: ${audience}`
+    );
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Newsletter Theme Suggester</CardTitle>
-        <CardDescription>Get inspiration for your next newsletter.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={suggest} className="space-y-4">
-          <Input
-            placeholder="Target audience"
-            value={audience}
-            onChange={(e) => setAudience(e.target.value)}
-          />
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Suggesting..." : "Suggest"}
-          </Button>
-        </form>
-        {completion && (
-          <p className="mt-4 whitespace-pre-wrap text-sm">{completion}</p>
-        )}
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <form onSubmit={suggest} className="space-y-4">
+        <Label htmlFor="audience">{t("audienceLabel")}</Label>
+        <Input
+          id="audience"
+          placeholder={t("audiencePlaceholder")}
+          value={audience}
+          onChange={(e) => setAudience(e.target.value)}
+        />
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? t("buttonLoading") : t("button")}
+        </Button>
+      </form>
+      <AiOutput completion={completion} />
+    </div>
   );
 }
 
 function SupportReplyGenerator() {
+  const t = useTranslations("AiToolsPage.supportReply");
   const [question, setQuestion] = useState("");
-  const { completion, complete, isLoading } = useCompletion({ api: "/api/ai/generate" });
+  const { completion, complete, isLoading } = useCompletion({
+    api: "/api/ai/generate",
+  });
 
   const generate = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const prompt = `Write a helpful customer support reply to: ${question}`;
-    complete(prompt);
+    complete(
+      `Write a helpful and empathetic customer support reply to: ${question}`
+    );
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Support Reply Generator</CardTitle>
-        <CardDescription>Craft polite responses to customer questions.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={generate} className="space-y-4">
-          <Input
-            placeholder="Customer question"
-            value={question}
-            onChange={(e) => setQuestion(e.target.value)}
-          />
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Generating..." : "Generate"}
-          </Button>
-        </form>
-        {completion && (
-          <p className="mt-4 whitespace-pre-wrap text-sm">{completion}</p>
-        )}
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <form onSubmit={generate} className="space-y-4">
+        <Label htmlFor="customer-q">{t("questionLabel")}</Label>
+        <Input
+          id="customer-q"
+          placeholder={t("questionPlaceholder")}
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+        />
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? t("buttonLoading") : t("button")}
+        </Button>
+      </form>
+      <AiOutput completion={completion} />
+    </div>
   );
 }
 
 function SocialPostIdeas() {
+  const t = useTranslations("AiToolsPage.socialPost");
   const [topic, setTopic] = useState("");
-  const { completion, complete, isLoading } = useCompletion({ api: "/api/ai/generate" });
+  const { completion, complete, isLoading } = useCompletion({
+    api: "/api/ai/generate",
+  });
 
   const generate = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const prompt = `Give me social media post ideas about: ${topic}`;
-    complete(prompt);
+    complete(`Give me 5 creative social media post ideas about: ${topic}`);
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Social Post Ideas</CardTitle>
-        <CardDescription>Generate catchy posts for social channels.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={generate} className="space-y-4">
-          <Input
-            placeholder="Topic or event"
-            value={topic}
-            onChange={(e) => setTopic(e.target.value)}
-          />
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Generating..." : "Generate"}
-          </Button>
-        </form>
-        {completion && (
-          <p className="mt-4 whitespace-pre-wrap text-sm">{completion}</p>
-        )}
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <form onSubmit={generate} className="space-y-4">
+        <Label htmlFor="social-topic">{t("topicLabel")}</Label>
+        <Input
+          id="social-topic"
+          placeholder={t("topicPlaceholder")}
+          value={topic}
+          onChange={(e) => setTopic(e.target.value)}
+        />
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? t("buttonLoading") : t("button")}
+        </Button>
+      </form>
+      <AiOutput completion={completion} />
+    </div>
   );
 }
-

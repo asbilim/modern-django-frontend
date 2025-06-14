@@ -12,7 +12,7 @@ import {
   Menu,
   Settings,
   BrainCircuit,
-  Home,
+  Layers,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DynamicIcon } from "@/components/ui/dynamic-icon";
@@ -44,6 +44,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { DefaultLogo } from "@/components/ui/default-logo";
 
 // Sidebar animation variants
 const sidebarVariants: Variants = {
@@ -149,8 +150,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   });
 
   const siteName = adminConfig?.frontend_options?.site_name || "Dashboard";
-  const logoUrl =
-    adminConfig?.frontend_options?.logo_url || "/default-logo.png";
+  const logoUrl = adminConfig?.frontend_options?.logo_url;
 
   useEffect(() => {
     if (userProfile?.preferences?.theme) {
@@ -159,7 +159,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   }, [userProfile?.preferences?.theme, setTheme]);
 
   useEffect(() => {
-    preferencesMutation.mutate({ theme: theme });
+    if (theme) {
+      preferencesMutation.mutate({ theme: theme });
+    }
   }, [theme]);
 
   useEffect(() => {
@@ -189,26 +191,51 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   if (!session) return null;
 
+  const SidebarHeader = ({ isMobile = false }: { isMobile?: boolean }) => (
+    <div className="h-16 flex items-center px-4 border-b border-sidebar-border w-full justify-between">
+      <Link href="/" className="flex items-center overflow-hidden">
+        {logoUrl ? (
+          <img src={logoUrl} alt={siteName} className="h-8 w-8 flex-shrink-0" />
+        ) : (
+          <DefaultLogo className="h-8 w-8 text-sidebar-foreground flex-shrink-0" />
+        )}
+        <AnimatePresence>
+          {(!isSidebarCollapsed || isMobile) && (
+            <motion.span
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.2 }}
+              className="ml-3 font-semibold text-lg text-sidebar-foreground whitespace-nowrap">
+              {siteName}
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </Link>
+      {!isMobile && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleSidebar}
+          className="text-sidebar-foreground hover:bg-sidebar-accent -mr-2">
+          <ChevronRight
+            className={cn(
+              "h-5 w-5 transition-transform",
+              isSidebarCollapsed ? "" : "rotate-180"
+            )}
+          />
+        </Button>
+      )}
+    </div>
+  );
+
   const SidebarContent = () => (
     <>
-      <div className="h-16 flex items-center px-4 border-b border-sidebar-border w-full">
-        <Link href="/" className="flex items-center">
-          <img src={logoUrl} alt={siteName} className="h-8 w-8" />
-          <motion.span
-            variants={itemVariants}
-            initial={false}
-            animate={isSidebarCollapsed && !isMobile ? "collapsed" : "expanded"}
-            className="ml-3 font-semibold text-lg text-sidebar-foreground">
-            {siteName}
-          </motion.span>
-        </Link>
-      </div>
-
       <ScrollArea className="flex-1 w-full">
         <nav className="px-2 py-4 space-y-1">
           <SidebarLink
             href="/"
-            icon={<Home className="h-5 w-5 flex-shrink-0" />}
+            icon={<Layers className="h-5 w-5 flex-shrink-0" />}
             label={t("dashboard")}
             isCollapsed={isSidebarCollapsed && !isMobile}
             isActive={isActive("/")}
@@ -313,21 +340,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         initial={false}
         animate={isSidebarCollapsed ? "collapsed" : "expanded"}
         className="bg-sidebar text-sidebar-foreground border-r border-sidebar-border hidden md:flex flex-col z-30">
-        <div className="h-16 flex items-center px-4 justify-end w-full">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleSidebar}
-            className="text-sidebar-foreground hover:bg-sidebar-accent">
-            <ChevronRight
-              className={cn(
-                "h-4 w-4 transition-transform",
-                isSidebarCollapsed ? "" : "rotate-180"
-              )}
-            />
-          </Button>
-        </div>
-        <div className="flex-1 flex flex-col overflow-y-hidden">
+        <SidebarHeader />
+        <div className="flex-1 flex flex-col overflow-y-auto">
           <SidebarContent />
         </div>
       </motion.aside>
@@ -341,12 +355,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="p-0 bg-sidebar flex flex-col">
+              <SidebarHeader isMobile={true} />
               <SidebarContent />
             </SheetContent>
           </Sheet>
           <Link href="/" className="flex items-center">
-            <img src={logoUrl} alt={siteName} className="h-8 w-8" />
-            <span className="ml-3 font-semibold text-lg">{siteName}</span>
+            <span className="font-semibold text-lg">{siteName}</span>
           </Link>
           <ThemeSwitcher />
         </header>
@@ -392,9 +406,28 @@ function SidebarLink({
           : "text-sidebar-foreground hover:bg-sidebar-accent/50",
         isCollapsed ? "justify-center" : "justify-start"
       )}>
-      <TooltipProvider>
+      <TooltipProvider delayDuration={0}>
         <Tooltip>
-          <TooltipTrigger asChild>{icon}</TooltipTrigger>
+          <TooltipTrigger asChild>
+            <span className="flex items-center">
+              {icon}
+              <AnimatePresence>
+                {!isCollapsed && (
+                  <motion.span
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{
+                      opacity: 1,
+                      width: "auto",
+                      transition: { delay: 0.1 },
+                    }}
+                    exit={{ opacity: 0, width: 0 }}
+                    className="ml-3">
+                    {label}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </span>
+          </TooltipTrigger>
           {isCollapsed && (
             <TooltipContent side="right">
               <p>{label}</p>
@@ -402,14 +435,6 @@ function SidebarLink({
           )}
         </Tooltip>
       </TooltipProvider>
-
-      <motion.span
-        variants={itemVariants}
-        initial={false}
-        animate={isCollapsed ? "collapsed" : "expanded"}
-        className="ml-3">
-        {label}
-      </motion.span>
     </Link>
   );
 }
@@ -440,24 +465,29 @@ function UserNav({
         <Button
           variant="ghost"
           className={cn(
-            "flex h-auto w-full items-center gap-3 p-2",
-            isCollapsed ? "justify-center" : "justify-between"
+            "flex h-auto w-full items-center gap-2 p-2",
+            isCollapsed ? "justify-center px-0" : "justify-start"
           )}>
           <Avatar className="h-8 w-8">
             <AvatarImage src={user.avatar_url} />
             <AvatarFallback>{getInitials(user.first_name)}</AvatarFallback>
           </Avatar>
-          <motion.span
-            variants={itemVariants}
-            animate={isCollapsed ? "collapsed" : "expanded"}
-            className="flex-1 truncate text-left text-sm font-medium text-sidebar-foreground">
-            {user.first_name}
-          </motion.span>
-          <motion.div
-            variants={itemVariants}
-            animate={isCollapsed ? "collapsed" : "expanded"}>
-            <ChevronRight className="h-4 w-4 text-sidebar-foreground/50" />
-          </motion.div>
+          <AnimatePresence>
+            {!isCollapsed && (
+              <motion.div
+                initial={{ opacity: 0, x: -5 }}
+                animate={{ opacity: 1, x: 0, transition: { delay: 0.1 } }}
+                exit={{ opacity: 0, x: -5 }}
+                className="flex flex-col items-start flex-1 truncate">
+                <span className="text-sm font-medium text-sidebar-foreground truncate">
+                  {user.first_name}
+                </span>
+                <span className="text-xs text-sidebar-foreground/70 truncate">
+                  {user.email}
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-64" align="end" forceMount>

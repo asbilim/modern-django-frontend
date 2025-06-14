@@ -4,6 +4,7 @@ import { getMessages } from "next-intl/server";
 import { Toaster } from "@/components/ui/toaster";
 import { dashboardConfig } from "@/lib/config";
 import { Providers } from "@/components/providers";
+import { DefaultFavicon } from "@/components/ui/default-favicon";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,7 +23,7 @@ export default async function LocaleLayout({
       <head>
         <title>{dashboardConfig.name}</title>
         <meta name="description" content={dashboardConfig.description} />
-        <link rel="icon" href={dashboardConfig.favicon} />
+        <DefaultFavicon />
       </head>
       <body className={inter.className}>
         <Providers>

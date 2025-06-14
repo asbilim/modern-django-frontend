@@ -159,7 +159,7 @@
     "system": "System",
     "signOut": "Sign out",
     "signOutSuccessTitle": "Signed out",
-    "signOutSuccessDescription": "You have been signed out successfully.",
+    "signOutSuccessDescription": "You have been successfully signed out.",
     "tools": "Tools",
     "aiTools": "AI Tools"
   },
@@ -179,5 +179,76 @@
     "description": "An unexpected error occurred. You can try to reload the page.",
     "details": "Error Details",
     "tryAgain": "Try again"
+  },
+  "AiToolsPage": {
+    "title": "AI Toolbox",
+    "resultTitle": "Result:",
+    "summarizer": {
+      "title": "Text Summarizer",
+      "description": "Quickly summarize long passages.",
+      "textLabel": "Text to Summarize",
+      "button": "Summarize",
+      "buttonLoading": "Summarizing..."
+    },
+    "translator": {
+      "title": "Translator",
+      "description": "Translate text into another language.",
+      "textLabel": "Text",
+      "languageLabel": "Target Language",
+      "languagePlaceholder": "e.g., Spanish, French, Japanese",
+      "button": "Translate",
+      "buttonLoading": "Translating..."
+    },
+    "emailDrafter": {
+      "title": "Email Draft Generator",
+      "description": "Let AI craft a quick email draft.",
+      "topicLabel": "Email Topic",
+      "topicPlaceholder": "e.g., Project update, meeting request",
+      "button": "Generate",
+      "buttonLoading": "Generating..."
+    },
+    "supportReply": {
+      "title": "Support Reply Generator",
+      "description": "Craft polite customer responses.",
+      "questionLabel": "Customer Question",
+      "questionPlaceholder": "e.g., I can't log in to my account",
+      "button": "Generate",
+      "buttonLoading": "Generating..."
+    },
+    "socialPost": {
+      "title": "Social Post Ideas",
+      "description": "Generate catchy social posts.",
+      "topicLabel": "Topic or Event",
+      "topicPlaceholder": "e.g., New product launch, company anniversary",
+      "button": "Generate",
+      "buttonLoading": "Generating..."
+    },
+    "marketingIdeas": {
+      "title": "Marketing Ideas",
+      "description": "Brainstorm promotional campaigns.",
+      "productLabel": "Product or Service",
+      "productPlaceholder": "e.g., A new coffee brand, a SaaS product",
+      "button": "Generate",
+      "buttonLoading": "Generating..."
+    },
+    "newsletterThemes": {
+      "title": "Newsletter Theme Suggester",
+      "description": "Get inspiration for your next newsletter.",
+      "audienceLabel": "Target Audience",
+      "audiencePlaceholder": "e.g., Software developers, small business owners",
+      "button": "Suggest",
+      "buttonLoading": "Suggesting..."
+    },
+    "passwordGenerator": {
+      "title": "Secure Password Generator",
+      "description": "Create strong, random passwords.",
+      "lengthLabel": "Password Length",
+      "numbersLabel": "Include Numbers",
+      "symbolsLabel": "Include Symbols",
+      "button": "Generate Password",
+      "buttonLoading": "Generating...",
+      "copySuccess": "Copied!",
+      "copyDescription": "Password copied to clipboard."
+    }
   }
 }

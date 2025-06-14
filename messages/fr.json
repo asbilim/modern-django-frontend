@@ -94,5 +94,76 @@
     "system": "Système",
     "tools": "Outils",
     "aiTools": "Outils d'IA"
+  },
+  "AiToolsPage": {
+    "title": "Boîte à outils IA",
+    "resultTitle": "Résultat :",
+    "summarizer": {
+      "title": "Résumé de texte",
+      "description": "Résumez rapidement de longs passages.",
+      "textLabel": "Texte à résumer",
+      "button": "Résumer",
+      "buttonLoading": "Résumé en cours..."
+    },
+    "translator": {
+      "title": "Traducteur",
+      "description": "Traduisez du texte dans une autre langue.",
+      "textLabel": "Texte",
+      "languageLabel": "Langue cible",
+      "languagePlaceholder": "ex: espagnol, français, japonais",
+      "button": "Traduire",
+      "buttonLoading": "Traduction en cours..."
+    },
+    "emailDrafter": {
+      "title": "Générateur de brouillons d'e-mails",
+      "description": "Laissez l'IA rédiger un brouillon rapide.",
+      "topicLabel": "Sujet de l'e-mail",
+      "topicPlaceholder": "ex: mise à jour du projet, demande de réunion",
+      "button": "Générer",
+      "buttonLoading": "Génération en cours..."
+    },
+    "supportReply": {
+      "title": "Générateur de réponses de support",
+      "description": "Rédigez des réponses polies aux clients.",
+      "questionLabel": "Question du client",
+      "questionPlaceholder": "ex: je n'arrive pas à me connecter",
+      "button": "Générer",
+      "buttonLoading": "Génération en cours..."
+    },
+    "socialPost": {
+      "title": "Idées de publications sociales",
+      "description": "Générez des publications attrayantes.",
+      "topicLabel": "Sujet ou événement",
+      "topicPlaceholder": "ex: lancement de produit, anniversaire",
+      "button": "Générer",
+      "buttonLoading": "Génération en cours..."
+    },
+    "marketingIdeas": {
+      "title": "Idées de marketing",
+      "description": "Brainstormez des campagnes promotionnelles.",
+      "productLabel": "Produit ou service",
+      "productPlaceholder": "ex: une nouvelle marque de café, un SaaS",
+      "button": "Générer",
+      "buttonLoading": "Génération en cours..."
+    },
+    "newsletterThemes": {
+      "title": "Suggesteur de thèmes de newsletter",
+      "description": "Trouvez l'inspiration pour votre prochaine newsletter.",
+      "audienceLabel": "Public cible",
+      "audiencePlaceholder": "ex: développeurs, propriétaires de PME",
+      "button": "Suggérer",
+      "buttonLoading": "Suggestion en cours..."
+    },
+    "passwordGenerator": {
+      "title": "Générateur de mot de passe sécurisé",
+      "description": "Créez des mots de passe forts et aléatoires.",
+      "lengthLabel": "Longueur du mot de passe",
+      "numbersLabel": "Inclure des chiffres",
+      "symbolsLabel": "Inclure des symboles",
+      "button": "Générer le mot de passe",
+      "buttonLoading": "Génération en cours...",
+      "copySuccess": "Copié !",
+      "copyDescription": "Mot de passe copié dans le presse-papiers."
+    }
   }
 }
