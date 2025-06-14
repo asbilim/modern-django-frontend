@@ -109,8 +109,8 @@ export default function AiToolsPage() {
   }, [selectedToolId, toolDefinitions]);
 
   return (
-    <div className="grid md:grid-cols-[280px_1fr] gap-6 h-full">
-      <aside className="border rounded-lg p-4 flex flex-col h-full bg-background">
+    <div className="grid md:grid-cols-[280px_1fr] gap-6">
+      <aside className="sticky top-6 border rounded-lg p-4 flex flex-col bg-background self-start">
         <div className="flex items-center gap-3 mb-6 px-2">
           <Sparkles className="h-6 w-6 text-primary" />
           <h1 className="text-xl font-bold">{t("title")}</h1>
@@ -145,7 +145,7 @@ export default function AiToolsPage() {
           ))}
         </div>
       </aside>
-      <main className="overflow-y-auto h-full">
+      <main>
         <AnimatePresence mode="wait">
           <motion.div
             key={selectedToolId}
@@ -153,7 +153,7 @@ export default function AiToolsPage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -15 }}
             transition={{ duration: 0.25 }}>
-            <Card className="h-full">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-3">
                   {selectedTool &&
