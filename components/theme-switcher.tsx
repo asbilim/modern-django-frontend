@@ -4,6 +4,7 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -24,6 +25,7 @@ interface UserProfile {
 export function ThemeSwitcher() {
   const t = useTranslations("DashboardLayout");
   const queryClient = useQueryClient();
+  const { setTheme } = useTheme();
 
   const { data: userProfile } = useQuery<UserProfile>({
     queryKey: ["userProfile"],
@@ -33,7 +35,8 @@ export function ThemeSwitcher() {
   const mutation = useMutation({
     mutationFn: (theme: string) =>
       api.updateUserProfile({ preferences: { theme } }),
-    onSuccess: () => {
+    onSuccess: (_, theme) => {
+      setTheme(theme);
       queryClient.invalidateQueries({ queryKey: ["userProfile"] });
     },
   });

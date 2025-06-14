@@ -25,6 +25,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useTranslations } from "next-intl";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { LayoutSwitcher } from "@/components/layout-switcher";
+import { useTheme } from "next-themes";
 
 // Sidebar animation variants
 const sidebarVariants: Variants = {
@@ -107,6 +108,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
   const t = useTranslations("DashboardLayout");
+  const { setTheme } = useTheme();
 
   const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -146,17 +148,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const navbarStyle = userProfile?.preferences?.navbar_style || "modern";
 
   useEffect(() => {
-    // Apply theme to the document
-    const body = document.documentElement;
-    body.classList.remove(
-      "light",
-      "dark",
-      "professional",
-      "administrator",
-      "customer"
-    );
-    body.classList.add(theme);
-  }, [theme]);
+    setTheme(theme);
+  }, [theme, setTheme]);
 
   useEffect(() => {
     // Set initial sidebar state from user preferences or mobile status
