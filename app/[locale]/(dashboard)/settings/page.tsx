@@ -295,6 +295,9 @@ function TwoFactorAuthForm({ is2FAEnabled }: { is2FAEnabled: boolean }) {
   // Mutation to verify the OTP and activate 2FA
   const verifyMutation = useMutation({
     mutationFn: (otp: string) => api.verify2FA(otp),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+    },
     onSuccess: () => {
       toast({
         title: "Two-Factor Authentication Enabled",
@@ -302,7 +305,6 @@ function TwoFactorAuthForm({ is2FAEnabled }: { is2FAEnabled: boolean }) {
       });
       setQrCodeUrl(null);
       setSecret(null);
-      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
     },
     onError: (error) => {
       toast({

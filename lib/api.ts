@@ -136,6 +136,60 @@ async function apiFetch<T>(
   return null as T;
 }
 
+async function apiFileFetch(
+  endpoint: string,
+  options: RequestInit = {},
+  isRetry = false
+): Promise<Response> {
+  let session = await getSession();
+  let token = session?.accessToken;
+
+  if (isRetry && !token) {
+    throw new Error("Authentication failed after token refresh.");
+  }
+
+  const url = `${dashboardConfig.api.baseUrl}${endpoint}`;
+  const headers = new Headers(options.headers);
+
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  const finalOptions: RequestInit = { ...options, headers };
+
+  const response = await fetch(url, finalOptions);
+
+  if (response.status === 401 && !isRetry) {
+    try {
+      const newAccessToken = await refreshManager.handleRefresh();
+      headers.set("Authorization", `Bearer ${newAccessToken}`);
+      return await apiFileFetch(endpoint, { ...options, headers }, true);
+    } catch (refreshError) {
+      await signOut({ redirect: false });
+      window.location.href = "/login";
+      toast({
+        variant: "destructive",
+        title: "Session Expired",
+        description: "Your session has expired. Please log in again.",
+      });
+      throw new Error("Session expired. Please log in again.");
+    }
+  }
+
+  if (!response.ok) {
+    let errorDetail = `API Error: ${response.status} ${response.statusText}`;
+    try {
+      const errorData = await response.json();
+      errorDetail = errorData.detail || JSON.stringify(errorData);
+    } catch (e) {
+      // Ignore if response is not JSON
+    }
+    throw new Error(errorDetail);
+  }
+
+  return response;
+}
+
 export const api = {
   getAdminConfig: () => apiFetch<any>("/api/admin/"),
   getDashboardStats: () => apiFetch<any>("/api/admin/dashboard-stats/"),
@@ -191,6 +245,23 @@ export const api = {
       ? new URL(modelUrl).pathname
       : modelUrl;
     return apiFetch<void>(`${url}${id}/`, { method: "DELETE" });
+  },
+
+  // Import/Export
+  exportModelData: (modelUrl: string, format: "csv" | "json") => {
+    const url = modelUrl.startsWith("http")
+      ? new URL(modelUrl).pathname
+      : modelUrl;
+    return apiFileFetch(`${url}export/?format=${format}`);
+  },
+  importModelData: (importUrl: string, data: FormData) => {
+    const url = importUrl.startsWith("http")
+      ? new URL(importUrl).pathname
+      : importUrl;
+    return apiFetch<any>(url, {
+      method: "POST",
+      body: data,
+    });
   },
 
   // Auth and User Management

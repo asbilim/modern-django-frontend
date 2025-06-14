@@ -27,7 +27,11 @@
     "deleteTitle": "Are you absolutely sure?",
     "deleteConfirm": "This action cannot be undone. This will permanently delete the item.",
     "tryAgain": "Try Again",
-    "save": "Save Changes"
+    "save": "Save Changes",
+    "import": "Import",
+    "export": "Export",
+    "exportAsCsv": "Export as CSV",
+    "exportAsJson": "Export as JSON"
   },
   "SettingsPage": {
     "title": "Settings",
@@ -67,7 +71,8 @@
     "verifyAndActivate": "Verify & Activate",
     "twoFactorDisabled": "2FA is currently disabled.",
     "enabling": "Enabling...",
-    "enable2FA": "Enable 2FA"
+    "enable2FA": "Enable 2FA",
+    "verify": "Verify"
   },
   "Time": {
     "years": "{count, plural, one {# year ago} other {# years ago}}",
@@ -84,5 +89,26 @@
     "cancel": "Cancel",
     "verify": "Verify",
     "verifying": "Verifying..."
+  },
+  "ImportExport": {
+    "export": "Export",
+    "import": "Import",
+    "exportAsCsv": "Export as CSV",
+    "exportAsJson": "Export as JSON",
+    "exportStartedTitle": "Export Started",
+    "exportStartedDescription": "Your {format} file is downloading.",
+    "exportFailedTitle": "Export Failed",
+    "importTitle": "Import Data for {model}",
+    "importDescription": "Upload a CSV or JSON file to bulk-create items. Make sure the file columns match the model fields.",
+    "formatLabel": "File Format",
+    "selectFormatPlaceholder": "Select a format",
+    "fileLabel": "File",
+    "fileDescription": "Only .csv and .json files are accepted.",
+    "cancel": "Cancel",
+    "importButton": "Import Data",
+    "importing": "Importing...",
+    "importSuccessTitle": "Import Successful",
+    "importSuccessDescription": "{count, plural, =0 {No items were imported} one {# item was imported} other {# items were imported}}.",
+    "importErrorTitle": "Import Failed"
   }
 }

@@ -15,6 +15,8 @@ import {
   Pencil,
   AlertCircle,
   MoreHorizontal,
+  Upload,
+  Download,
 } from "lucide-react";
 import { getModelUrl, formatDate } from "@/lib/utils";
 import { DynamicIcon } from "@/components/ui/dynamic-icon";
@@ -44,6 +46,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { ImportModal } from "@/components/import-modal";
 
 const PAGE_SIZE = 15;
 
@@ -126,6 +129,7 @@ export default function ModelListPage() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemToDelete, setItemToDelete] = useState<ModelItem | null>(null);
+  const [isImportModalOpen, setImportModalOpen] = useState(false);
 
   const { data: adminConfig } = useQuery<AdminConfig>({
     queryKey: ["adminConfig"],
@@ -170,6 +174,7 @@ export default function ModelListPage() {
         description: `Item ${deletedId} was deleted successfully.`,
       });
       queryClient.invalidateQueries({ queryKey: ["modelItems", modelKey] });
+      queryClient.invalidateQueries({ queryKey: ["adminConfig"] });
     },
     onError: (error: Error, deletedId) => {
       toast({
@@ -190,6 +195,32 @@ export default function ModelListPage() {
     if (itemToDelete) {
       deleteMutation.mutate(itemToDelete.id);
       setItemToDelete(null);
+    }
+  };
+
+  const handleExport = async (format: "csv" | "json") => {
+    if (!model) return;
+    try {
+      const response = await api.exportModelData(model.api_url, format);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${modelKey}.${format}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      toast({
+        title: "Export Started",
+        description: `Your ${format.toUpperCase()} file is downloading.`,
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Export Failed",
+        description: error.message,
+      });
     }
   };
 
@@ -253,12 +284,36 @@ export default function ModelListPage() {
             {totalItems} item{totalItems !== 1 ? "s" : ""}
           </Badge>
         </div>
-        <Button
-          onClick={() => router.push(getModelUrl(modelKey, "create"))}
-          disabled={deleteMutation.isPending}>
-          <PlusIcon className="h-4 w-4 mr-2" />
-          {t("createNew")}
-        </Button>
+        <div className="flex items-center space-x-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <Download className="h-4 w-4 mr-2" />
+                {t("export")}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => handleExport("csv")}>
+                {t("exportAsCsv")}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport("json")}>
+                {t("exportAsJson")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <Button onClick={() => setImportModalOpen(true)}>
+            <Upload className="h-4 w-4 mr-2" />
+            {t("import")}
+          </Button>
+
+          <Button
+            onClick={() => router.push(getModelUrl(modelKey, "create"))}
+            disabled={deleteMutation.isPending}>
+            <PlusIcon className="h-4 w-4 mr-2" />
+            {t("createNew")}
+          </Button>
+        </div>
       </div>
 
       <div className="rounded-lg border overflow-hidden">
@@ -427,6 +482,12 @@ export default function ModelListPage() {
           </div>
         )}
       </div>
+      <ImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        modelKey={modelKey}
+        modelName={modelConfig?.verbose_name_plural || modelKey}
+      />
     </div>
   );
 }
