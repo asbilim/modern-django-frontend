@@ -22,6 +22,9 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useTranslations } from "next-intl";
+import { ThemeSwitcher } from "@/components/theme-switcher";
+import { LayoutSwitcher } from "@/components/layout-switcher";
 
 // Sidebar animation variants
 const sidebarVariants: Variants = {
@@ -90,7 +93,7 @@ interface AdminConfig {
 
 interface UserProfile {
   preferences: {
-    theme?: "light" | "dark";
+    theme?: string;
     navbar_style?: string;
     sidebar_collapsed?: boolean;
   };
@@ -103,6 +106,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
+  const t = useTranslations("DashboardLayout");
 
   const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -143,11 +147,15 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Apply theme to the document
-    if (theme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
+    const body = document.documentElement;
+    body.classList.remove(
+      "light",
+      "dark",
+      "professional",
+      "administrator",
+      "customer"
+    );
+    body.classList.add(theme);
   }, [theme]);
 
   useEffect(() => {
@@ -155,11 +163,6 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
     const collapsed = isMobile ?? userProfile?.preferences?.sidebar_collapsed;
     setSidebarCollapsed(!!collapsed);
   }, [userProfile, isMobile]);
-
-  const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    preferencesMutation.mutate({ theme: newTheme });
-  };
 
   const toggleSidebar = () => {
     const newCollapsedState = !isSidebarCollapsed;
@@ -172,8 +175,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/login" });
     toast({
-      title: "Signed out",
-      description: "You have been signed out successfully.",
+      title: t("signOutSuccessTitle"),
+      description: t("signOutSuccessDescription"),
     });
   };
 
@@ -241,7 +244,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 initial={false}
                 animate={isSidebarCollapsed ? "collapsed" : "expanded"}
                 className="ml-3">
-                Dashboard
+                {t("dashboard")}
               </motion.span>
             </Link>
 
@@ -293,7 +296,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <div className="my-2">
               {!isSidebarCollapsed && (
                 <h3 className="px-3 py-2 text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wider">
-                  System
+                  {t("system")}
                 </h3>
               )}
               <Link
@@ -314,7 +317,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   initial={false}
                   animate={isSidebarCollapsed ? "collapsed" : "expanded"}
                   className="ml-3">
-                  Settings
+                  {t("settings")}
                 </motion.span>
               </Link>
             </div>
@@ -324,17 +327,8 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         <div className="p-4 border-t border-sidebar-border w-full">
           <div className="flex items-center justify-between">
             <LanguageSwitcher />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleTheme}
-              className="text-sidebar-foreground hover:bg-sidebar-accent">
-              {theme === "light" ? (
-                <MoonIcon className="h-5 w-5" />
-              ) : (
-                <SunIcon className="h-5 w-5" />
-              )}
-            </Button>
+            <ThemeSwitcher />
+            <LayoutSwitcher />
             <motion.div
               variants={itemVariants}
               initial={false}
@@ -344,7 +338,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 onClick={handleSignOut}
                 className="text-sidebar-foreground hover:bg-sidebar-accent">
                 <LogOutIcon className="h-5 w-5 mr-2" />
-                Sign out
+                {t("signOut")}
               </Button>
             </motion.div>
           </div>
@@ -382,7 +376,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                         name="home"
                         className="h-5 w-5 flex-shrink-0 mr-3"
                       />
-                      Dashboard
+                      {t("dashboard")}
                     </Link>
 
                     {adminConfig &&
@@ -421,7 +415,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                       )}
                     <div className="my-2">
                       <h3 className="px-3 py-2 text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wider">
-                        System
+                        {t("system")}
                       </h3>
                       <Link
                         href="/settings"
@@ -435,7 +429,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                           name="settings"
                           className="h-5 w-5 flex-shrink-0 mr-3"
                         />
-                        Settings
+                        {t("settings")}
                       </Link>
                     </div>
                   </nav>
@@ -443,23 +437,14 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-sidebar-border">
                   <div className="flex items-center justify-between">
                     <LanguageSwitcher />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={toggleTheme}
-                      className="text-sidebar-foreground hover:bg-sidebar-accent">
-                      {theme === "light" ? (
-                        <MoonIcon className="h-5 w-5" />
-                      ) : (
-                        <SunIcon className="h-5 w-5" />
-                      )}
-                    </Button>
+                    <ThemeSwitcher />
+                    <LayoutSwitcher />
                     <Button
                       variant="ghost"
                       onClick={handleSignOut}
                       className="text-sidebar-foreground hover:bg-sidebar-accent">
                       <LogOutIcon className="h-5 w-5 mr-2" />
-                      Sign out
+                      {t("signOut")}
                     </Button>
                   </div>
                 </div>
@@ -468,17 +453,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <img src={logoUrl} alt={siteName} className="h-8 w-8 ml-3" />
             <span className="ml-3 font-semibold text-lg">{siteName}</span>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleTheme}
-            className="text-foreground">
-            {theme === "light" ? (
-              <MoonIcon className="h-5 w-5" />
-            ) : (
-              <SunIcon className="h-5 w-5" />
-            )}
-          </Button>
+          <div className="flex items-center">
+            <ThemeSwitcher />
+            <LayoutSwitcher />
+          </div>
         </div>
       </div>
 

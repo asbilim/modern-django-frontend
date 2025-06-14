@@ -51,13 +51,13 @@ export default function CreateModelPage() {
   }
 
   if (!modelConfig) {
-    return <div>Failed to load model configuration.</div>;
+    return <div>{t("loadModelConfigFailed")}</div>;
   }
 
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">
-        {t("createNew")} {modelConfig.verbose_name}
+        {t("createTitle", { modelName: modelConfig.verbose_name })}
       </h1>
       <ModelForm modelKey={modelKey} modelConfig={modelConfig} />
     </div>

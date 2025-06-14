@@ -65,13 +65,16 @@ export default function EditModelPage() {
   }
 
   if (!modelConfig || !initialData) {
-    return <div>Failed to load model data.</div>;
+    return <div>{t("loadModelDataFailed")}</div>;
   }
 
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">
-        {t("edit")} {modelConfig.verbose_name}: #{itemId}
+        {t("editTitle", {
+          modelName: modelConfig.verbose_name,
+          id: itemId,
+        })}
       </h1>
       <ModelForm
         modelKey={modelKey}

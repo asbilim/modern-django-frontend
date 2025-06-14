@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useForm, Controller } from "react-hook-form";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -14,18 +15,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -34,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 interface ImportModalProps {
   isOpen: boolean;
@@ -42,12 +32,10 @@ interface ImportModalProps {
   modelName: string;
 }
 
-const importSchema = z.object({
-  file: z
-    .instanceof(FileList)
-    .refine((files) => files?.length === 1, "File is required."),
-  format: z.enum(["csv", "json"]),
-});
+interface IFormInput {
+  file: FileList;
+  format: "csv" | "json";
+}
 
 export function ImportModal({
   isOpen,
@@ -58,25 +46,19 @@ export function ImportModal({
   const t = useTranslations("ImportExport");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { register, handleSubmit, control, reset } = useForm<IFormInput>();
 
-  const form = useForm<z.infer<typeof importSchema>>({
-    resolver: zodResolver(importSchema),
-    defaultValues: {
-      format: "csv",
-    },
-  });
-
-  const importMutation = useMutation({
-    mutationFn: (data: FormData) =>
-      api.importModelData(`/api/admin/models/${modelKey}/import/`, data),
-    onSuccess: (data: any) => {
+  const mutation = useMutation({
+    mutationFn: (data: FormData) => api.importModelItems(modelKey, data),
+    onSuccess: (result: { count: number }) => {
       toast({
         title: t("importSuccessTitle"),
-        description: t("importSuccessDescription", { count: data.count || 0 }),
+        description: t("importSuccessDescription", { count: result.count }),
       });
       queryClient.invalidateQueries({ queryKey: ["modelItems", modelKey] });
       queryClient.invalidateQueries({ queryKey: ["adminConfig"] });
       onClose();
+      reset();
     },
     onError: (error: Error) => {
       toast({
@@ -87,87 +69,71 @@ export function ImportModal({
     },
   });
 
-  const onSubmit = (values: z.infer<typeof importSchema>) => {
+  const onSubmit = (data: IFormInput) => {
+    if (!data.file || data.file.length === 0) {
+      toast({
+        variant: "destructive",
+        title: t("importErrorTitle"),
+        description: "Please select a file to import.",
+      });
+      return;
+    }
     const formData = new FormData();
-    formData.append("file", values.file[0]);
-    formData.append("format", values.format);
-    importMutation.mutate(formData);
+    formData.append("file", data.file[0]);
+    formData.append("format", data.format);
+    mutation.mutate(formData);
   };
-
-  const handleClose = () => {
-    if (importMutation.isPending) return;
-    form.reset();
-    onClose();
-  };
-
-  if (!isOpen) return null;
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("importTitle", { model: modelName })}</DialogTitle>
           <DialogDescription>{t("importDescription")}</DialogDescription>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="format">{t("formatLabel")}</Label>
+            <Controller
               name="format"
+              control={control}
+              defaultValue="csv"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("formatLabel")}</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder={t("selectFormatPlaceholder")}
-                        />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="csv">CSV</SelectItem>
-                      <SelectItem value="json">JSON</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("selectFormatPlaceholder")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="csv">CSV</SelectItem>
+                    <SelectItem value="json">JSON</SelectItem>
+                  </SelectContent>
+                </Select>
               )}
             />
-            <FormField
-              control={form.control}
-              name="file"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t("fileLabel")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="file"
-                      accept=".csv, .json"
-                      {...form.register("file")}
-                    />
-                  </FormControl>
-                  <FormDescription>{t("fileDescription")}</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="file">{t("fileLabel")}</Label>
+            <Input
+              id="file"
+              type="file"
+              accept=".csv,.json"
+              {...register("file")}
             />
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleClose}
-                disabled={importMutation.isPending}>
-                {t("cancel")}
-              </Button>
-              <Button type="submit" disabled={importMutation.isPending}>
-                {importMutation.isPending ? t("importing") : t("importButton")}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+            <p className="text-sm text-muted-foreground">
+              {t("fileDescription")}
+            </p>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>
+              {t("cancel")}
+            </Button>
+            <Button type="submit" disabled={mutation.isPending}>
+              {mutation.isPending ? t("importing") : t("importButton")}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

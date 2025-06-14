@@ -9,11 +9,22 @@
     "toastSuccessTitle": "Success",
     "toastSuccessDescription": "You have been successfully logged in.",
     "toastOtpInvalidTitle": "Invalid OTP",
-    "toastOtpInvalidDescription": "The OTP code is incorrect. Please try again."
+    "toastOtpInvalidDescription": "The OTP code is incorrect. Please try again.",
+    "unexpectedErrorTitle": "Error",
+    "unexpectedErrorDescription": "An unexpected error occurred. Please try again."
   },
   "DashboardPage": {
     "title": "Dashboard",
-    "description": "An overview of your project's activity."
+    "description": "An overview of your project's activity.",
+    "loadErrorTitle": "Failed to load dashboard data",
+    "loadErrorDescription": "Displaying mock data as a fallback. Please ensure your backend endpoint at `/api/admin/dashboard-stats/` is configured correctly.",
+    "userSignupsCardTitle": "User Signups",
+    "userSignupsCardDescription": "Monthly new user registrations.",
+    "contentOverviewCardTitle": "Content Overview",
+    "contentOverviewCardDescription": "Total items per model.",
+    "activityFeedCardTitle": "Recent Activity",
+    "activityFeedCardDescription": "What's new in your project.",
+    "activityByUser": "by {user}"
   },
   "ModelListPage": {
     "createNew": "Create new",
@@ -31,7 +42,30 @@
     "import": "Import",
     "export": "Export",
     "exportAsCsv": "Export as CSV",
-    "exportAsJson": "Export as JSON"
+    "exportAsJson": "Export as JSON",
+    "deleteSuccessTitle": "Success",
+    "deleteSuccessDescription": "Item {id} was deleted successfully.",
+    "deleteErrorTitle": "Error",
+    "deleteErrorDescription": "Failed to delete item {id}: {message}",
+    "exportPreparingTitle": "Preparing Export",
+    "exportPreparingDescription": "Fetching all {totalItems} items... This may take a moment.",
+    "exportReadyTitle": "Export Ready",
+    "exportReadyDescription": "Your {format} file has been generated and is downloading.",
+    "exportFailedTitle": "Export Failed",
+    "exportFailedDescription": "An error occurred while exporting data: {message}",
+    "itemCount": "{count, plural, =1 {item} other {items}}",
+    "errorTitle": "Error",
+    "cancel": "Cancel",
+    "deleting": "Deleting...",
+    "editTitle": "Edit {modelName}: #{id}",
+    "loadModelDataFailed": "Failed to load model data.",
+    "createTitle": "Create new {modelName}",
+    "loadModelConfigFailed": "Failed to load model configuration.",
+    "saveSuccessTitle": "Success",
+    "saveSuccessDescription": "Item {isUpdating, select, true {updated} false {created}} successfully.",
+    "saveErrorTitle": "Error",
+    "saving": "Saving...",
+    "loadingRelationOptions": "Loading options for {fieldName}..."
   },
   "SettingsPage": {
     "title": "Settings",
@@ -66,13 +100,21 @@
     "scanQrCode": "Scan the QR code below with your authenticator app.",
     "secretKey": "Or enter this secret key manually",
     "verificationCode": "Verification Code",
-    "cancel": "Cancel",
     "verifying": "Verifying...",
     "verifyAndActivate": "Verify & Activate",
     "twoFactorDisabled": "2FA is currently disabled.",
     "enabling": "Enabling...",
     "enable2FA": "Enable 2FA",
-    "verify": "Verify"
+    "verify": "Verify",
+    "loadError": "Failed to load user settings: {message}",
+    "twoFactorEnableErrorTitle": "Failed to start 2FA setup.",
+    "twoFactorEnableSuccessTitle": "Two-Factor Authentication Enabled",
+    "twoFactorEnableSuccessDescription": "2FA has been successfully activated on your account.",
+    "twoFactorVerifyErrorTitle": "2FA Verification Failed",
+    "twoFactorDisableSuccessTitle": "Two-Factor Authentication Disabled",
+    "twoFactorDisableErrorTitle": "Failed to disable 2FA",
+    "disable2faPasswordPlaceholder": "Enter password to disable",
+    "otpPlaceholder": "123456"
   },
   "Time": {
     "years": "{count, plural, one {# year ago} other {# years ago}}",
@@ -110,5 +152,30 @@
     "importSuccessTitle": "Import Successful",
     "importSuccessDescription": "{count, plural, =0 {No items were imported} one {# item was imported} other {# items were imported}}.",
     "importErrorTitle": "Import Failed"
+  },
+  "DashboardLayout": {
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "system": "System",
+    "signOut": "Sign out",
+    "signOutSuccessTitle": "Signed out",
+    "signOutSuccessDescription": "You have been signed out successfully."
+  },
+  "AuthErrorPage": {
+    "credentialsSigninTitle": "Sign-in Failed",
+    "credentialsSigninDescription": "The username or password you entered is incorrect. Please double-check your credentials and try again.",
+    "accessDeniedTitle": "Access Denied",
+    "accessDeniedDescription": "You do not have permission to access this page.",
+    "configurationTitle": "Server Configuration Error",
+    "configurationDescription": "There is an issue with the server configuration. Please contact an administrator.",
+    "defaultTitle": "Something went wrong",
+    "defaultDescription": "An unexpected error occurred during authentication.",
+    "backToLogin": "Go back to Login"
+  },
+  "ErrorPage": {
+    "title": "Something went wrong!",
+    "description": "An unexpected error occurred. You can try to reload the page.",
+    "details": "Error Details",
+    "tryAgain": "Try again"
   }
 }

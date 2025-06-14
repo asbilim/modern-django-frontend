@@ -171,8 +171,8 @@ export default function ModelListPage() {
       api.deleteModelItem(model!.api_url, id),
     onSuccess: (_, deletedId) => {
       toast({
-        title: "Success",
-        description: `Item ${deletedId} was deleted successfully.`,
+        title: t("deleteSuccessTitle"),
+        description: t("deleteSuccessDescription", { id: deletedId }),
       });
       queryClient.invalidateQueries({ queryKey: ["modelItems", modelKey] });
       queryClient.invalidateQueries({ queryKey: ["adminConfig"] });
@@ -180,8 +180,11 @@ export default function ModelListPage() {
     onError: (error: Error, deletedId) => {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: `Failed to delete item ${deletedId}: ${error.message}`,
+        title: t("deleteErrorTitle"),
+        description: t("deleteErrorDescription", {
+          id: deletedId,
+          message: error.message,
+        }),
       });
     },
   });
@@ -203,8 +206,8 @@ export default function ModelListPage() {
     if (!model) return;
 
     toast({
-      title: "Preparing Export",
-      description: `Fetching all ${totalItems} items... This may take a moment.`,
+      title: t("exportPreparingTitle"),
+      description: t("exportPreparingDescription", { totalItems }),
     });
 
     try {
@@ -223,14 +226,16 @@ export default function ModelListPage() {
       }
 
       toast({
-        title: "Export Ready",
-        description: `Your ${format.toUpperCase()} file has been generated and is downloading.`,
+        title: t("exportReadyTitle"),
+        description: t("exportReadyDescription", {
+          format: format.toUpperCase(),
+        }),
       });
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Export Failed",
-        description: `An error occurred while exporting data: ${error.message}`,
+        title: t("exportFailedTitle"),
+        description: t("exportFailedDescription", { message: error.message }),
       });
     }
   };
@@ -262,7 +267,9 @@ export default function ModelListPage() {
       <div className="p-6 bg-destructive/10 border border-destructive rounded-lg">
         <div className="flex items-center gap-3 mb-2">
           <AlertCircle className="h-5 w-5 text-destructive" />
-          <h2 className="text-xl font-bold text-destructive">Error</h2>
+          <h2 className="text-xl font-bold text-destructive">
+            {t("errorTitle")}
+          </h2>
         </div>
         <p className="text-destructive mb-4">{error.message}</p>
         <Button
@@ -292,7 +299,7 @@ export default function ModelListPage() {
             {modelConfig?.verbose_name || modelKey}
           </h1>
           <Badge variant="outline" className="ml-2">
-            {totalItems} item{totalItems !== 1 ? "s" : ""}
+            {totalItems} {t("itemCount", { count: totalItems })}
           </Badge>
         </div>
         <div className="flex items-center space-x-2">
@@ -427,12 +434,12 @@ export default function ModelListPage() {
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                             <AlertDialogAction
                               onClick={handleDelete}
                               disabled={deleteMutation.isPending}>
                               {deleteMutation.isPending
-                                ? "Deleting..."
+                                ? t("deleting")
                                 : t("delete")}
                             </AlertDialogAction>
                           </AlertDialogFooter>

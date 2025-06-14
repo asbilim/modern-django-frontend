@@ -58,8 +58,8 @@ export default function LoginPage() {
       console.error("Login error:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
+        title: t("unexpectedErrorTitle"),
+        description: t("unexpectedErrorDescription"),
       });
       setIsLoading(false);
     }
@@ -94,8 +94,8 @@ export default function LoginPage() {
       console.error("OTP submission error:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "An unexpected error occurred. Please try again.",
+        title: t("unexpectedErrorTitle"),
+        description: t("unexpectedErrorDescription"),
       });
       setIsLoading(false);
     }

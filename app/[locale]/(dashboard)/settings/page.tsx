@@ -72,7 +72,7 @@ export default function SettingsPage() {
   if (error)
     return (
       <div className="text-destructive">
-        Failed to load user settings: {error.message}
+        {t("loadError", { message: error.message })}
       </div>
     );
 
@@ -286,7 +286,7 @@ function TwoFactorAuthForm({ is2FAEnabled }: { is2FAEnabled: boolean }) {
     onError: (error) => {
       toast({
         variant: "destructive",
-        title: "Failed to start 2FA setup.",
+        title: t("twoFactorEnableErrorTitle"),
         description: error.message,
       });
     },
@@ -300,8 +300,8 @@ function TwoFactorAuthForm({ is2FAEnabled }: { is2FAEnabled: boolean }) {
     },
     onSuccess: () => {
       toast({
-        title: "Two-Factor Authentication Enabled",
-        description: "2FA has been successfully activated on your account.",
+        title: t("twoFactorEnableSuccessTitle"),
+        description: t("twoFactorEnableSuccessDescription"),
       });
       setQrCodeUrl(null);
       setSecret(null);
@@ -309,7 +309,7 @@ function TwoFactorAuthForm({ is2FAEnabled }: { is2FAEnabled: boolean }) {
     onError: (error) => {
       toast({
         variant: "destructive",
-        title: "2FA Verification Failed",
+        title: t("twoFactorVerifyErrorTitle"),
         description: error.message,
       });
     },
@@ -318,13 +318,13 @@ function TwoFactorAuthForm({ is2FAEnabled }: { is2FAEnabled: boolean }) {
   const disableMutation = useMutation({
     mutationFn: (password: string) => api.disable2FA(password),
     onSuccess: () => {
-      toast({ title: "Two-Factor Authentication Disabled" });
+      toast({ title: t("twoFactorDisableSuccessTitle") });
       queryClient.invalidateQueries({ queryKey: ["userProfile"] });
     },
     onError: (error) => {
       toast({
         variant: "destructive",
-        title: "Failed to disable 2FA",
+        title: t("twoFactorDisableErrorTitle"),
         description: error.message,
       });
     },
@@ -367,7 +367,7 @@ function TwoFactorAuthForm({ is2FAEnabled }: { is2FAEnabled: boolean }) {
                         <Input
                           type="password"
                           {...field}
-                          placeholder="Enter password to disable"
+                          placeholder={t("disable2faPasswordPlaceholder")}
                         />
                       </FormControl>
                       <FormMessage />
@@ -406,7 +406,7 @@ function TwoFactorAuthForm({ is2FAEnabled }: { is2FAEnabled: boolean }) {
                     <FormItem>
                       <FormLabel>{t("verificationCode")}</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="123456" />
+                        <Input {...field} placeholder={t("otpPlaceholder")} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

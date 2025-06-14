@@ -155,13 +155,12 @@ export default function DashboardPage() {
         <div className="flex items-center gap-3 mb-2">
           <AlertCircle className="h-5 w-5 text-destructive" />
           <h2 className="text-xl font-bold text-destructive">
-            Failed to load dashboard data
+            {t("loadErrorTitle")}
           </h2>
         </div>
         <p className="text-destructive mb-4">{error.message}</p>
         <p className="text-sm text-muted-foreground">
-          Displaying mock data as a fallback. Please ensure your backend
-          endpoint at `/api/admin/dashboard-stats/` is configured correctly.
+          {t("loadErrorDescription")}
         </p>
       </div>
     );
@@ -220,11 +219,12 @@ function StatCard({ title, value, change, icon, description }: Stat) {
 }
 
 function AreaChartCard({ data }: { data: any[] }) {
+  const t = useTranslations("DashboardPage");
   return (
     <Card>
       <CardHeader>
-        <CardTitle>User Signups</CardTitle>
-        <CardDescription>Monthly new user registrations.</CardDescription>
+        <CardTitle>{t("userSignupsCardTitle")}</CardTitle>
+        <CardDescription>{t("userSignupsCardDescription")}</CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
@@ -267,11 +267,12 @@ function AreaChartCard({ data }: { data: any[] }) {
 }
 
 function BarChartCard({ data }: { data: any[] }) {
+  const t = useTranslations("DashboardPage");
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Content Overview</CardTitle>
-        <CardDescription>Total items per model.</CardDescription>
+        <CardTitle>{t("contentOverviewCardTitle")}</CardTitle>
+        <CardDescription>{t("contentOverviewCardDescription")}</CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={250}>
@@ -299,6 +300,7 @@ function BarChartCard({ data }: { data: any[] }) {
 
 function ActivityFeedCard({ data }: { data: Activity[] }) {
   const t = useTranslations("Time");
+  const tDashboard = useTranslations("DashboardPage");
 
   const timeAgo = (dateString: string) => {
     const date = new Date(dateString);
@@ -332,8 +334,10 @@ function ActivityFeedCard({ data }: { data: Activity[] }) {
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle>Recent Activity</CardTitle>
-        <CardDescription>What's new in your project.</CardDescription>
+        <CardTitle>{tDashboard("activityFeedCardTitle")}</CardTitle>
+        <CardDescription>
+          {tDashboard("activityFeedCardDescription")}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -346,7 +350,8 @@ function ActivityFeedCard({ data }: { data: Activity[] }) {
               <div className="flex-1">
                 <p className="text-sm font-medium">{activity.title}</p>
                 <p className="text-xs text-muted-foreground">
-                  by {activity.user} &middot; {timeAgo(activity.timestamp)}
+                  {tDashboard("activityByUser", { user: activity.user })}{" "}
+                  &middot; {timeAgo(activity.timestamp)}
                 </p>
               </div>
             </div>

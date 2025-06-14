@@ -111,8 +111,10 @@ export function ModelForm({
     },
     onSuccess: () => {
       toast({
-        title: "Success",
-        description: `Item ${itemId ? "updated" : "created"} successfully.`,
+        title: t("saveSuccessTitle"),
+        description: t("saveSuccessDescription", {
+          isUpdating: !!itemId ? "true" : "false",
+        }),
       });
       queryClient.invalidateQueries({ queryKey: ["modelItems", modelKey] });
       queryClient.invalidateQueries({ queryKey: ["adminConfig"] }); // Invalidate dashboard counts
@@ -121,7 +123,7 @@ export function ModelForm({
     onError: (error: Error) => {
       toast({
         variant: "destructive",
-        title: "Error",
+        title: t("saveErrorTitle"),
         description: error.message,
       });
     },
@@ -396,7 +398,7 @@ export function ModelForm({
         )}
 
         <Button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? "Saving..." : t("save")}
+          {mutation.isPending ? t("saving") : t("save")}
         </Button>
       </form>
     </Form>
@@ -416,6 +418,7 @@ function RelationField({
   disabled?: boolean;
 }) {
   const { status } = useSession();
+  const t = useTranslations("ModelListPage");
   const { data: options, isLoading } = useQuery({
     queryKey: ["relationOptions", fieldConfig.related_model?.api_url],
     queryFn: () =>
@@ -439,7 +442,11 @@ function RelationField({
   });
 
   if (isLoading) {
-    return <p>Loading options for {fieldConfig.verbose_name}...</p>;
+    return (
+      <p>
+        {t("loadingRelationOptions", { fieldName: fieldConfig.verbose_name })}
+      </p>
+    );
   }
 
   return (

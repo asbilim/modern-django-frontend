@@ -11,29 +11,29 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export default function AuthErrorPage() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
+  const t = useTranslations("AuthErrorPage");
 
   const errors: Record<string, { title: string; description: string }> = {
     CredentialsSignin: {
-      title: "Sign-in Failed",
-      description:
-        "The username or password you entered is incorrect. Please double-check your credentials and try again.",
+      title: t("credentialsSigninTitle"),
+      description: t("credentialsSigninDescription"),
     },
     AccessDenied: {
-      title: "Access Denied",
-      description: "You do not have permission to access this page.",
+      title: t("accessDeniedTitle"),
+      description: t("accessDeniedDescription"),
     },
     Configuration: {
-      title: "Server Configuration Error",
-      description:
-        "There is an issue with the server configuration. Please contact an administrator.",
+      title: t("configurationTitle"),
+      description: t("configurationDescription"),
     },
     Default: {
-      title: "Something went wrong",
-      description: "An unexpected error occurred during authentication.",
+      title: t("defaultTitle"),
+      description: t("defaultDescription"),
     },
   };
 
@@ -48,7 +48,7 @@ export default function AuthErrorPage() {
         </CardHeader>
         <CardFooter>
           <Button asChild className="w-full">
-            <Link href="/login">Go back to Login</Link>
+            <Link href="/login">{t("backToLogin")}</Link>
           </Button>
         </CardFooter>
       </Card>

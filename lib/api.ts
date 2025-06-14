@@ -315,4 +315,10 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ password }),
     }),
+  importModelItems: (modelKey: string, data: FormData) => {
+    return apiFetch<any>(`/api/admin/models/${modelKey}/import/`, {
+      method: "POST",
+      body: data,
+    });
+  },
 };
