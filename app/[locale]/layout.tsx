@@ -4,7 +4,7 @@ import { getMessages } from "next-intl/server";
 import { Toaster } from "@/components/ui/toaster";
 import { dashboardConfig } from "@/lib/config";
 import { Providers } from "@/components/providers";
-import { QueryProvider } from "@/components/query-provider";
+import { DefaultFavicon } from "@/components/ui/default-favicon";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,20 +19,18 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <title>{dashboardConfig.name}</title>
         <meta name="description" content={dashboardConfig.description} />
-        <link rel="icon" href={dashboardConfig.favicon} />
+        <DefaultFavicon />
       </head>
       <body className={inter.className}>
         <Providers>
-          <QueryProvider>
-            <NextIntlClientProvider messages={messages}>
-              {children}
-              <Toaster />
-            </NextIntlClientProvider>
-          </QueryProvider>
+          <NextIntlClientProvider messages={messages}>
+            {children}
+            <Toaster />
+          </NextIntlClientProvider>
         </Providers>
       </body>
     </html>

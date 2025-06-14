@@ -84,5 +84,76 @@
     "cancel": "Abbrechen",
     "verify": "Überprüfen",
     "verifying": "Überprüfen..."
+  },
+  "AiToolsPage": {
+    "title": "KI-Werkzeugkasten",
+    "resultTitle": "Ergebnis:",
+    "summarizer": {
+      "title": "Text-Zusammenfasser",
+      "description": "Fassen Sie lange Textpassagen schnell zusammen.",
+      "textLabel": "Zusammenzufassender Text",
+      "button": "Zusammenfassen",
+      "buttonLoading": "Wird zusammengefasst..."
+    },
+    "translator": {
+      "title": "Übersetzer",
+      "description": "Übersetzen Sie Text in eine andere Sprache.",
+      "textLabel": "Text",
+      "languageLabel": "Zielsprache",
+      "languagePlaceholder": "z.B. Spanisch, Französisch, Japanisch",
+      "button": "Übersetzen",
+      "buttonLoading": "Übersetzt..."
+    },
+    "emailDrafter": {
+      "title": "E-Mail-Entwurf-Generator",
+      "description": "Lassen Sie die KI einen schnellen E-Mail-Entwurf erstellen.",
+      "topicLabel": "E-Mail-Betreff",
+      "topicPlaceholder": "z.B. Projekt-Update, Terminanfrage",
+      "button": "Generieren",
+      "buttonLoading": "Wird generiert..."
+    },
+    "supportReply": {
+      "title": "Support-Antwort-Generator",
+      "description": "Verfassen Sie höfliche Kundenantworten.",
+      "questionLabel": "Kundenfrage",
+      "questionPlaceholder": "z.B. Ich kann mich nicht in mein Konto einloggen",
+      "button": "Generieren",
+      "buttonLoading": "Wird generiert..."
+    },
+    "socialPost": {
+      "title": "Social-Media-Post-Ideen",
+      "description": "Generieren Sie ansprechende Social-Media-Posts.",
+      "topicLabel": "Thema oder Ereignis",
+      "topicPlaceholder": "z.B. Neueinführung eines Produkts, Firmenjubiläum",
+      "button": "Generieren",
+      "buttonLoading": "Wird generiert..."
+    },
+    "marketingIdeas": {
+      "title": "Marketing-Ideen",
+      "description": "Entwickeln Sie kreative Werbekampagnen.",
+      "productLabel": "Produkt oder Dienstleistung",
+      "productPlaceholder": "z.B. eine neue Kaffeemarke, ein SaaS-Produkt",
+      "button": "Generieren",
+      "buttonLoading": "Wird generiert..."
+    },
+    "newsletterThemes": {
+      "title": "Newsletter-Themen-Vorschläge",
+      "description": "Holen Sie sich Inspiration für Ihren nächsten Newsletter.",
+      "audienceLabel": "Zielgruppe",
+      "audiencePlaceholder": "z.B. Softwareentwickler, Kleinunternehmer",
+      "button": "Vorschlagen",
+      "buttonLoading": "Wird vorgeschlagen..."
+    },
+    "passwordGenerator": {
+      "title": "Sicherer Passwort-Generator",
+      "description": "Erstellen Sie starke, zufällige Passwörter.",
+      "lengthLabel": "Passwortlänge",
+      "numbersLabel": "Zahlen einschließen",
+      "symbolsLabel": "Symbole einschließen",
+      "button": "Passwort generieren",
+      "buttonLoading": "Wird generiert...",
+      "copySuccess": "Kopiert!",
+      "copyDescription": "Passwort in die Zwischenablage kopiert."
+    }
   }
 }
