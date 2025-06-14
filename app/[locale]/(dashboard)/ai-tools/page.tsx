@@ -30,6 +30,7 @@ import {
   Share2,
   Sparkles,
 } from "lucide-react";
+import { AiResult } from "@/components/ai-result";
 
 export default function AiToolsPage() {
   const t = useTranslations("AiToolsPage");
@@ -271,7 +272,16 @@ function SecurePasswordGenerator() {
           {isLoading ? t("buttonLoading") : t("button")}
         </Button>
       </form>
-      <AiOutput completion={completion} onCopy={copyToClipboard} />
+      <AiResult
+        content={completion || ""}
+        isLoading={isLoading}
+        onCopy={copyToClipboard}
+        onRegenerate={() =>
+          generatePassword(
+            new Event("submit") as any as React.FormEvent<HTMLFormElement>
+          )
+        }
+      />
     </div>
   );
 }
@@ -305,7 +315,16 @@ function TextSummarizer() {
           {isLoading ? t("buttonLoading") : t("button")}
         </Button>
       </form>
-      <AiOutput completion={completion} />
+      <AiResult
+        content={completion || ""}
+        isLoading={isLoading}
+        onCopy={() => {}}
+        onRegenerate={() =>
+          summarize(
+            new Event("submit") as any as React.FormEvent<HTMLFormElement>
+          )
+        }
+      />
     </div>
   );
 }
@@ -351,7 +370,16 @@ function Translator() {
           {isLoading ? t("buttonLoading") : t("button")}
         </Button>
       </form>
-      <AiOutput completion={completion} />
+      <AiResult
+        content={completion || ""}
+        isLoading={isLoading}
+        onCopy={() => {}}
+        onRegenerate={() =>
+          translate(
+            new Event("submit") as any as React.FormEvent<HTMLFormElement>
+          )
+        }
+      />
     </div>
   );
 }
@@ -384,7 +412,16 @@ function EmailDraftGenerator() {
           {isLoading ? t("buttonLoading") : t("button")}
         </Button>
       </form>
-      <AiOutput completion={completion} />
+      <AiResult
+        content={completion || ""}
+        isLoading={isLoading}
+        onCopy={() => {}}
+        onRegenerate={() =>
+          generate(
+            new Event("submit") as any as React.FormEvent<HTMLFormElement>
+          )
+        }
+      />
     </div>
   );
 }
@@ -417,7 +454,16 @@ function MarketingIdeas() {
           {isLoading ? t("buttonLoading") : t("button")}
         </Button>
       </form>
-      <AiOutput completion={completion} />
+      <AiResult
+        content={completion || ""}
+        isLoading={isLoading}
+        onCopy={() => {}}
+        onRegenerate={() =>
+          generate(
+            new Event("submit") as any as React.FormEvent<HTMLFormElement>
+          )
+        }
+      />
     </div>
   );
 }
@@ -452,7 +498,16 @@ function NewsletterThemeSuggester() {
           {isLoading ? t("buttonLoading") : t("button")}
         </Button>
       </form>
-      <AiOutput completion={completion} />
+      <AiResult
+        content={completion || ""}
+        isLoading={isLoading}
+        onCopy={() => {}}
+        onRegenerate={() =>
+          suggest(
+            new Event("submit") as any as React.FormEvent<HTMLFormElement>
+          )
+        }
+      />
     </div>
   );
 }
@@ -487,7 +542,16 @@ function SupportReplyGenerator() {
           {isLoading ? t("buttonLoading") : t("button")}
         </Button>
       </form>
-      <AiOutput completion={completion} />
+      <AiResult
+        content={completion || ""}
+        isLoading={isLoading}
+        onCopy={() => {}}
+        onRegenerate={() =>
+          generate(
+            new Event("submit") as any as React.FormEvent<HTMLFormElement>
+          )
+        }
+      />
     </div>
   );
 }
@@ -520,7 +584,16 @@ function SocialPostIdeas() {
           {isLoading ? t("buttonLoading") : t("button")}
         </Button>
       </form>
-      <AiOutput completion={completion} />
+      <AiResult
+        content={completion || ""}
+        isLoading={isLoading}
+        onCopy={() => {}}
+        onRegenerate={() =>
+          generate(
+            new Event("submit") as any as React.FormEvent<HTMLFormElement>
+          )
+        }
+      />
     </div>
   );
 }

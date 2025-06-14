@@ -156,6 +156,11 @@
   "AiToolsPage": {
     "title": "AI Tools",
     "resultTitle": "Generated Result",
+    "copy": "Copy",
+    "regenerate": "Regenerate",
+    "generating": "Generating",
+    "copySuccess": "Copied!",
+    "copyDescription": "Copied to clipboard.",
     "summarizer": {
       "title": "Text Summarizer",
       "description": "Condense long text into key points.",
@@ -221,9 +226,7 @@
       "numbersLabel": "Include Numbers",
       "symbolsLabel": "Include Symbols",
       "button": "Generate Password",
-      "buttonLoading": "Generating...",
-      "copySuccess": "Copied!",
-      "copyDescription": "Password copied to clipboard."
+      "buttonLoading": "Generating..."
     }
   },
   "AuthErrorPage": {

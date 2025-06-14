@@ -156,13 +156,20 @@
   "AiToolsPage": {
     "title": "KI-Werkzeuge",
     "resultTitle": "Generiertes Ergebnis",
+    "copy": "Kopieren",
+    "regenerate": "Neu generieren",
+    "generating": "Wird generiert",
+    "copySuccess": "Kopiert!",
+    "copyDescription": "In die Zwischenablage kopiert.",
     "summarizer": {
       "title": "Text-Zusammenfasser",
       "description": "Langen Text auf Kernpunkte reduzieren.",
       "textLabel": "Zusammenzufassender Text",
       "textPlaceholder": "Geben Sie hier den Text ein, den Sie zusammenfassen möchten...",
       "button": "Zusammenfassen",
-      "buttonLoading": "Wird zusammengefasst..."
+      "buttonLoading": "Wird zusammengefasst...",
+      "copySuccess": "Kopiert!",
+      "copyDescription": "Passwort in die Zwischenablage kopiert."
     },
     "translator": {
       "title": "Sprachübersetzer",
@@ -221,9 +228,7 @@
       "numbersLabel": "Zahlen einschließen",
       "symbolsLabel": "Symbole einschließen",
       "button": "Passwort generieren",
-      "buttonLoading": "Generiere...",
-      "copySuccess": "Kopiert!",
-      "copyDescription": "Passwort in die Zwischenablage kopiert."
+      "buttonLoading": "Generiere..."
     }
   },
   "AuthErrorPage": {
