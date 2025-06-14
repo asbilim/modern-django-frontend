@@ -15,8 +15,11 @@ import {
   Pencil,
   AlertCircle,
   MoreHorizontal,
+  Upload,
+  Download,
 } from "lucide-react";
 import { getModelUrl, formatDate } from "@/lib/utils";
+import { convertToCsv, downloadFile } from "@/lib/export";
 import { DynamicIcon } from "@/components/ui/dynamic-icon";
 import {
   AlertDialog,
@@ -44,6 +47,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { ImportModal } from "@/components/import-modal";
 
 const PAGE_SIZE = 15;
 
@@ -126,6 +130,7 @@ export default function ModelListPage() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemToDelete, setItemToDelete] = useState<ModelItem | null>(null);
+  const [isImportModalOpen, setImportModalOpen] = useState(false);
 
   const { data: adminConfig } = useQuery<AdminConfig>({
     queryKey: ["adminConfig"],
@@ -166,16 +171,20 @@ export default function ModelListPage() {
       api.deleteModelItem(model!.api_url, id),
     onSuccess: (_, deletedId) => {
       toast({
-        title: "Success",
-        description: `Item ${deletedId} was deleted successfully.`,
+        title: t("deleteSuccessTitle"),
+        description: t("deleteSuccessDescription", { id: deletedId }),
       });
       queryClient.invalidateQueries({ queryKey: ["modelItems", modelKey] });
+      queryClient.invalidateQueries({ queryKey: ["adminConfig"] });
     },
     onError: (error: Error, deletedId) => {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: `Failed to delete item ${deletedId}: ${error.message}`,
+        title: t("deleteErrorTitle"),
+        description: t("deleteErrorDescription", {
+          id: deletedId,
+          message: error.message,
+        }),
       });
     },
   });
@@ -190,6 +199,44 @@ export default function ModelListPage() {
     if (itemToDelete) {
       deleteMutation.mutate(itemToDelete.id);
       setItemToDelete(null);
+    }
+  };
+
+  const handleExport = async (format: "csv" | "json") => {
+    if (!model) return;
+
+    toast({
+      title: t("exportPreparingTitle"),
+      description: t("exportPreparingDescription", { totalItems }),
+    });
+
+    try {
+      const allItems = await api.getAllModelItems(model.api_url);
+
+      if (format === "csv") {
+        const csvContent = convertToCsv(allItems);
+        downloadFile(csvContent, `${modelKey}_export.csv`, "text/csv");
+      } else {
+        const jsonContent = JSON.stringify(allItems, null, 2);
+        downloadFile(
+          jsonContent,
+          `${modelKey}_export.json`,
+          "application/json"
+        );
+      }
+
+      toast({
+        title: t("exportReadyTitle"),
+        description: t("exportReadyDescription", {
+          format: format.toUpperCase(),
+        }),
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: t("exportFailedTitle"),
+        description: t("exportFailedDescription", { message: error.message }),
+      });
     }
   };
 
@@ -220,7 +267,9 @@ export default function ModelListPage() {
       <div className="p-6 bg-destructive/10 border border-destructive rounded-lg">
         <div className="flex items-center gap-3 mb-2">
           <AlertCircle className="h-5 w-5 text-destructive" />
-          <h2 className="text-xl font-bold text-destructive">Error</h2>
+          <h2 className="text-xl font-bold text-destructive">
+            {t("errorTitle")}
+          </h2>
         </div>
         <p className="text-destructive mb-4">{error.message}</p>
         <Button
@@ -250,15 +299,39 @@ export default function ModelListPage() {
             {modelConfig?.verbose_name || modelKey}
           </h1>
           <Badge variant="outline" className="ml-2">
-            {totalItems} item{totalItems !== 1 ? "s" : ""}
+            {totalItems} {t("itemCount", { count: totalItems })}
           </Badge>
         </div>
-        <Button
-          onClick={() => router.push(getModelUrl(modelKey, "create"))}
-          disabled={deleteMutation.isPending}>
-          <PlusIcon className="h-4 w-4 mr-2" />
-          {t("createNew")}
-        </Button>
+        <div className="flex items-center space-x-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                <Download className="h-4 w-4 mr-2" />
+                {t("export")}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => handleExport("csv")}>
+                {t("exportAsCsv")}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport("json")}>
+                {t("exportAsJson")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <Button onClick={() => setImportModalOpen(true)}>
+            <Upload className="h-4 w-4 mr-2" />
+            {t("import")}
+          </Button>
+
+          <Button
+            onClick={() => router.push(getModelUrl(modelKey, "create"))}
+            disabled={deleteMutation.isPending}>
+            <PlusIcon className="h-4 w-4 mr-2" />
+            {t("createNew")}
+          </Button>
+        </div>
       </div>
 
       <div className="rounded-lg border overflow-hidden">
@@ -361,12 +434,12 @@ export default function ModelListPage() {
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                             <AlertDialogAction
                               onClick={handleDelete}
                               disabled={deleteMutation.isPending}>
                               {deleteMutation.isPending
-                                ? "Deleting..."
+                                ? t("deleting")
                                 : t("delete")}
                             </AlertDialogAction>
                           </AlertDialogFooter>
@@ -427,6 +500,12 @@ export default function ModelListPage() {
           </div>
         )}
       </div>
+      <ImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        modelKey={modelKey}
+        modelName={modelConfig?.verbose_name_plural || modelKey}
+      />
     </div>
   );
 }

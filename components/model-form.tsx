@@ -111,8 +111,10 @@ export function ModelForm({
     },
     onSuccess: () => {
       toast({
-        title: "Success",
-        description: `Item ${itemId ? "updated" : "created"} successfully.`,
+        title: t("saveSuccessTitle"),
+        description: t("saveSuccessDescription", {
+          isUpdating: !!itemId ? "true" : "false",
+        }),
       });
       queryClient.invalidateQueries({ queryKey: ["modelItems", modelKey] });
       queryClient.invalidateQueries({ queryKey: ["adminConfig"] }); // Invalidate dashboard counts
@@ -121,39 +123,65 @@ export function ModelForm({
     onError: (error: Error) => {
       toast({
         variant: "destructive",
-        title: "Error",
+        title: t("saveErrorTitle"),
         description: error.message,
       });
     },
   });
 
   const onSubmit = (data: Record<string, any>) => {
-    const formData = new FormData();
-    Object.keys(data).forEach((key) => {
-      const value = data[key];
-      if (value instanceof FileList && value.length > 0) {
-        formData.append(key, value[0]);
-      } else if (Array.isArray(value)) {
-        value.forEach((item) => formData.append(key, String(item)));
-      } else if (
-        value !== null &&
-        value !== undefined &&
-        !(value instanceof FileList)
-      ) {
-        formData.append(key, String(value));
-      }
-    });
-
-    // Check if there are any files to upload. If not, send as JSON.
+    const preparedData: Record<string, any> = {};
     let hasFiles = false;
-    for (const value of formData.values()) {
-      if (value instanceof File) {
-        hasFiles = true;
-        break;
+
+    for (const key in data) {
+      if (Object.prototype.hasOwnProperty.call(data, key)) {
+        const value = data[key];
+        const fieldConfig = modelConfig.fields[key];
+
+        if (
+          fieldConfig &&
+          (fieldConfig.ui_component === "datetime_picker" ||
+            fieldConfig.ui_component === "date_picker") &&
+          value
+        ) {
+          const date = new Date(value);
+          if (!isNaN(date.getTime())) {
+            preparedData[key] = date.toISOString();
+          } else {
+            preparedData[key] = value;
+          }
+        } else if (value instanceof FileList && value.length > 0) {
+          preparedData[key] = value;
+          hasFiles = true;
+        } else {
+          preparedData[key] = value;
+        }
       }
     }
 
-    mutation.mutate(hasFiles ? formData : data);
+    if (hasFiles) {
+      const formData = new FormData();
+      for (const key in preparedData) {
+        const value = preparedData[key];
+        if (value instanceof FileList && value.length > 0) {
+          formData.append(key, value[0]);
+        } else if (Array.isArray(value)) {
+          value.forEach((item) => formData.append(key, String(item)));
+        } else if (value !== null && value !== undefined) {
+          formData.append(key, String(value));
+        }
+      }
+      mutation.mutate(formData);
+    } else {
+      // Remove FileList objects if no file was selected
+      const jsonPayload = { ...preparedData };
+      for (const key in jsonPayload) {
+        if (jsonPayload[key] instanceof FileList) {
+          delete jsonPayload[key];
+        }
+      }
+      mutation.mutate(jsonPayload);
+    }
   };
 
   const renderField = (fieldName: string, fieldConfig: FieldConfig) => {
@@ -370,7 +398,7 @@ export function ModelForm({
         )}
 
         <Button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? "Saving..." : t("save")}
+          {mutation.isPending ? t("saving") : t("save")}
         </Button>
       </form>
     </Form>
@@ -390,20 +418,35 @@ function RelationField({
   disabled?: boolean;
 }) {
   const { status } = useSession();
+  const t = useTranslations("ModelListPage");
   const { data: options, isLoading } = useQuery({
     queryKey: ["relationOptions", fieldConfig.related_model?.api_url],
     queryFn: () =>
       api.getModelList(fieldConfig.related_model!.api_url).then((res) =>
-        res.results.map((item: any) => ({
-          value: item.id.toString(),
-          label: item.name || item.title || item.username || `ID: ${item.id}`,
-        }))
+        res.results.map((item: any) => {
+          let label = `ID: ${item.id}`;
+          if (item.name) {
+            label = item.name;
+          } else if (item.title) {
+            label = item.title;
+          } else if (item.username) {
+            label = item.username;
+          }
+          return {
+            value: item.id.toString(),
+            label,
+          };
+        })
       ),
     enabled: status === "authenticated" && !!fieldConfig.related_model?.api_url,
   });
 
   if (isLoading) {
-    return <p>Loading options for {fieldConfig.verbose_name}...</p>;
+    return (
+      <p>
+        {t("loadingRelationOptions", { fieldName: fieldConfig.verbose_name })}
+      </p>
+    );
   }
 
   return (

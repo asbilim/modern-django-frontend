@@ -3,11 +3,17 @@
     "title": "Melden Sie sich bei Ihrem Konto an",
     "usernameLabel": "Benutzername",
     "passwordLabel": "Passwort",
-    "signInButton": "Anmelden"
+    "signInButton": "Anmelden",
+    "toastErrorTitle": "Authentifizierung fehlgeschlagen",
+    "toastErrorDescription": "Bitte überprüfen Sie Ihre Anmeldedaten und versuchen Sie es erneut.",
+    "toastSuccessTitle": "Erfolg",
+    "toastSuccessDescription": "Sie wurden erfolgreich angemeldet.",
+    "toastOtpInvalidTitle": "Ungültiges OTP",
+    "toastOtpInvalidDescription": "Der OTP-Code ist falsch. Bitte versuchen Sie es erneut."
   },
   "DashboardPage": {
     "title": "Dashboard",
-    "description": "Verwalten Sie Ihre Anwendungsdaten und Einstellungen."
+    "description": "Eine Übersicht über die Aktivitäten Ihres Projekts."
   },
   "ModelListPage": {
     "createNew": "Neu erstellen",
@@ -15,13 +21,13 @@
     "name": "Name / Titel",
     "createdAt": "Erstellt am",
     "actions": "Aktionen",
-    "noItems": "Keine Einträge für dieses Modell gefunden.",
+    "noItems": "Keine Einträge gefunden.",
     "edit": "Bearbeiten",
     "delete": "Löschen",
-    "deleteTitle": "Sind Sie sicher?",
-    "deleteConfirm": "Diese Aktion kann nicht rückgängig gemacht werden. Dies wird das Element dauerhaft löschen.",
+    "deleteTitle": "Sind Sie absolut sicher?",
+    "deleteConfirm": "Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird das Element dauerhaft gelöscht.",
     "tryAgain": "Erneut versuchen",
-    "save": "Speichern"
+    "save": "Änderungen speichern"
   },
   "SettingsPage": {
     "title": "Einstellungen",
@@ -29,16 +35,54 @@
     "siteName": "Seitenname",
     "logo": "Logo-URL",
     "navbarStyle": "Navbar-Stil",
-    "otp": "Zwei-Faktor-Authentifizierung aktivieren",
-    "password": "Passwort ändern",
-    "save": "Speichern"
+    "otp": "Zwei-Faktor-Authentifizierung",
+    "password": "Passwort",
+    "save": "Änderungen speichern",
+    "profileUpdateSuccess": "Profil erfolgreich aktualisiert.",
+    "profileUpdateError": "Profil konnte nicht aktualisiert werden.",
+    "profileTitle": "Benutzerprofil",
+    "profileDescription": "Aktualisieren Sie Ihre persönlichen Informationen.",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
+    "email": "E-Mail-Adresse",
+    "saving": "Speichern...",
+    "passwordUpdateSuccess": "Passwort erfolgreich aktualisiert.",
+    "passwordUpdateError": "Passwort konnte nicht aktualisiert werden.",
+    "passwordTitle": "Passwort ändern",
+    "passwordDescription": "Aktualisieren Sie Ihr Kontopasswort.",
+    "currentPassword": "Aktuelles Passwort",
+    "newPassword": "Neues Passwort",
+    "confirmNewPassword": "Neues Passwort bestätigen",
+    "savePassword": "Passwort aktualisieren",
+    "twoFactorTitle": "Zwei-Faktor-Authentifizierung (2FA)",
+    "twoFactorDescription": "Fügen Sie Ihrem Konto eine zusätzliche Sicherheitsebene hinzu.",
+    "twoFactorEnabled": "2FA ist für Ihr Konto derzeit aktiviert.",
+    "disabling": "Deaktivieren...",
+    "disable2FA": "2FA deaktivieren",
+    "scanQrCode": "Scannen Sie den QR-Code unten mit Ihrer Authentifizierungs-App.",
+    "secretKey": "Oder geben Sie diesen geheimen Schlüssel manuell ein",
+    "verificationCode": "Bestätigungscode",
+    "cancel": "Abbrechen",
+    "verifying": "Überprüfen...",
+    "verifyAndActivate": "Überprüfen & Aktivieren",
+    "twoFactorDisabled": "2FA ist derzeit deaktiviert.",
+    "enabling": "Aktivieren...",
+    "enable2FA": "2FA aktivieren"
   },
   "Time": {
-    "years": "vor {count, plural, =1 {# Jahr} other {# Jahren}}",
-    "months": "vor {count, plural, =1 {# Monat} other {# Monaten}}",
-    "days": "vor {count, plural, =1 {# Tag} other {# Tagen}}",
-    "hours": "vor {count, plural, =1 {# Stunde} other {# Stunden}}",
-    "minutes": "vor {count, plural, =1 {# Minute} other {# Minuten}}",
-    "seconds": "vor {count, plural, =1 {# Sekunde} other {# Sekunden}}"
+    "years": "{count, plural, one {vor # Jahr} other {vor # Jahren}}",
+    "months": "{count, plural, one {vor # Monat} other {vor # Monaten}}",
+    "days": "{count, plural, one {vor # Tag} other {vor # Tagen}}",
+    "hours": "{count, plural, one {vor # Stunde} other {vor # Stunden}}",
+    "minutes": "{count, plural, one {vor # Minute} other {vor # Minuten}}",
+    "seconds": "{count, plural, one {vor # Sekunde} other {vor # Sekunden}}"
+  },
+  "OtpDialog": {
+    "title": "Bestätigungscode eingeben",
+    "description": "Ein Bestätigungscode wurde an Ihre Authentifizierungs-App gesendet.",
+    "placeholder": "6-stelliger Code",
+    "cancel": "Abbrechen",
+    "verify": "Überprüfen",
+    "verifying": "Überprüfen..."
   }
 }

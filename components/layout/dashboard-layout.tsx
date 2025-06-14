@@ -1,17 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, Variants } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { dashboardConfig } from "@/lib/config";
 import {
   MoonIcon,
   SunIcon,
   MenuIcon,
-  XIcon,
   LogOutIcon,
   ChevronRight,
 } from "lucide-react";
@@ -21,8 +19,12 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { LanguageSwitcher } from "@/components/language-switcher";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useTranslations } from "next-intl";
+import { ThemeSwitcher } from "@/components/theme-switcher";
+import { LayoutSwitcher } from "@/components/layout-switcher";
 
 // Sidebar animation variants
 const sidebarVariants: Variants = {
@@ -83,115 +85,106 @@ interface AdminConfig {
   models: Record<string, ModelInfo>;
   categories: Record<string, string[]>;
   frontend_options: {
-    categories: string[];
-    icons: string[];
+    site_name: string;
+    logo_url: string;
+    favicon: string;
   };
+}
+
+interface UserProfile {
+  preferences: {
+    theme?: string;
+    navbar_style?: string;
+    sidebar_collapsed?: boolean;
+  };
+  [key: string]: any;
 }
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
   const pathname = usePathname();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
+  const t = useTranslations("DashboardLayout");
 
-  const [isMounted, setIsMounted] = useState(false);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMobileView, setIsMobileView] = useState(false);
-  const [siteName, setSiteName] = useState(dashboardConfig.name);
-  const [logoUrl, setLogoUrl] = useState(dashboardConfig.logoUrl);
-  const [navbarStyle, setNavbarStyle] = useState("modern");
+  const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const { data: adminConfig } = useQuery<AdminConfig>({
     queryKey: ["adminConfig"],
     queryFn: api.getAdminConfig,
     enabled: !!session,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
 
-  // Initialize theme and sidebar state from localStorage
-  useEffect(() => {
-    setIsMounted(true);
+  const { data: userProfile } = useQuery<UserProfile>({
+    queryKey: ["userProfile"],
+    queryFn: api.getUserProfile,
+    enabled: !!session,
+  });
 
-    // Theme initialization
-    const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
-    const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    ).matches;
-    const initialTheme = savedTheme || (prefersDark ? "dark" : "light");
-    setTheme(initialTheme);
-    if (initialTheme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-
-    const storedName = localStorage.getItem("siteName");
-    if (storedName) setSiteName(storedName);
-    const storedLogo = localStorage.getItem("logoUrl");
-    if (storedLogo) setLogoUrl(storedLogo);
-    const storedStyle = localStorage.getItem("navbarStyle");
-    if (storedStyle) setNavbarStyle(storedStyle);
-
-    // Sidebar state initialization
-    const savedSidebarState = localStorage.getItem("sidebarCollapsed");
-    if (savedSidebarState === "true") {
-      setIsCollapsed(true);
-    }
-
-    // Check if mobile view
-    const checkIfMobile = () => {
-      const isMobile = window.innerWidth < 768;
-      setIsMobileView(isMobile);
-      if (isMobile) {
-        setIsCollapsed(true);
-      }
-    };
-
-    checkIfMobile();
-    window.addEventListener("resize", checkIfMobile);
-    return () => window.removeEventListener("resize", checkIfMobile);
-  }, []);
-
-  // Toggle between light and dark mode
-  const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    setTheme(newTheme);
-    document.documentElement.classList.toggle("dark", newTheme === "dark");
-    localStorage.setItem("theme", newTheme);
-  };
-
-  // Toggle sidebar expand/collapse
-  const toggleSidebar = () => {
-    const newCollapsedState = !isCollapsed;
-    setIsCollapsed(newCollapsedState);
-    localStorage.setItem("sidebarCollapsed", String(newCollapsedState));
-  };
-
-  // Handle sign out
-  const handleSignOut = async () => {
-    try {
-      // Sign out logic here
-      toast({
-        title: "Signed out",
-        description: "You have been signed out successfully.",
-      });
-    } catch (error) {
+  const preferencesMutation = useMutation({
+    mutationFn: (prefs: Partial<UserProfile["preferences"]>) =>
+      api.updateUserProfile({ preferences: prefs }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+    },
+    onError: (error) => {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to sign out. Please try again.",
+        title: "Failed to update preferences",
+        description: error.message,
       });
+    },
+  });
+
+  // Derived state from queries
+  const theme = userProfile?.preferences?.theme || "light";
+  const siteName = adminConfig?.frontend_options?.site_name || "Dashboard";
+  const logoUrl =
+    adminConfig?.frontend_options?.logo_url || "/default-logo.png";
+  const navbarStyle = userProfile?.preferences?.navbar_style || "modern";
+
+  useEffect(() => {
+    // Apply theme to the document
+    const body = document.documentElement;
+    body.classList.remove(
+      "light",
+      "dark",
+      "professional",
+      "administrator",
+      "customer"
+    );
+    body.classList.add(theme);
+  }, [theme]);
+
+  useEffect(() => {
+    // Set initial sidebar state from user preferences or mobile status
+    const collapsed = isMobile ?? userProfile?.preferences?.sidebar_collapsed;
+    setSidebarCollapsed(!!collapsed);
+  }, [userProfile, isMobile]);
+
+  const toggleSidebar = () => {
+    const newCollapsedState = !isSidebarCollapsed;
+    setSidebarCollapsed(newCollapsedState);
+    if (!isMobile) {
+      preferencesMutation.mutate({ sidebar_collapsed: newCollapsedState });
     }
   };
 
-  // Check if a navigation item is active
+  const handleSignOut = async () => {
+    await signOut({ callbackUrl: "/login" });
+    toast({
+      title: t("signOutSuccessTitle"),
+      description: t("signOutSuccessDescription"),
+    });
+  };
+
   const isActive = (path: string) => {
     return pathname?.startsWith(path);
   };
 
-  if (!isMounted) {
-    return null; // or a loading skeleton
-  }
+  if (!session) return null;
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
@@ -199,24 +192,23 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
       <motion.aside
         variants={sidebarVariants}
         initial={false}
-        animate={isCollapsed ? "collapsed" : "expanded"}
+        animate={isSidebarCollapsed ? "collapsed" : "expanded"}
         data-style={navbarStyle}
         className={cn(
           "bg-sidebar text-sidebar-foreground border-r border-sidebar-border hidden md:flex flex-col z-30",
-          isCollapsed ? "items-center" : "items-start"
+          isSidebarCollapsed ? "items-center" : "items-start"
         )}>
-        {/* Sidebar Header */}
         <div className="h-16 flex items-center px-4 justify-between w-full">
           <motion.div
             variants={logoVariants}
             initial={false}
-            animate={isCollapsed ? "collapsed" : "expanded"}
+            animate={isSidebarCollapsed ? "collapsed" : "expanded"}
             className="overflow-hidden flex items-center">
             <img src={logoUrl} alt={siteName} className="h-8 w-8" />
             <motion.span
               variants={itemVariants}
               initial={false}
-              animate={isCollapsed ? "collapsed" : "expanded"}
+              animate={isSidebarCollapsed ? "collapsed" : "expanded"}
               className="ml-3 font-semibold text-lg">
               {siteName}
             </motion.span>
@@ -229,13 +221,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <ChevronRight
               className={cn(
                 "h-4 w-4 transition-transform",
-                isCollapsed ? "" : "rotate-180"
+                isSidebarCollapsed ? "" : "rotate-180"
               )}
             />
           </Button>
         </div>
 
-        {/* Navigation Links */}
         <ScrollArea className="flex-1 w-full py-4">
           <nav className="px-2 space-y-1">
             <Link
@@ -245,15 +236,15 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 isActive("/")
                   ? "bg-sidebar-accent text-sidebar-accent-foreground"
                   : "text-sidebar-foreground hover:bg-sidebar-accent/50",
-                isCollapsed ? "justify-center" : "justify-start"
+                isSidebarCollapsed ? "justify-center" : "justify-start"
               )}>
               <DynamicIcon name="home" className="h-5 w-5 flex-shrink-0" />
               <motion.span
                 variants={itemVariants}
                 initial={false}
-                animate={isCollapsed ? "collapsed" : "expanded"}
+                animate={isSidebarCollapsed ? "collapsed" : "expanded"}
                 className="ml-3">
-                Dashboard
+                {t("dashboard")}
               </motion.span>
             </Link>
 
@@ -261,7 +252,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               Object.entries(adminConfig.categories).map(
                 ([category, modelKeys]) => (
                   <div key={category} className="my-2">
-                    {!isCollapsed && (
+                    {!isSidebarCollapsed && (
                       <h3 className="px-3 py-2 text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wider">
                         {category}
                       </h3>
@@ -279,7 +270,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                             isActive(href)
                               ? "bg-sidebar-accent text-sidebar-accent-foreground"
                               : "text-sidebar-foreground hover:bg-sidebar-accent/50",
-                            isCollapsed ? "justify-center" : "justify-start"
+                            isSidebarCollapsed
+                              ? "justify-center"
+                              : "justify-start"
                           )}>
                           <DynamicIcon
                             name={model.frontend_config?.icon || "file-text"}
@@ -288,7 +281,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                           <motion.span
                             variants={itemVariants}
                             initial={false}
-                            animate={isCollapsed ? "collapsed" : "expanded"}
+                            animate={
+                              isSidebarCollapsed ? "collapsed" : "expanded"
+                            }
                             className="ml-3">
                             {model.verbose_name_plural}
                           </motion.span>
@@ -299,9 +294,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 )
               )}
             <div className="my-2">
-              {!isCollapsed && (
+              {!isSidebarCollapsed && (
                 <h3 className="px-3 py-2 text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wider">
-                  System
+                  {t("system")}
                 </h3>
               )}
               <Link
@@ -311,7 +306,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   isActive("/settings")
                     ? "bg-sidebar-accent text-sidebar-accent-foreground"
                     : "text-sidebar-foreground hover:bg-sidebar-accent/50",
-                  isCollapsed ? "justify-center" : "justify-start"
+                  isSidebarCollapsed ? "justify-center" : "justify-start"
                 )}>
                 <DynamicIcon
                   name="settings"
@@ -320,40 +315,30 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 <motion.span
                   variants={itemVariants}
                   initial={false}
-                  animate={isCollapsed ? "collapsed" : "expanded"}
+                  animate={isSidebarCollapsed ? "collapsed" : "expanded"}
                   className="ml-3">
-                  Settings
+                  {t("settings")}
                 </motion.span>
               </Link>
             </div>
           </nav>
         </ScrollArea>
-
         {/* Sidebar Footer */}
         <div className="p-4 border-t border-sidebar-border w-full">
           <div className="flex items-center justify-between">
             <LanguageSwitcher />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleTheme}
-              className="text-sidebar-foreground hover:bg-sidebar-accent">
-              {theme === "light" ? (
-                <MoonIcon className="h-5 w-5" />
-              ) : (
-                <SunIcon className="h-5 w-5" />
-              )}
-            </Button>
+            <ThemeSwitcher />
+            <LayoutSwitcher />
             <motion.div
               variants={itemVariants}
               initial={false}
-              animate={isCollapsed ? "collapsed" : "expanded"}>
+              animate={isSidebarCollapsed ? "collapsed" : "expanded"}>
               <Button
                 variant="ghost"
                 onClick={handleSignOut}
                 className="text-sidebar-foreground hover:bg-sidebar-accent">
                 <LogOutIcon className="h-5 w-5 mr-2" />
-                Sign out
+                {t("signOut")}
               </Button>
             </motion.div>
           </div>
@@ -391,7 +376,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                         name="home"
                         className="h-5 w-5 flex-shrink-0 mr-3"
                       />
-                      Dashboard
+                      {t("dashboard")}
                     </Link>
 
                     {adminConfig &&
@@ -430,7 +415,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                       )}
                     <div className="my-2">
                       <h3 className="px-3 py-2 text-xs font-semibold text-sidebar-foreground/60 uppercase tracking-wider">
-                        System
+                        {t("system")}
                       </h3>
                       <Link
                         href="/settings"
@@ -444,7 +429,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                           name="settings"
                           className="h-5 w-5 flex-shrink-0 mr-3"
                         />
-                        Settings
+                        {t("settings")}
                       </Link>
                     </div>
                   </nav>
@@ -452,23 +437,14 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                 <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-sidebar-border">
                   <div className="flex items-center justify-between">
                     <LanguageSwitcher />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={toggleTheme}
-                      className="text-sidebar-foreground hover:bg-sidebar-accent">
-                      {theme === "light" ? (
-                        <MoonIcon className="h-5 w-5" />
-                      ) : (
-                        <SunIcon className="h-5 w-5" />
-                      )}
-                    </Button>
+                    <ThemeSwitcher />
+                    <LayoutSwitcher />
                     <Button
                       variant="ghost"
                       onClick={handleSignOut}
                       className="text-sidebar-foreground hover:bg-sidebar-accent">
                       <LogOutIcon className="h-5 w-5 mr-2" />
-                      Sign out
+                      {t("signOut")}
                     </Button>
                   </div>
                 </div>
@@ -477,25 +453,17 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             <img src={logoUrl} alt={siteName} className="h-8 w-8 ml-3" />
             <span className="ml-3 font-semibold text-lg">{siteName}</span>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleTheme}
-            className="text-foreground">
-            {theme === "light" ? (
-              <MoonIcon className="h-5 w-5" />
-            ) : (
-              <SunIcon className="h-5 w-5" />
-            )}
-          </Button>
+          <div className="flex items-center">
+            <ThemeSwitcher />
+            <LayoutSwitcher />
+          </div>
         </div>
       </div>
 
-      {/* Main Content */}
       <main
         className={cn(
           "flex-1 overflow-y-auto p-6 pt-6",
-          isMobileView ? "mt-16" : ""
+          isMobile ? "mt-16" : ""
         )}>
         <AnimatePresence mode="wait">
           <motion.div

@@ -136,6 +136,60 @@ async function apiFetch<T>(
   return null as T;
 }
 
+async function apiFileFetch(
+  endpoint: string,
+  options: RequestInit = {},
+  isRetry = false
+): Promise<Response> {
+  let session = await getSession();
+  let token = session?.accessToken;
+
+  if (isRetry && !token) {
+    throw new Error("Authentication failed after token refresh.");
+  }
+
+  const url = `${dashboardConfig.api.baseUrl}${endpoint}`;
+  const headers = new Headers(options.headers);
+
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  const finalOptions: RequestInit = { ...options, headers };
+
+  const response = await fetch(url, finalOptions);
+
+  if (response.status === 401 && !isRetry) {
+    try {
+      const newAccessToken = await refreshManager.handleRefresh();
+      headers.set("Authorization", `Bearer ${newAccessToken}`);
+      return await apiFileFetch(endpoint, { ...options, headers }, true);
+    } catch (refreshError) {
+      await signOut({ redirect: false });
+      window.location.href = "/login";
+      toast({
+        variant: "destructive",
+        title: "Session Expired",
+        description: "Your session has expired. Please log in again.",
+      });
+      throw new Error("Session expired. Please log in again.");
+    }
+  }
+
+  if (!response.ok) {
+    let errorDetail = `API Error: ${response.status} ${response.statusText}`;
+    try {
+      const errorData = await response.json();
+      errorDetail = errorData.detail || JSON.stringify(errorData);
+    } catch (e) {
+      // Ignore if response is not JSON
+    }
+    throw new Error(errorDetail);
+  }
+
+  return response;
+}
+
 export const api = {
   getAdminConfig: () => apiFetch<any>("/api/admin/"),
   getDashboardStats: () => apiFetch<any>("/api/admin/dashboard-stats/"),
@@ -157,6 +211,24 @@ export const api = {
       });
     }
     return apiFetch<any>(`${url.pathname}${url.search}`);
+  },
+  getAllModelItems: async (modelUrl: string) => {
+    const url = modelUrl.startsWith("http")
+      ? new URL(modelUrl).pathname
+      : modelUrl;
+
+    let results: any[] = [];
+    let page = 1;
+    let hasNext = true;
+
+    while (hasNext) {
+      const response = await apiFetch<any>(`${url}?page=${page}`);
+      results = results.concat(response.results);
+      // The backend should provide a `next` field, which is null when there are no more pages.
+      hasNext = response.next !== null;
+      page++;
+    }
+    return results;
   },
   getModelItem: (modelUrl: string, id: string | number) => {
     const url = modelUrl.startsWith("http")
@@ -191,5 +263,62 @@ export const api = {
       ? new URL(modelUrl).pathname
       : modelUrl;
     return apiFetch<void>(`${url}${id}/`, { method: "DELETE" });
+  },
+
+  // Import/Export
+  exportModelData: (modelUrl: string, format: "csv" | "json") => {
+    const url = modelUrl.startsWith("http")
+      ? new URL(modelUrl).pathname
+      : modelUrl;
+    return apiFileFetch(`${url}export/?format=${format}`);
+  },
+  importModelData: (importUrl: string, data: FormData) => {
+    const url = importUrl.startsWith("http")
+      ? new URL(importUrl).pathname
+      : importUrl;
+    return apiFetch<any>(url, {
+      method: "POST",
+      body: data,
+    });
+  },
+
+  // Auth and User Management
+  getUserProfile: () => apiFetch<any>("/api/auth/me/"),
+  updateUserProfile: (data: any) =>
+    apiFetch<any>("/api/auth/me/", {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+  changePassword: (data: any) =>
+    apiFetch<any>("/api/auth/me/change-password/", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  requestPasswordReset: (email: string) =>
+    apiFetch<any>("/api/auth/password_reset/", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }),
+  confirmPasswordReset: (data: any) =>
+    apiFetch<any>("/api/auth/password_reset/confirm/", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  get2FASecret: () => apiFetch<any>("/api/auth/2fa/enable/"),
+  verify2FA: (otp: string) =>
+    apiFetch<any>("/api/auth/2fa/verify/", {
+      method: "POST",
+      body: JSON.stringify({ otp }),
+    }),
+  disable2FA: (password: string) =>
+    apiFetch<any>("/api/auth/2fa/disable/", {
+      method: "POST",
+      body: JSON.stringify({ password }),
+    }),
+  importModelItems: (modelKey: string, data: FormData) => {
+    return apiFetch<any>(`/api/admin/models/${modelKey}/import/`, {
+      method: "POST",
+      body: data,
+    });
   },
 };
