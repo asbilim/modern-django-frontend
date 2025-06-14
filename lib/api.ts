@@ -212,6 +212,24 @@ export const api = {
     }
     return apiFetch<any>(`${url.pathname}${url.search}`);
   },
+  getAllModelItems: async (modelUrl: string) => {
+    const url = modelUrl.startsWith("http")
+      ? new URL(modelUrl).pathname
+      : modelUrl;
+
+    let results: any[] = [];
+    let page = 1;
+    let hasNext = true;
+
+    while (hasNext) {
+      const response = await apiFetch<any>(`${url}?page=${page}`);
+      results = results.concat(response.results);
+      // The backend should provide a `next` field, which is null when there are no more pages.
+      hasNext = response.next !== null;
+      page++;
+    }
+    return results;
+  },
   getModelItem: (modelUrl: string, id: string | number) => {
     const url = modelUrl.startsWith("http")
       ? new URL(modelUrl).pathname

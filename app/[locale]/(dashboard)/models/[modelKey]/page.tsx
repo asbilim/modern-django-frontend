@@ -19,6 +19,7 @@ import {
   Download,
 } from "lucide-react";
 import { getModelUrl, formatDate } from "@/lib/utils";
+import { convertToCsv, downloadFile } from "@/lib/export";
 import { DynamicIcon } from "@/components/ui/dynamic-icon";
 import {
   AlertDialog,
@@ -200,26 +201,36 @@ export default function ModelListPage() {
 
   const handleExport = async (format: "csv" | "json") => {
     if (!model) return;
+
+    toast({
+      title: "Preparing Export",
+      description: `Fetching all ${totalItems} items... This may take a moment.`,
+    });
+
     try {
-      const response = await api.exportModelData(model.api_url, format);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${modelKey}.${format}`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
+      const allItems = await api.getAllModelItems(model.api_url);
+
+      if (format === "csv") {
+        const csvContent = convertToCsv(allItems);
+        downloadFile(csvContent, `${modelKey}_export.csv`, "text/csv");
+      } else {
+        const jsonContent = JSON.stringify(allItems, null, 2);
+        downloadFile(
+          jsonContent,
+          `${modelKey}_export.json`,
+          "application/json"
+        );
+      }
+
       toast({
-        title: "Export Started",
-        description: `Your ${format.toUpperCase()} file is downloading.`,
+        title: "Export Ready",
+        description: `Your ${format.toUpperCase()} file has been generated and is downloading.`,
       });
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Export Failed",
-        description: error.message,
+        description: `An error occurred while exporting data: ${error.message}`,
       });
     }
   };
