@@ -159,7 +159,9 @@
     "system": "System",
     "signOut": "Sign out",
     "signOutSuccessTitle": "Signed out",
-    "signOutSuccessDescription": "You have been signed out successfully."
+    "signOutSuccessDescription": "You have been signed out successfully.",
+    "tools": "Tools",
+    "aiTools": "AI Tools"
   },
   "AuthErrorPage": {
     "credentialsSigninTitle": "Sign-in Failed",

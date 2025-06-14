@@ -84,5 +84,15 @@
     "cancel": "Annuler",
     "verify": "Vérifier",
     "verifying": "Vérification..."
+  },
+  "DashboardLayout": {
+    "dashboard": "Tableau de bord",
+    "settings": "Paramètres",
+    "signOut": "Se déconnecter",
+    "signOutSuccessTitle": "Déconnecté",
+    "signOutSuccessDescription": "Vous avez été déconnecté avec succès.",
+    "system": "Système",
+    "tools": "Outils",
+    "aiTools": "Outils d'IA"
   }
 }
