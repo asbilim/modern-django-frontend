@@ -1,27 +1,33 @@
 {
   "LoginPage": {
-    "title": "Sign in to your account",
+    "title": "Login to your Account",
     "usernameLabel": "Username",
     "passwordLabel": "Password",
-    "signInButton": "Sign In"
+    "signInButton": "Sign In",
+    "toastErrorTitle": "Authentication Failed",
+    "toastErrorDescription": "Please check your credentials and try again.",
+    "toastSuccessTitle": "Success",
+    "toastSuccessDescription": "You have been successfully logged in.",
+    "toastOtpInvalidTitle": "Invalid OTP",
+    "toastOtpInvalidDescription": "The OTP code is incorrect. Please try again."
   },
   "DashboardPage": {
     "title": "Dashboard",
-    "description": "Manage your application data and settings."
+    "description": "An overview of your project's activity."
   },
   "ModelListPage": {
-    "createNew": "Create New",
+    "createNew": "Create new",
     "id": "ID",
     "name": "Name / Title",
     "createdAt": "Created At",
     "actions": "Actions",
-    "noItems": "No items found for this model.",
+    "noItems": "No items found.",
     "edit": "Edit",
     "delete": "Delete",
-    "deleteTitle": "Are you sure?",
+    "deleteTitle": "Are you absolutely sure?",
     "deleteConfirm": "This action cannot be undone. This will permanently delete the item.",
     "tryAgain": "Try Again",
-    "save": "Save"
+    "save": "Save Changes"
   },
   "SettingsPage": {
     "title": "Settings",
@@ -29,16 +35,54 @@
     "siteName": "Site Name",
     "logo": "Logo URL",
     "navbarStyle": "Navbar Style",
-    "otp": "Enable Two-factor Authentication",
-    "password": "Change Password",
-    "save": "Save Changes"
+    "otp": "Two Factor Authentication",
+    "password": "Password",
+    "save": "Save Changes",
+    "profileUpdateSuccess": "Profile updated successfully.",
+    "profileUpdateError": "Failed to update profile.",
+    "profileTitle": "User Profile",
+    "profileDescription": "Update your personal information.",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email Address",
+    "saving": "Saving...",
+    "passwordUpdateSuccess": "Password updated successfully.",
+    "passwordUpdateError": "Failed to update password.",
+    "passwordTitle": "Change Password",
+    "passwordDescription": "Update your account password.",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmNewPassword": "Confirm New Password",
+    "savePassword": "Update Password",
+    "twoFactorTitle": "Two-Factor Authentication (2FA)",
+    "twoFactorDescription": "Add an extra layer of security to your account.",
+    "twoFactorEnabled": "2FA is currently enabled on your account.",
+    "disabling": "Disabling...",
+    "disable2FA": "Disable 2FA",
+    "scanQrCode": "Scan the QR code below with your authenticator app.",
+    "secretKey": "Or enter this secret key manually",
+    "verificationCode": "Verification Code",
+    "cancel": "Cancel",
+    "verifying": "Verifying...",
+    "verifyAndActivate": "Verify & Activate",
+    "twoFactorDisabled": "2FA is currently disabled.",
+    "enabling": "Enabling...",
+    "enable2FA": "Enable 2FA"
   },
   "Time": {
-    "years": "{count, plural, =1 {# year ago} other {# years ago}}",
-    "months": "{count, plural, =1 {# month ago} other {# months ago}}",
-    "days": "{count, plural, =1 {# day ago} other {# days ago}}",
-    "hours": "{count, plural, =1 {# hour ago} other {# hours ago}}",
-    "minutes": "{count, plural, =1 {# minute ago} other {# minutes ago}}",
-    "seconds": "{count, plural, =1 {# second ago} other {# seconds ago}}"
+    "years": "{count, plural, one {# year ago} other {# years ago}}",
+    "months": "{count, plural, one {# month ago} other {# months ago}}",
+    "days": "{count, plural, one {# day ago} other {# days ago}}",
+    "hours": "{count, plural, one {# hour ago} other {# hours ago}}",
+    "minutes": "{count, plural, one {# minute ago} other {# minutes ago}}",
+    "seconds": "{count, plural, one {# second ago} other {# seconds ago}}"
+  },
+  "OtpDialog": {
+    "title": "Enter Verification Code",
+    "description": "A verification code has been sent to your authenticator app.",
+    "placeholder": "6-digit code",
+    "cancel": "Cancel",
+    "verify": "Verify",
+    "verifying": "Verifying..."
   }
 }

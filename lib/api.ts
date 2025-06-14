@@ -192,4 +192,38 @@ export const api = {
       : modelUrl;
     return apiFetch<void>(`${url}${id}/`, { method: "DELETE" });
   },
+
+  // Auth and User Management
+  getUserProfile: () => apiFetch<any>("/api/auth/me/"),
+  updateUserProfile: (data: any) =>
+    apiFetch<any>("/api/auth/me/", {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
+  changePassword: (data: any) =>
+    apiFetch<any>("/api/auth/me/change-password/", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  requestPasswordReset: (email: string) =>
+    apiFetch<any>("/api/auth/password_reset/", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    }),
+  confirmPasswordReset: (data: any) =>
+    apiFetch<any>("/api/auth/password_reset/confirm/", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  get2FASecret: () => apiFetch<any>("/api/auth/2fa/enable/"),
+  verify2FA: (otp: string) =>
+    apiFetch<any>("/api/auth/2fa/verify/", {
+      method: "POST",
+      body: JSON.stringify({ otp }),
+    }),
+  disable2FA: (password: string) =>
+    apiFetch<any>("/api/auth/2fa/disable/", {
+      method: "POST",
+      body: JSON.stringify({ password }),
+    }),
 };

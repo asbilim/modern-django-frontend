@@ -3,760 +3,272 @@ description:
 globs: 
 alwaysApply: true
 ---
-# Frontend Integration Rules for Django Admin API
+# Django Admin API
 
-## Overview
+A modern Django admin interface with auto-generated REST API for any Django project.
 
-This document provides frontend development rules for integrating with the Django Admin API system. The backend automatically generates REST API endpoints for all Django admin models and provides comprehensive metadata for building dynamic admin interfaces.
+Created by: **asbilim**
 
-**Backend Features to Leverage:**
-- Auto-generated REST API endpoints for all registered models
-- Dynamic field metadata with UI component suggestions
-- Built-in internationalization (English, German, French)
-- JWT authentication with 2FA support
-- File upload handling (local and Cloudflare R2)
-- Comprehensive API documentation
+- **Twitter:** [@iampaullilian](https://twitter.com/iampaullilian)
+- **GitHub:** [asbilim](https://github.com/asbilim)
+- **Portfolio:** [paullilian.dev](https://paullilian.dev)
 
-## API Discovery & Integration Pattern
+## Features
 
-### 1. Start with Admin Root Endpoint
-Always begin by fetching the main admin configuration to discover available models and options:
+- **Auto-generated API:** Automatically creates REST API endpoints for all models registered in the Django admin.
+- **Dashboard Analytics:** A new `/api/admin/dashboard-stats/` endpoint provides a comprehensive overview of site activity, including user signups, content creation statistics, and recent activities.
+- **Pre-built Blog App:** Includes a full-featured, RESTful blog API with posts, categories, tags, comments, and more.
+- **Dynamic Configuration:** Manage site settings like email and file storage directly through the API.
+- **Enhanced Site Identity:** More detailed site identity management, including author information, contact details, and social media links.
+- **Admin User Preferences:** Users can have their own admin UI preferences, such as theme and layout density.
+- **API Request Logging:** Automatically logs API requests for analytics and monitoring.
+- **Site Identity & SEO:** Manage your site's name, logo, favicon, and SEO tags from a central place.
+- **User & Group Management:** Super admins can manage users and groups via the API.
+- **Frontend Ready:** Provides configuration endpoints for easy integration with a frontend dashboard.
+- **Customizable:** Easily extend and customize serializers, viewsets, and permissions.
+- **Automatic Translations:** All text fields are available in English, German and French without manual setup.
+- **UI Component Metadata:** Each API response includes suggested components for creating, editing and displaying fields, plus predefined choices for things like icons and categories to ensure a consistent look and feel.
 
-```typescript
-// Initial API discovery
-const discoverAdminAPI = async () => {
-  const response = await fetch('/api/admin/', {
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json'
-    }
-  })
-  
-  const adminConfig = await response.json()
-  
-  // Response structure:
-  // {
-  //   "models": {
-  //     "blogpost": {
-  //       "name": "Blog Post",
-  //       "api_url": "/api/admin/models/blogpost/",
-  //       "config_url": "/api/admin/models/blogpost/config/",
-  //       "count": 25
-  //     }
-  //   },
-  //   "frontend_options": {
-  //     "icons": ["home", "user", "settings", "blog", ...],
-  //     "categories": ["content", "user-management", "settings"],
-  //     "ui_components": {...}
-  //   }
-  // }
-  
-  return adminConfig
-}
-```
+## Quick Start
 
-### 2. Fetch Model Configuration Before Building UI
-For each model, fetch its configuration to understand field types and UI requirements:
+1. **Setup Environment**
 
-```typescript
-// Get model field configuration
-const getModelConfig = async (configUrl: string) => {
-  const response = await fetch(configUrl, {
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json'
-    }
-  })
-  
-  return await response.json()
-  // Returns field metadata with ui_component suggestions
-}
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # Linux/Mac
+   # or
+   venv\Scripts\activate  # Windows
+   ```
 
-// TypeScript interface for model configuration
-interface ModelConfig {
-  fields: {
-    [fieldName: string]: {
-      type: string
-      required: boolean
-      ui_component: string
-      label: string
-      help_text?: string
-      choices?: Array<{value: string, label: string}>
-      max_length?: number
-    }
-  }
-  translations: {
-    en: Record<string, string>
-    de: Record<string, string>
-    fr: Record<string, string>
-  }
-}
-```
+2. **Install Dependencies**
 
-## Authentication Integration
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-### JWT Token Management
-```typescript
-// Authentication service
-class AuthService {
-  private accessToken: string | null = null
-  private refreshToken: string | null = null
-  
-  async login(username: string, password: string, otp?: string) {
-    const response = await fetch('/api/token/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password, otp })
-    })
-    
-    if (response.ok) {
-      const tokens = await response.json()
-      this.accessToken = tokens.access
-      this.refreshToken = tokens.refresh
-      
-      // Store in secure storage (not localStorage in artifacts)
-      this.storeTokens(tokens)
-    }
-    
-    return response
-  }
-  
-  async refreshAccessToken() {
-    if (!this.refreshToken) throw new Error('No refresh token')
-    
-    const response = await fetch('/api/token/refresh/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refresh: this.refreshToken })
-    })
-    
-    if (response.ok) {
-      const { access } = await response.json()
-      this.accessToken = access
-    }
-    
-    return response
-  }
-  
-  getAuthHeaders() {
-    return {
-      'Authorization': `Bearer ${this.accessToken}`,
-      'Content-Type': 'application/json'
-    }
-  }
-}
-```
+3. **Environment Variables**
 
-### 2FA Implementation
-```typescript
-// Two-Factor Authentication flow
-const enable2FA = async () => {
-  const response = await fetch('/api/auth/2fa/enable/', {
-    headers: authService.getAuthHeaders()
-  })
-  
-  const { qr_code, secret_key } = await response.json()
-  
-  // Display QR code and secret to user
-  return { qr_code, secret_key }
-}
+   Create a `.env` file from the example:
 
-const verify2FA = async (otp: string) => {
-  const response = await fetch('/api/auth/2fa/verify/', {
-    method: 'POST',
-    headers: authService.getAuthHeaders(),
-    body: JSON.stringify({ otp })
-  })
-  
-  return response.ok
-}
-```
+   ```bash
+   cp .env.example .env
+   ```
 
-## Dynamic UI Component Generation
+   Then, edit the `.env` file with your settings. See the `.env.example` file for detailed explanations of each variable. This now includes optional configuration for Cloudflare R2 storage.
 
-### Component Mapping Strategy
-```typescript
-// Map backend ui_component suggestions to your UI components
-const UIComponentMap = {
-  'text_input': TextInput,
-  'textarea': Textarea,
-  'rich_text_editor': RichTextEditor,
-  'number_input': NumberInput,
-  'date_picker': DatePicker,
-  'datetime_picker': DateTimePicker,
-  'select': Select,
-  'multiselect': MultiSelect,
-  'checkbox': Checkbox,
-  'radio': RadioGroup,
-  'image_upload': ImageUpload,
-  'file_upload': FileUpload,
-  'color_picker': ColorPicker,
-  'url_input': URLInput,
-  'email_input': EmailInput,
-  'password_input': PasswordInput,
-  'slug_input': SlugInput
-}
+4. **Database Setup**
 
-// Dynamic form field renderer
-const DynamicFormField = ({ fieldName, fieldConfig, value, onChange }: {
-  fieldName: string
-  fieldConfig: FieldConfig
-  value: any
-  onChange: (value: any) => void
-}) => {
-  const Component = UIComponentMap[fieldConfig.ui_component] || TextInput
-  
-  return (
-    <FormField>
-      <FormLabel required={fieldConfig.required}>
-        {fieldConfig.label}
-      </FormLabel>
-      <Component
-        name={fieldName}
-        value={value}
-        onChange={onChange}
-        placeholder={fieldConfig.help_text}
-        required={fieldConfig.required}
-        choices={fieldConfig.choices}
-        maxLength={fieldConfig.max_length}
-      />
-      {fieldConfig.help_text && (
-        <FormHelperText>{fieldConfig.help_text}</FormHelperText>
-      )}
-    </FormField>
-  )
-}
-```
+   ```bash
+   python manage.py migrate
+   python manage.py createsuperuser
+   ```
 
-### Dynamic Form Generation
-```typescript
-// Generate entire forms from model configuration
-const DynamicModelForm = ({ modelConfig, initialData, onSubmit }: {
-  modelConfig: ModelConfig
-  initialData?: Record<string, any>
-  onSubmit: (data: Record<string, any>) => void
-}) => {
-  const [formData, setFormData] = useState(initialData || {})
-  
-  const handleFieldChange = (fieldName: string, value: any) => {
-    setFormData(prev => ({ ...prev, [fieldName]: value }))
-  }
-  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onSubmit(formData)
-  }
-  
-  return (
-    <form onSubmit={handleSubmit}>
-      {Object.entries(modelConfig.fields).map(([fieldName, fieldConfig]) => (
-        <DynamicFormField
-          key={fieldName}
-          fieldName={fieldName}
-          fieldConfig={fieldConfig}
-          value={formData[fieldName]}
-          onChange={(value) => handleFieldChange(fieldName, value)}
-        />
-      ))}
-      
-      <Button type="submit">
-        {initialData ? 'Update' : 'Create'}
-      </Button>
-    </form>
-  )
-}
-```
+5. **Run Development Server**
 
-## Internationalization Integration
+   ```bash
+   python manage.py runserver
+   ```
 
-### Language Management
-```typescript
-// Language context for admin interface
-const AdminLanguageContext = createContext<{
-  currentLanguage: 'en' | 'de' | 'fr'
-  setLanguage: (lang: 'en' | 'de' | 'fr') => void
-  t: (key: string, fallback?: string) => string
-}>({
-  currentLanguage: 'en',
-  setLanguage: () => {},
-  t: (key) => key
-})
+6. **(Optional) Create Dummy Data**
 
-// Translation hook for dynamic content
-const useAdminTranslations = (translations: ModelConfig['translations']) => {
-  const { currentLanguage } = useContext(AdminLanguageContext)
-  
-  const t = (key: string, fallback?: string) => {
-    return translations[currentLanguage]?.[key] || 
-           translations.en?.[key] || 
-           fallback || 
-           key
-  }
-  
-  return { t, currentLanguage }
-}
-```
+   To populate the database with some sample data for testing, you can run the following command:
 
-### Multi-language Form Fields
-```typescript
-// Handle multi-language text fields
-const MultiLanguageTextInput = ({ 
-  fieldName, 
-  translations, 
-  values, 
-  onChange 
-}: {
-  fieldName: string
-  translations: Record<string, string>
-  values: Record<string, string>
-  onChange: (lang: string, value: string) => void
-}) => {
-  const [activeTab, setActiveTab] = useState<'en' | 'de' | 'fr'>('en')
-  
-  return (
-    <div>
-      <div className="flex space-x-2 mb-2">
-        {(['en', 'de', 'fr'] as const).map(lang => (
-          <Button
-            key={lang}
-            variant={activeTab === lang ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setActiveTab(lang)}
-          >
-            {lang.toUpperCase()}
-          </Button>
-        ))}
-      </div>
-      
-      <Input
-        value={values[`${fieldName}_${activeTab}`] || ''}
-        onChange={(e) => onChange(activeTab, e.target.value)}
-        placeholder={translations[activeTab]}
-      />
-    </div>
-  )
-}
-```
+   ```bash
+   python manage.py create_dummy_todos
+   ```
 
-## CRUD Operations
+## API Endpoints
 
-### API Service Pattern
-```typescript
-// Generic API service for admin models
-class AdminAPIService {
-  constructor(private authService: AuthService) {}
-  
-  async getModelList(modelUrl: string, params?: Record<string, any>) {
-    const searchParams = new URLSearchParams(params)
-    const response = await fetch(`${modelUrl}?${searchParams}`, {
-      headers: this.authService.getAuthHeaders()
-    })
-    
-    return await response.json()
-  }
-  
-  async getModelItem(modelUrl: string, id: string | number) {
-    const response = await fetch(`${modelUrl}${id}/`, {
-      headers: this.authService.getAuthHeaders()
-    })
-    
-    return await response.json()
-  }
-  
-  async createModelItem(modelUrl: string, data: Record<string, any>) {
-    const response = await fetch(modelUrl, {
-      method: 'POST',
-      headers: this.authService.getAuthHeaders(),
-      body: JSON.stringify(data)
-    })
-    
-    return await response.json()
-  }
-  
-  async updateModelItem(modelUrl: string, id: string | number, data: Record<string, any>) {
-    const response = await fetch(`${modelUrl}${id}/`, {
-      method: 'PATCH',
-      headers: this.authService.getAuthHeaders(),
-      body: JSON.stringify(data)
-    })
-    
-    return await response.json()
-  }
-  
-  async deleteModelItem(modelUrl: string, id: string | number) {
-    const response = await fetch(`${modelUrl}${id}/`, {
-      method: 'DELETE',
-      headers: this.authService.getAuthHeaders()
-    })
-    
-    return response.ok
-  }
-}
-```
+- **Admin API Root**: `http://localhost:8000/api/admin/`
+- **Dashboard Analytics**: `http://localhost:8000/api/admin/dashboard-stats/`
+- **API for a model**: `http://localhost:8000/api/admin/models/<model-name>/`
+- **Blog API**:
+  - Posts: `http://localhost:8000/api/blog/posts/`
+  - Categories: `http://localhost:8000/api/blog/categories/`
+  - Tags: `http://localhost:8000/api/blog/tags/`
+  - Search: `http://localhost:8000/api/blog/search/?q=<query>`
+- **Traditional Admin**: `http://localhost:8000/admin/`
+- **API Schema**:
+  - `http://localhost:8000/api/schema/` (Download OpenAPI Schema)
+  - `http://localhost:8000/api/schema/swagger-ui/` (Swagger UI)
+  - `http://localhost:8000/api/schema/redoc/` (Redoc)
 
-### React Query Integration
-```typescript
-// Use React Query for state management
-const useModelList = (modelUrl: string, params?: Record<string, any>) => {
-  return useQuery({
-    queryKey: ['model-list', modelUrl, params],
-    queryFn: () => adminAPI.getModelList(modelUrl, params),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-  })
-}
+## Authentication Flow
 
-const useModelItem = (modelUrl: string, id: string | number) => {
-  return useQuery({
-    queryKey: ['model-item', modelUrl, id],
-    queryFn: () => adminAPI.getModelItem(modelUrl, id),
-    enabled: !!id,
-  })
-}
+This project uses JWT for authentication. Here is a summary of the authentication and user management endpoints.
 
-const useCreateModelItem = (modelUrl: string) => {
-  const queryClient = useQueryClient()
-  
-  return useMutation({
-    mutationFn: (data: Record<string, any>) => 
-      adminAPI.createModelItem(modelUrl, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['model-list', modelUrl] })
-    },
-  })
-}
-```
+### 1. Token Management
 
-## File Upload Handling
+- **Get Tokens (Login Step 1)**: `POST /api/token/`
 
-### File Upload Component
-```typescript
-// Handle file uploads with progress
-const FileUploadField = ({ 
-  fieldName, 
-  value, 
-  onChange, 
-  accept = "image/*",
-  multiple = false 
-}: {
-  fieldName: string
-  value: File | File[] | string | null
-  onChange: (file: File | File[] | null) => void
-  accept?: string
-  multiple?: boolean
-}) => {
-  const [uploading, setUploading] = useState(false)
-  const [progress, setProgress] = useState(0)
-  
-  const handleFileSelect = async (files: FileList | null) => {
-    if (!files || files.length === 0) return
-    
-    const selectedFiles = multiple ? Array.from(files) : files[0]
-    
-    setUploading(true)
-    setProgress(0)
-    
-    try {
-      // Handle file upload with progress
-      const formData = new FormData()
-      if (multiple && Array.isArray(selectedFiles)) {
-        selectedFiles.forEach((file, index) => {
-          formData.append(`${fieldName}_${index}`, file)
-        })
-      } else {
-        formData.append(fieldName, selectedFiles as File)
-      }
-      
-      // Upload with progress tracking
-      const xhr = new XMLHttpRequest()
-      
-      xhr.upload.onprogress = (e) => {
-        if (e.lengthComputable) {
-          setProgress((e.loaded / e.total) * 100)
+  - Provide `username` and `password`.
+  - If 2FA is **disabled**, this returns `access` and `refresh` tokens directly.
+  - If 2FA is **enabled**, it returns a temporary message: `{"detail": "OTP required.", "is_2fa_enabled": true}`.
+
+- **Verify 2FA and Get Tokens (Login Step 2)**: `POST /api/auth/token/verify/`
+
+  - If 2FA is enabled, use this endpoint.
+  - Provide `username`, `password`, and the `otp` from an authenticator app.
+  - On success, this returns the final `access` and `refresh` tokens.
+  - _Note: If you receive an "Invalid OTP" error, please ensure your phone's clock is synchronized with an internet time server._
+
+- **Refresh Token**: `POST /api/token/refresh/`
+  - Provide the `refresh` token to get a new `access` token.
+
+### 2. Password Reset
+
+- **Request Reset**: `POST /api/auth/password_reset/`
+  - Provide the user's `email` to receive a password reset link.
+- **Confirm Reset**: `POST /api/auth/password_reset/confirm/`
+  - Provide the `token` from the email and a `new_password`.
+
+### 3. Account Management (Authenticated)
+
+These endpoints require an active `access` token in the authorization header.
+
+- **User Profile**:
+  - `GET /api/auth/me/`: Retrieve the current user's profile (`username`, `email`, `first_name`, `last_name`).
+  - `PATCH /api/auth/me/`: Update the current user's profile data.
+- **Change Password**:
+  - `POST /api/auth/me/change-password/`: Change the password by providing `old_password` and `new_password`.
+- **Two-Factor Authentication (2FA)**:
+  - **Enable (Step 1)**: `GET /api/auth/2fa/enable/` to get a secret key and a QR code for your authenticator app.
+  - **Verify & Activate (Step 2)**: `POST /api/auth/2fa/verify/` with an `otp` to confirm the setup and activate 2FA on your account.
+  - **Disable**: `POST /api/auth/2fa/disable/` with your current `password` to deactivate 2FA.
+
+## Field Metadata and UI Components
+
+Each model endpoint returns metadata describing its fields. This includes a
+suggested `ui_component` for rendering forms or detail pages. The same
+component type can be used when creating, editing or simply displaying data.
+Translation fields are automatically added for every text field so your frontend
+can present forms in English, German and French without extra setup.
+
+To provide more specific control over the UI components, you can define a `field_metadata` dictionary within your `ModelAdmin`'s `Meta` class. This allows you to override the default component for any field. For example, to specify that a `content` field should use a Markdown editor:
+
+```python
+# in your_app/admin.py
+
+@admin.register(Post)
+class PostAdmin(admin.ModelAdmin):
+    # ... other admin settings
+
+    class Meta:
+        frontend_config = {
+            'icon': 'file-text',
+            'category': 'Blog',
+            'include_in_dashboard': True,
         }
-      }
-      
-      xhr.onload = () => {
-        if (xhr.status === 200) {
-          onChange(selectedFiles)
+        field_metadata = {
+            'content': {'ui_component': 'markdown_editor'},
+            'excerpt': {'ui_component': 'textarea'},
         }
-        setUploading(false)
-      }
-      
-      xhr.open('POST', '/api/upload/')
-      xhr.setRequestHeader('Authorization', `Bearer ${accessToken}`)
-      xhr.send(formData)
-      
-    } catch (error) {
-      console.error('Upload failed:', error)
-      setUploading(false)
-    }
-  }
-  
-  return (
-    <div>
-      <input
-        type="file"
-        accept={accept}
-        multiple={multiple}
-        onChange={(e) => handleFileSelect(e.target.files)}
-        disabled={uploading}
-      />
-      
-      {uploading && (
-        <div className="mt-2">
-          <div className="bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-blue-600 h-2 rounded-full transition-all"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-          <p className="text-sm text-gray-600 mt-1">
-            Uploading... {Math.round(progress)}%
-          </p>
-        </div>
-      )}
-    </div>
-  )
-}
 ```
 
-## Admin Dashboard Structure
+This gives you fine-grained control over the frontend rendering hints provided by the API.
 
-### Navigation Generation
-```typescript
-// Generate navigation from available models
-const AdminNavigation = ({ adminConfig }: { adminConfig: AdminConfig }) => {
-  const { frontend_options, models } = adminConfig
-  
-  // Group models by category
-  const categorizedModels = Object.entries(models).reduce((acc, [key, model]) => {
-    const category = model.category || 'general'
-    if (!acc[category]) acc[category] = []
-    acc[category].push({ key, ...model })
-    return acc
-  }, {} as Record<string, any[]>)
-  
-  return (
-    <nav className="admin-nav">
-      {Object.entries(categorizedModels).map(([category, categoryModels]) => (
-        <div key={category} className="nav-section">
-          <h3 className="nav-section-title">
-            {category.charAt(0).toUpperCase() + category.slice(1)}
-          </h3>
-          
-          {categoryModels.map(model => (
-            <Link
-              key={model.key}
-              to={`/admin/models/${model.key}`}
-              className="nav-item"
-            >
-              <Icon name={model.icon || 'default'} />
-              <span>{model.name}</span>
-              <Badge variant="secondary">{model.count}</Badge>
-            </Link>
-          ))}
-        </div>
-      ))}
-    </nav>
-  )
-}
-```
+The main admin endpoint (`/api/admin/`) also provides a `frontend_options` object
+that contains lists of predefined choices, such as available model
+categories and a comprehensive icon set. This allows the frontend to build UIs
+with consistent dropdowns and selection tools.
 
-### Model List View
-```typescript
-// Generic model list component
-const ModelListView = ({ modelKey }: { modelKey: string }) => {
-  const { data: adminConfig } = useAdminConfig()
-  const modelConfig = adminConfig?.models[modelKey]
-  
-  const { 
-    data: items, 
-    isLoading, 
-    error 
-  } = useModelList(modelConfig?.api_url || '')
-  
-  const { data: fieldConfig } = useModelConfig(modelConfig?.config_url || '')
-  
-  if (isLoading) return <LoadingSpinner />
-  if (error) return <ErrorMessage error={error} />
-  
-  return (
-    <div className="model-list-view">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">{modelConfig?.name}</h1>
-        <Button onClick={() => navigate(`/admin/models/${modelKey}/create`)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Create New
-        </Button>
-      </div>
-      
-      <DataTable
-        data={items?.results || []}
-        columns={generateColumnsFromConfig(fieldConfig)}
-        onRowClick={(item) => navigate(`/admin/models/${modelKey}/${item.id}`)}
-      />
-      
-      {items?.next && (
-        <Pagination
-          currentPage={items.current_page}
-          totalPages={items.total_pages}
-          onPageChange={(page) => {/* handle pagination */}}
-        />
-      )}
-    </div>
-  )
-}
-```
+**For a detailed guide on how this system works, please see the [API Metadata Guide](./API_METADATA_GUIDE.md).**
 
-## Error Handling & Loading States
+## File Storage
 
-### Comprehensive Error Handling
-```typescript
-// Error boundary for admin interface
-const AdminErrorBoundary = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <ErrorBoundary
-      fallback={({ error, retry }) => (
-        <div className="error-container">
-          <h2>Something went wrong</h2>
-          <p>{error.message}</p>
-          <Button onClick={retry}>Try Again</Button>
-        </div>
-      )}
-    >
-      {children}
-    </ErrorBoundary>
-  )
-}
+This project supports both local file storage and Cloudflare R2 for media uploads.
+By default, it uses the local filesystem. To use Cloudflare R2, you must provide
+the appropriate `AWS_*` environment variables as detailed in the `.env.example` file.
+When configured, all file uploads (like logos, user attachments, etc.) will be
+sent to your R2 bucket.
 
-// API error handling
-const handleAPIError = (error: any) => {
-  if (error.response?.status === 401) {
-    // Token expired, redirect to login
-    authService.logout()
-    navigate('/login')
-  } else if (error.response?.status === 403) {
-    // Insufficient permissions
-    toast.error('You do not have permission to perform this action')
-  } else if (error.response?.status >= 500) {
-    // Server error
-    toast.error('Server error. Please try again later.')
-  } else {
-    // Other errors
-    toast.error(error.message || 'An unexpected error occurred')
-  }
-}
-```
+## Project Structure
 
-## Performance Optimization
+- `admin_api/` - The core app for the auto-generated admin API.
+- `config/` - Django settings, main URL configuration, and WSGI entry point.
+- `apps/` - Your project's applications (e.g., `core`, `blog`, `site_config`, `site_identity`).
 
-### Caching Strategy
-```typescript
-// Cache model configurations
-const useModelConfigCache = () => {
-  const [configCache, setConfigCache] = useState<Map<string, ModelConfig>>(new Map())
-  
-  const getConfig = async (configUrl: string) => {
-    if (configCache.has(configUrl)) {
-      return configCache.get(configUrl)!
-    }
-    
-    const config = await fetchModelConfig(configUrl)
-    setConfigCache(prev => new Map(prev).set(configUrl, config))
-    return config
-  }
-  
-  return { getConfig, clearCache: () => setConfigCache(new Map()) }
-}
-```
+---
 
-### Lazy Loading
-```typescript
-// Lazy load admin components
-const ModelListView = lazy(() => import('./ModelListView'))
-const ModelFormView = lazy(() => import('./ModelFormView'))
-const ModelDetailView = lazy(() => import('./ModelDetailView'))
+## Guide d'utilisation pour tous (même ma grand-mère) 👵
 
-// Admin routes with lazy loading
-const AdminRoutes = () => (
-  <Suspense fallback={<LoadingSpinner />}>
-    <Routes>
-      <Route path="/models/:modelKey" element={<ModelListView />} />
-      <Route path="/models/:modelKey/create" element={<ModelFormView />} />
-      <Route path="/models/:modelKey/:id" element={<ModelDetailView />} />
-    </Routes>
-  </Suspense>
-)
-```
+Cette section est en français pour vous montrer à quel point ce projet est amical.
 
-## Development Best Practices
+### Partie 1 : Installer le projet sur votre ordinateur
 
-### TypeScript Integration
-```typescript
-// Define types for API responses
-interface APIResponse<T> {
-  count: number
-  next: string | null
-  previous: string | null
-  results: T[]
-}
+Imaginez que votre ordinateur possède une fenêtre de discussion magique (nous l'appelons un "terminal") où vous pouvez lui donner des instructions directes. C'est ce que nous allons utiliser.
 
-interface ModelInstance {
-  id: number
-  created_at: string
-  updated_at: string
-  [key: string]: any
-}
+1.  **Créer un bac à sable pour notre projet**
+    Nous allons d'abord créer un petit espace privé sur votre ordinateur, juste pour notre projet. C'est comme un bac à sable, pour que nos jouets ne se mélangent pas avec les autres.
 
-// Generate types from model configuration
-type GenerateModelType<T extends ModelConfig> = {
-  [K in keyof T['fields']]: T['fields'][K]['type'] extends 'CharField' 
-    ? string 
-    : T['fields'][K]['type'] extends 'IntegerField' 
-    ? number 
-    : any
-}
-```
+    ```bash
+    python -m venv env
+    ```
 
-### Testing Strategy
-```typescript
-// Mock admin API for testing
-const mockAdminAPI = {
-  getAdminConfig: jest.fn(),
-  getModelConfig: jest.fn(),
-  getModelList: jest.fn(),
-  createModelItem: jest.fn(),
-  updateModelItem: jest.fn(),
-  deleteModelItem: jest.fn(),
-}
+    Puis, on dit à l'ordinateur de "rentrer" dans ce bac à sable pour commencer à jouer.
 
-// Test dynamic form generation
-test('renders form fields based on model configuration', () => {
-  const mockConfig = {
-    fields: {
-      title: {
-        type: 'CharField',
-        required: true,
-        ui_component: 'text_input',
-        label: 'Title'
-      }
-    }
-  }
-  
-  render(<DynamicModelForm modelConfig={mockConfig} onSubmit={jest.fn()} />)
-  
-  expect(screen.getByLabelText('Title')).toBeInTheDocument()
-  expect(screen.getByRole('textbox')).toBeRequired()
-})
-```
+    ```bash
+    # Sur Windows
+    env\\Scripts\\activate
+    # Sur Mac ou Linux
+    source env/bin/activate
+    ```
 
-Remember to:
-- Always start with API discovery before building UI
-- Use the provided ui_component suggestions for consistent UX
-- Handle authentication and token refresh automatically
-- Leverage the built-in internationalization
-- Cache model configurations for better performance
-- Implement proper error handling and loading states
-- Use the file upload system for media handling
+2.  **Donner la liste de courses au projet**
+    Notre projet a besoin de quelques "ingrédients" ou "outils" pour fonctionner. Nous lui donnons une liste de courses, et il va tout chercher et installer tout seul.
 
-- Follow the provided patterns for CRUD operations
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3.  **Préparer les fondations**
+    Maintenant que nous avons les outils, nous devons construire la "mémoire" du projet (sa base de données). C'est comme monter une étagère ou un classeur pour pouvoir ranger toutes les informations.
+
+    ```bash
+    python manage.py migrate
+    ```
+
+4.  **Créer votre clé de "Super-Admin"**
+    Vous êtes le chef de ce projet ! Nous allons donc vous créer une clé secrète (un nom d'utilisateur et un mot de passe) qui vous donnera accès à tout.
+
+    ```bash
+    python manage.py createsuperuser
+    ```
+
+5.  **Lancer la machine !**
+    Et voilà ! Il ne reste plus qu'à démarrer le moteur.
+    ```bash
+    python manage.py runserver
+    ```
+    Votre projet est maintenant en ligne et accessible depuis votre navigateur à l'adresse `http://127.0.0.1:8000/`.
+
+### Partie 2 : Créer une interface pour contrôler le projet
+
+Maintenant que le projet fonctionne, imaginez-le comme une cuisine magique prête à préparer n'importe quel "plat de données". Votre interface (le "frontend") sera la salle du restaurant, où vous prendrez les commandes et afficherez les plats.
+
+**Comment connaître le menu ?**
+
+La cuisine a un "directeur" très intelligent. Vous n'avez pas besoin de deviner le menu, il vous suffit de lui demander !
+
+1.  **Demander le Menu Principal**
+    Envoyez une requête à l'endpoint `http://localhost:8000/api/admin/`. Le directeur vous donnera la liste de _tous les types de plats_ que la cuisine peut préparer (par exemple : "Utilisateurs", "Articles de blog", "Catégories").
+    Pour chaque plat, il vous donnera aussi son **adresse exacte** (la clé `api_url`). C'est comme un menu qui vous dit : "Pour la soupe, allez au comptoir N°1".
+    En plus, le directeur vous donnera une liste de "décorations" prédéfinies (la clé `frontend_options`). Cela inclut une liste d'icônes et de catégories que vous pouvez utiliser dans votre interface pour que tout soit joli et cohérent.
+
+2.  **Demander la Recette de Chaque Plat**
+    Une fois que vous savez que vous voulez un "Article de blog", comment savoir de quels ingrédients vous avez besoin pour en créer un ?
+    Il suffit de demander la recette ! Chaque plat a une adresse de "configuration" (`/config/`).
+    Cette recette vous dit tout ce dont vous avez besoin pour chaque ingrédient (chaque "champ") :
+    - **Le type d'ingrédient** : Est-ce un texte court, une longue histoire, une date, une image ?
+    - **La boîte à utiliser** : La recette vous suggère même le type de "boîte" ou de "composant" à utiliser dans votre interface. C'est la clé `ui_component`. Elle vous dira d'utiliser un petit champ de texte, une grande zone de texte, un éditeur de texte riche (Markdown), un calendrier, un bouton pour télécharger une image, etc. C'est comme un kit de peinture par numéros pour construire vos formulaires !
+    - **Les traductions** : Pour chaque champ de texte, la cuisine a déjà préparé des versions en français, anglais et allemand. Votre interface peut donc facilement afficher des onglets pour chaque langue.
+
+**Comment passer une commande ?**
+
+Une fois que votre interface est construite avec les bons formulaires (grâce aux recettes !), vous pouvez commencer à envoyer des commandes à la cuisine.
+
+- Pour **VOIR** tous les articles de blog : `GET` sur l'adresse `api_url` des articles.
+- Pour **CRÉER** un nouvel article : `POST` sur la même adresse, avec les données du formulaire.
+- Pour **MODIFIER** un article existant : `PUT` ou `PATCH` sur l'adresse de cet article précis.
+
+N'oubliez pas que pour entrer dans la cuisine, il faut montrer votre clé de "Super-Admin" (le token JWT) à chaque demande. C'est notre système de sécurité pour s'assurer que seul le chef peut donner des ordres !

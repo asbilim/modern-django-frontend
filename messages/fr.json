@@ -3,11 +3,17 @@
     "title": "Connectez-vous à votre compte",
     "usernameLabel": "Nom d'utilisateur",
     "passwordLabel": "Mot de passe",
-    "signInButton": "Se connecter"
+    "signInButton": "Se connecter",
+    "toastErrorTitle": "Échec de l'authentification",
+    "toastErrorDescription": "Veuillez vérifier vos identifiants et réessayer.",
+    "toastSuccessTitle": "Succès",
+    "toastSuccessDescription": "Vous avez été connecté avec succès.",
+    "toastOtpInvalidTitle": "OTP invalide",
+    "toastOtpInvalidDescription": "Le code OTP est incorrect. Veuillez réessayer."
   },
   "DashboardPage": {
     "title": "Tableau de bord",
-    "description": "Gérez les données et paramètres de votre application."
+    "description": "Un aperçu de l'activité de votre projet."
   },
   "ModelListPage": {
     "createNew": "Créer",
@@ -15,30 +21,68 @@
     "name": "Nom / Titre",
     "createdAt": "Créé le",
     "actions": "Actions",
-    "noItems": "Aucun élément trouvé pour ce modèle.",
+    "noItems": "Aucun élément trouvé.",
     "edit": "Modifier",
     "delete": "Supprimer",
-    "deleteTitle": "Êtes-vous sûr?",
+    "deleteTitle": "Êtes-vous absolument sûr ?",
     "deleteConfirm": "Cette action est irréversible. Cela supprimera définitivement l'élément.",
     "tryAgain": "Réessayer",
-    "save": "Sauvegarder"
+    "save": "Enregistrer les modifications"
   },
   "SettingsPage": {
     "title": "Paramètres",
     "general": "Général",
     "siteName": "Nom du site",
     "logo": "URL du logo",
-    "navbarStyle": "Style de la barre",
-    "otp": "Activer l'authentification à deux facteurs",
-    "password": "Changer le mot de passe",
-    "save": "Enregistrer"
+    "navbarStyle": "Style de la barre de navigation",
+    "otp": "Authentification à deux facteurs",
+    "password": "Mot de passe",
+    "save": "Enregistrer les modifications",
+    "profileUpdateSuccess": "Profil mis à jour avec succès.",
+    "profileUpdateError": "Échec de la mise à jour du profil.",
+    "profileTitle": "Profil utilisateur",
+    "profileDescription": "Mettez à jour vos informations personnelles.",
+    "firstName": "Prénom",
+    "lastName": "Nom de famille",
+    "email": "Adresse e-mail",
+    "saving": "Enregistrement...",
+    "passwordUpdateSuccess": "Mot de passe mis à jour avec succès.",
+    "passwordUpdateError": "Échec de la mise à jour du mot de passe.",
+    "passwordTitle": "Changer le mot de passe",
+    "passwordDescription": "Mettez à jour le mot de passe de votre compte.",
+    "currentPassword": "Mot de passe actuel",
+    "newPassword": "Nouveau mot de passe",
+    "confirmNewPassword": "Confirmer le nouveau mot de passe",
+    "savePassword": "Mettre à jour le mot de passe",
+    "twoFactorTitle": "Authentification à deux facteurs (2FA)",
+    "twoFactorDescription": "Ajoutez une couche de sécurité supplémentaire à votre compte.",
+    "twoFactorEnabled": "La 2FA est actuellement activée sur votre compte.",
+    "disabling": "Désactivation...",
+    "disable2FA": "Désactiver la 2FA",
+    "scanQrCode": "Scannez le code QR ci-dessous avec votre application d'authentification.",
+    "secretKey": "Ou entrez cette clé secrète manuellement",
+    "verificationCode": "Code de vérification",
+    "cancel": "Annuler",
+    "verifying": "Vérification...",
+    "verifyAndActivate": "Vérifier et activer",
+    "twoFactorDisabled": "La 2FA est actuellement désactivée.",
+    "enabling": "Activation...",
+    "enable2FA": "Activer la 2FA"
   },
   "Time": {
-    "years": "il y a {count, plural, =1 {# an} other {# ans}}",
-    "months": "il y a {count} mois",
-    "days": "il y a {count, plural, =1 {# jour} other {# jours}}",
-    "hours": "il y a {count, plural, =1 {# heure} other {# heures}}",
-    "minutes": "il y a {count, plural, =1 {# minute} other {# minutes}}",
-    "seconds": "il y a {count, plural, =1 {# seconde} other {# secondes}}"
+    "years": "{count, plural, one {il y a # an} other {il y a # ans}}",
+    "months": "{count, plural, one {il y a # mois} other {il y a # mois}}",
+    "days": "{count, plural, one {il y a # jour} other {il y a # jours}}",
+    "hours": "{count, plural, one {il y a # heure} other {il y a # heures}}",
+    "minutes": "{count, plural, one {il y a # minute} other {il y a # minutes}}",
+    "seconds": "{count, plural, one {il y a # seconde} other {il y a # secondes}}"
+  },
+  "OtpDialog": {
+    "title": "Saisir le code de vérification",
+    "description": "Un code de vérification a été envoyé à votre application d'authentification.",
+    "placeholder": "Code à 6 chiffres",
+    "cancel": "Annuler",
+    "verify": "Vérifier",
+    "verifying": "Vérification..."
   }
 }
