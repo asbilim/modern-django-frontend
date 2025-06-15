@@ -13,6 +13,24 @@
     "toastOtpInvalidTitle": "Invalid OTP",
     "toastOtpInvalidDescription": "The one-time password you entered is incorrect."
   },
+  "OtpDialog": {
+    "title": "Enter One-Time Password",
+    "description": "A code has been sent to your authenticator app. Please enter it below to complete your login.",
+    "placeholder": "6-digit code",
+    "cancel": "Cancel",
+    "verify": "Verify",
+    "verifying": "Verifying..."
+  },
+  "Header": {
+    "blog": "Blog",
+    "signIn": "Sign In"
+  },
+  "UserNav": {
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "admin": "Admin",
+    "signOut": "Sign Out"
+  },
   "DashboardPage": {
     "title": "Dashboard",
     "description": "Welcome back! Here's a summary of your project.",
@@ -101,7 +119,13 @@
     "editTitle": "Edit {modelName}: {id}",
     "createTitle": "Create new {modelName}",
     "loadModelConfigFailed": "Failed to load configuration for model: {modelName}",
-    "loadModelDataFailed": "Failed to load data for model: {modelName}"
+    "loadModelDataFailed": "Failed to load data for model: {modelName}",
+    "loadingRelationOptions": "Loading options for {fieldName}..."
+  },
+  "ModelForm": {
+    "saveSuccessTitle": "Item Saved",
+    "saveSuccessDescription": "The item has been successfully saved.",
+    "saveErrorTitle": "Error Saving Item"
   },
   "SettingsPage": {
     "title": "Settings",
@@ -151,10 +175,11 @@
       "passwordsDontMatch": "Passwords do not match.",
       "otpLength": "Your one-time password must be 6 characters.",
       "passwordRequiredFor2FA": "Your password is required to disable 2FA."
-    }
+    },
+    "seconds": "{count, plural, one {# second ago} other {# seconds ago}}"
   },
   "AiToolsPage": {
-    "title": "AI Tools",
+    "title": "AI Power Tools",
     "resultTitle": "Generated Result",
     "copy": "Copy",
     "regenerate": "Regenerate",
@@ -248,8 +273,9 @@
   },
   "DashboardLayout": {
     "dashboard": "Dashboard",
-    "tools": "Tools",
     "aiTools": "AI Tools",
+    "blog": "Blog",
+    "models": "Models",
     "settings": "Settings",
     "signOut": "Sign Out"
   },
@@ -260,5 +286,58 @@
     "hours": "{count, plural, one {# hour ago} other {# hours ago}}",
     "minutes": "{count, plural, one {# minute ago} other {# minutes ago}}",
     "seconds": "{count, plural, one {# second ago} other {# seconds ago}}"
+  },
+  "ImportExport": {
+    "importTitle": "Import {model}",
+    "importDescription": "Upload a CSV or JSON file to import data. Make sure the file structure matches the model schema.",
+    "formatLabel": "File Format",
+    "selectFormatPlaceholder": "Select a format",
+    "fileLabel": "File",
+    "fileDescription": "Only .csv and .json files are accepted.",
+    "cancel": "Cancel",
+    "importButton": "Import",
+    "importing": "Importing...",
+    "importSuccessTitle": "Import Successful",
+    "importSuccessDescription": "{count} items have been imported successfully.",
+    "importErrorTitle": "Import Failed"
+  },
+  "Common": {
+    "saving": "Saving...",
+    "save": "Save"
+  },
+  "BlogPage": {
+    "title": "Our Blog",
+    "readingTime": "{minutes, plural, =1 {# minute read} other {# minutes read}}",
+    "searchPlaceholder": "Search for posts...",
+    "loading": "Loading posts...",
+    "noResults": "No posts found.",
+    "loadingCategories": "Loading categories...",
+    "categoriesTitle": "Categories",
+    "allCategories": "All",
+    "commentsTitle": "Comments",
+    "commentPlaceholder": "Write a comment...",
+    "replyPlaceholder": "Write a reply...",
+    "namePlaceholder": "Your Name",
+    "emailPlaceholder": "Your Email",
+    "submitComment": "Submit Comment",
+    "submittingComment": "Submitting...",
+    "commentSuccess": "Comment posted successfully!",
+    "commentError": "Failed to post comment.",
+    "loadingComments": "Loading comments...",
+    "noComments": "Be the first to comment.",
+    "reply": "Reply",
+    "cancelReply": "Cancel Reply",
+    "description": "This project provides a sleek, responsive, and feature-rich admin interface to replace the standard Django admin. Built with Next.js, shadcn/ui, and Tailwind CSS.",
+    "ctaButton": "Get Started"
+  },
+  "Footer": {
+    "copyright": "© {year} Django Modern Admin. All rights reserved.",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service"
+  },
+  "HomePage": {
+    "title": "A Modern Admin Dashboard for Django",
+    "description": "This project provides a sleek, responsive, and feature-rich admin interface to replace the standard Django admin. Built with Next.js, shadcn/ui, and Tailwind CSS.",
+    "ctaButton": "Get Started"
   }
 }

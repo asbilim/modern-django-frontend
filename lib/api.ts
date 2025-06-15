@@ -1,6 +1,16 @@
 import { getSession, signOut } from "next-auth/react";
 import { dashboardConfig } from "@/lib/config";
 import { toast } from "@/hooks/use-toast";
+import {
+  PaginatedResponse,
+  PostListItem,
+  PostDetail,
+  Category,
+  Tag,
+  Author,
+  Comment,
+  BlogStats,
+} from "@/types/blog";
 
 const REFRESH_ATTEMPT_LIMIT = 3;
 const REFRESH_ATTEMPT_WINDOW_MS = 30000;
@@ -190,6 +200,48 @@ async function apiFileFetch(
   return response;
 }
 
+const getBlogPosts = async (
+  locale: string,
+  params: { page?: string; search?: string; ordering?: string } = {}
+): Promise<PaginatedResponse<PostListItem>> => {
+  const queryParams = new URLSearchParams(params).toString();
+  return apiFetch(`/api/blog/posts/?${queryParams}`, {
+    headers: { "Accept-Language": locale },
+  });
+};
+
+const getBlogPost = async (
+  locale: string,
+  slug: string
+): Promise<PostDetail> => {
+  return apiFetch(`/api/blog/posts/${slug}/`, {
+    headers: { "Accept-Language": locale },
+  });
+};
+
+const getBlogCategories = async (
+  locale: string
+): Promise<PaginatedResponse<Category>> => {
+  return apiFetch("/api/blog/categories/", {
+    headers: { "Accept-Language": locale },
+  });
+};
+
+const getBlogStats = async (locale: string): Promise<BlogStats> => {
+  return apiFetch("/api/blog/stats/", {
+    headers: { "Accept-Language": locale },
+  });
+};
+
+const getPostsByCategory = async (
+  locale: string,
+  categorySlug: string
+): Promise<PaginatedResponse<PostListItem>> => {
+  return apiFetch(`/api/blog/categories/${categorySlug}/posts/`, {
+    headers: { "Accept-Language": locale },
+  });
+};
+
 export const api = {
   getAdminConfig: () => apiFetch<any>("/api/admin/"),
   getDashboardStats: () => apiFetch<any>("/api/admin/dashboard-stats/"),
@@ -319,6 +371,36 @@ export const api = {
     return apiFetch<any>(`/api/admin/models/${modelKey}/import/`, {
       method: "POST",
       body: data,
+    });
+  },
+  getBlogPosts,
+  getBlogPost,
+  getBlogCategories,
+  getBlogStats,
+  getPostsByCategory,
+  getPostComments: async (
+    locale: string,
+    postId: string
+  ): Promise<PaginatedResponse<Comment>> => {
+    return apiFetch(`/api/blog/posts/${postId}/comments/`, {
+      headers: { "Accept-Language": locale },
+    });
+  },
+  createComment: async (
+    postId: string,
+    data: {
+      content: string;
+      parent: string | null;
+      author_name?: string;
+      author_email?: string;
+    }
+  ): Promise<Comment> => {
+    return apiFetch(`/api/blog/posts/${postId}/comments/`, {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
   },
 };

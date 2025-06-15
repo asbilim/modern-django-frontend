@@ -13,6 +13,34 @@
     "toastOtpInvalidTitle": "Ungültiges OTP",
     "toastOtpInvalidDescription": "Das von Ihnen eingegebene Einmalpasswort ist falsch."
   },
+  "OtpDialog": {
+    "title": "Einmalpasswort eingeben",
+    "description": "Ein Code wurde an Ihre Authentifizierungs-App gesendet. Bitte geben Sie ihn unten ein, um Ihre Anmeldung abzuschließen.",
+    "placeholder": "6-stelliger Code",
+    "cancel": "Abbrechen",
+    "verify": "Überprüfen",
+    "verifying": "Wird überprüft..."
+  },
+  "Header": {
+    "blog": "Blog",
+    "signIn": "Anmelden"
+  },
+  "UserNav": {
+    "dashboard": "Dashboard",
+    "settings": "Einstellungen",
+    "admin": "Admin",
+    "signOut": "Abmelden"
+  },
+  "Footer": {
+    "copyright": "© {year} Django Modern Admin. Alle Rechte vorbehalten.",
+    "privacy": "Datenschutz-Bestimmungen",
+    "terms": "Nutzungsbedingungen"
+  },
+  "HomePage": {
+    "title": "Ein modernes Admin-Dashboard für Django",
+    "description": "Dieses Projekt bietet eine schlanke, reaktionsschnelle und funktionsreiche Admin-Oberfläche, um die Standard-Django-Admin zu ersetzen. Erstellt mit Next.js, shadcn/ui und Tailwind CSS.",
+    "ctaButton": "Loslegen"
+  },
   "DashboardPage": {
     "title": "Dashboard",
     "description": "Willkommen zurück! Hier ist eine Zusammenfassung Ihres Projekts.",
@@ -101,7 +129,13 @@
     "editTitle": "Bearbeite {modelName}: {id}",
     "createTitle": "Erstelle neues {modelName}",
     "loadModelConfigFailed": "Konfiguration für Modell konnte nicht geladen werden: {modelName}",
-    "loadModelDataFailed": "Daten für Modell konnten nicht geladen werden: {modelName}"
+    "loadModelDataFailed": "Daten für Modell konnten nicht geladen werden: {modelName}",
+    "loadingRelationOptions": "Lade Optionen für {fieldName}..."
+  },
+  "ModelForm": {
+    "saveSuccessTitle": "Element gespeichert",
+    "saveSuccessDescription": "Das Element wurde erfolgreich gespeichert.",
+    "saveErrorTitle": "Fehler beim Speichern des Elements"
   },
   "SettingsPage": {
     "title": "Einstellungen",
@@ -151,7 +185,8 @@
       "passwordsDontMatch": "Passwörter stimmen nicht überein.",
       "otpLength": "Ihr Einmalpasswort muss 6 Zeichen lang sein.",
       "passwordRequiredFor2FA": "Ihr Passwort ist erforderlich, um 2FA zu deaktivieren."
-    }
+    },
+    "seconds": "{count, plural, one {vor # Sekunde} other {vor # Sekunden}}"
   },
   "AiToolsPage": {
     "title": "KI-Werkzeuge",
@@ -252,6 +287,8 @@
     "dashboard": "Dashboard",
     "tools": "Werkzeuge",
     "aiTools": "KI-Werkzeuge",
+    "blog": "Blog",
+    "models": "Modelle",
     "settings": "Einstellungen",
     "signOut": "Abmelden"
   },
@@ -262,5 +299,28 @@
     "hours": "{count, plural, one {vor # Stunde} other {vor # Stunden}}",
     "minutes": "{count, plural, one {vor # Minute} other {vor # Minuten}}",
     "seconds": "{count, plural, one {vor # Sekunde} other {vor # Sekunden}}"
+  },
+  "ImportExport": {
+    "importTitle": "{model} importieren",
+    "importDescription": "Laden Sie eine CSV- oder JSON-Datei hoch, um Daten zu importieren. Stellen Sie sicher, dass die Dateistruktur dem Modellschema entspricht.",
+    "formatLabel": "Dateiformat",
+    "selectFormatPlaceholder": "Wählen Sie ein Format",
+    "fileLabel": "Datei",
+    "fileDescription": "Nur .csv- und .json-Dateien werden akzeptiert.",
+    "cancel": "Abbrechen",
+    "importButton": "Importieren",
+    "importing": "Wird importiert...",
+    "importSuccessTitle": "Import erfolgreich",
+    "importSuccessDescription": "{count} Elemente wurden erfolgreich importiert.",
+    "importErrorTitle": "Import fehlgeschlagen"
+  },
+  "Common": {
+    "saving": "Speichern...",
+    "save": "Speichern"
+  },
+  "BlogPage": {
+    "title": "Blog",
+    "description": "Entdecken Sie Artikel über Webentwicklung, Django, Next.js und mehr.",
+    "comingSoon": "Weitere Artikel folgen in Kürze. Bleiben Sie dran!"
   }
 }

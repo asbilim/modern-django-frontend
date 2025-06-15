@@ -13,6 +13,29 @@
     "toastOtpInvalidTitle": "OTP invalide",
     "toastOtpInvalidDescription": "Le mot de passe à usage unique que vous avez entré est incorrect."
   },
+  "OtpDialog": {
+    "title": "Saisir le mot de passe à usage unique",
+    "description": "Un code a été envoyé à votre application d'authentification. Veuillez le saisir ci-dessous pour finaliser votre connexion.",
+    "placeholder": "Code à 6 chiffres",
+    "cancel": "Annuler",
+    "verify": "Vérifier",
+    "verifying": "Vérification en cours..."
+  },
+  "Header": {
+    "blog": "Blog",
+    "signIn": "Se connecter"
+  },
+  "UserNav": {
+    "dashboard": "Tableau de bord",
+    "settings": "Paramètres",
+    "admin": "Admin",
+    "signOut": "Se déconnecter"
+  },
+  "Footer": {
+    "copyright": "© {year} Django Modern Admin. Tous droits réservés.",
+    "privacy": "Politique de confidentialité",
+    "terms": "Conditions d'utilisation"
+  },
   "DashboardPage": {
     "title": "Tableau de bord",
     "description": "Content de vous revoir ! Voici un résumé de votre projet.",
@@ -101,7 +124,13 @@
     "editTitle": "Modifier {modelName}: {id}",
     "createTitle": "Créer un nouveau {modelName}",
     "loadModelConfigFailed": "Échec du chargement de la configuration pour le modèle: {modelName}",
-    "loadModelDataFailed": "Échec du chargement des données pour le modèle: {modelName}"
+    "loadModelDataFailed": "Échec du chargement des données pour le modèle: {modelName}",
+    "loadingRelationOptions": "Chargement des options pour {fieldName}..."
+  },
+  "ModelForm": {
+    "saveSuccessTitle": "Élément enregistré",
+    "saveSuccessDescription": "L'élément a été enregistré avec succès.",
+    "saveErrorTitle": "Erreur lors de l'enregistrement de l'élément"
   },
   "SettingsPage": {
     "title": "Paramètres",
@@ -151,7 +180,8 @@
       "passwordsDontMatch": "Les mots de passe ne correspondent pas.",
       "otpLength": "Votre mot de passe à usage unique doit comporter 6 caractères.",
       "passwordRequiredFor2FA": "Votre mot de passe est requis pour désactiver la 2FA."
-    }
+    },
+    "seconds": "{count, plural, one {il y a # seconde} other {il y a # secondes}}"
   },
   "AiToolsPage": {
     "title": "Outils d'IA",
@@ -243,8 +273,9 @@
   },
   "DashboardLayout": {
     "dashboard": "Tableau de bord",
-    "tools": "Outils",
     "aiTools": "Outils d'IA",
+    "blog": "Blog",
+    "models": "Modèles",
     "settings": "Paramètres",
     "signOut": "Se déconnecter"
   },
@@ -255,5 +286,51 @@
     "hours": "{count, plural, one {il y a # heure} other {il y a # heures}}",
     "minutes": "{count, plural, one {il y a # minute} other {il y a # minutes}}",
     "seconds": "{count, plural, one {il y a # seconde} other {il y a # secondes}}"
+  },
+  "ImportExport": {
+    "importTitle": "Importer {model}",
+    "importDescription": "Téléchargez un fichier CSV ou JSON pour importer des données. Assurez-vous que la structure du fichier correspond au schéma du modèle.",
+    "formatLabel": "Format de fichier",
+    "selectFormatPlaceholder": "Sélectionnez un format",
+    "fileLabel": "Fichier",
+    "fileDescription": "Seuls les fichiers .csv et .json sont acceptés.",
+    "cancel": "Annuler",
+    "importButton": "Importer",
+    "importing": "Importation en cours...",
+    "importSuccessTitle": "Importation réussie",
+    "importSuccessDescription": "{count} éléments ont été importés avec succès.",
+    "importErrorTitle": "Échec de l'importation"
+  },
+  "Common": {
+    "saving": "Enregistrement...",
+    "save": "Enregistrer"
+  },
+  "BlogPage": {
+    "title": "Notre Blog",
+    "readingTime": "{minutes, plural, =1 {Lecture d'une minute} other {Lecture de # minutes}}",
+    "searchPlaceholder": "Rechercher des articles...",
+    "loading": "Chargement des articles...",
+    "noResults": "Aucun article trouvé.",
+    "loadingCategories": "Chargement des catégories...",
+    "categoriesTitle": "Catégories",
+    "allCategories": "Toutes",
+    "commentsTitle": "Commentaires",
+    "commentPlaceholder": "Écrire un commentaire...",
+    "replyPlaceholder": "Écrire une réponse...",
+    "namePlaceholder": "Votre nom",
+    "emailPlaceholder": "Votre e-mail",
+    "submitComment": "Envoyer le commentaire",
+    "submittingComment": "Envoi en cours...",
+    "commentSuccess": "Commentaire publié avec succès !",
+    "commentError": "Échec de la publication du commentaire.",
+    "loadingComments": "Chargement des commentaires...",
+    "noComments": "Soyez le premier à commenter.",
+    "reply": "Répondre",
+    "cancelReply": "Annuler la réponse"
+  },
+  "HomePage": {
+    "title": "Un tableau de bord d'administration moderne pour Django",
+    "description": "Ce projet fournit une interface d'administration élégante, réactive et riche en fonctionnalités pour remplacer l'administration standard de Django. Construit avec Next.js, shadcn/ui et Tailwind CSS.",
+    "ctaButton": "Commencer"
   }
 }

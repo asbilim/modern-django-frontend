@@ -90,6 +90,7 @@ export default function SettingsPage() {
 
 function ProfileForm({ user }: { user: any }) {
   const t = useTranslations("SettingsPage");
+  const tCommon = useTranslations("Common");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -171,7 +172,7 @@ function ProfileForm({ user }: { user: any }) {
               )}
             />
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? t("saving") : t("save")}
+              {mutation.isPending ? tCommon("saving") : t("save")}
             </Button>
           </form>
         </Form>
@@ -182,6 +183,7 @@ function ProfileForm({ user }: { user: any }) {
 
 function PasswordForm() {
   const t = useTranslations("SettingsPage");
+  const tCommon = useTranslations("Common");
   const { toast } = useToast();
   const passwordFormSchema = createPasswordFormSchema(t);
 
@@ -257,7 +259,7 @@ function PasswordForm() {
               )}
             />
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? t("saving") : t("savePassword")}
+              {mutation.isPending ? tCommon("saving") : t("savePassword")}
             </Button>
           </form>
         </Form>

@@ -6,6 +6,7 @@ interface DjangoAuthResponse {
   refresh?: string;
   detail?: string;
   is_2fa_enabled?: boolean;
+  is_superuser?: boolean;
   [key: string]: any;
 }
 
@@ -57,6 +58,7 @@ export const authConfig = {
           return {
             id: username,
             backendTokens: { access: user.access, refresh: user.refresh },
+            is_superuser: user.is_superuser,
           };
         }
 
@@ -90,6 +92,7 @@ export const authConfig = {
             access: tokenData.access,
             refresh: tokenData.refresh,
           },
+          is_superuser: tokenData.is_superuser,
         };
       },
     }),
@@ -99,6 +102,7 @@ export const authConfig = {
       if (user) {
         // This block only runs on sign-in or when the OTP is submitted
         token.id = user.id;
+        token.is_superuser = user.is_superuser;
 
         // Case 1: Login is complete (either no 2FA, or 2FA was just verified)
         if (user.backendTokens) {
@@ -119,6 +123,7 @@ export const authConfig = {
 
       if (token.id && session.user) {
         session.user.id = token.id;
+        session.user.is_superuser = token.is_superuser;
       }
 
       // This flag tells the client whether to show the OTP dialog

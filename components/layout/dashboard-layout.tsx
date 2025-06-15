@@ -13,6 +13,8 @@ import {
   Settings,
   BrainCircuit,
   Layers,
+  Sparkles,
+  Rss,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DynamicIcon } from "@/components/ui/dynamic-icon";
@@ -298,6 +300,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
               label={t("aiTools")}
               isCollapsed={isSidebarCollapsed && !isMobile}
               isActive={isActive("/ai-tools")}
+            />
+            <SidebarLink
+              href="/blog"
+              icon={<Rss className="h-4 w-4" />}
+              label={t("blog")}
+              isCollapsed={isSidebarCollapsed && !isMobile}
+              isActive={isActive("/blog")}
             />
           </div>
 

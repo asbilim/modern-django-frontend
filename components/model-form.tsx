@@ -73,6 +73,8 @@ export function ModelForm({
   itemId,
 }: ModelFormProps) {
   const t = useTranslations("ModelListPage");
+  const tForm = useTranslations("ModelForm");
+  const tCommon = useTranslations("Common");
   const router = useRouter();
   const { toast } = useToast();
   const { status } = useSession();
@@ -111,10 +113,8 @@ export function ModelForm({
     },
     onSuccess: () => {
       toast({
-        title: t("saveSuccessTitle"),
-        description: t("saveSuccessDescription", {
-          isUpdating: !!itemId ? "true" : "false",
-        }),
+        title: tForm("saveSuccessTitle"),
+        description: tForm("saveSuccessDescription"),
       });
       queryClient.invalidateQueries({ queryKey: ["modelItems", modelKey] });
       queryClient.invalidateQueries({ queryKey: ["adminConfig"] }); // Invalidate dashboard counts
@@ -123,7 +123,7 @@ export function ModelForm({
     onError: (error: Error) => {
       toast({
         variant: "destructive",
-        title: t("saveErrorTitle"),
+        title: tForm("saveErrorTitle"),
         description: error.message,
       });
     },
@@ -398,7 +398,7 @@ export function ModelForm({
         )}
 
         <Button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? t("saving") : t("save")}
+          {mutation.isPending ? tCommon("saving") : tCommon("save")}
         </Button>
       </form>
     </Form>
