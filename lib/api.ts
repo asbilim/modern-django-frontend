@@ -79,6 +79,64 @@ const refreshManager = {
   },
 };
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+interface PaginatedResponse<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+}
+
+const getApiHeaders = async (locale?: string) => {
+  const session = await getSession();
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+  if (session?.accessToken) {
+    headers["Authorization"] = `Bearer ${session.accessToken}`;
+  }
+  if (locale) {
+    headers["Accept-Language"] = locale;
+  }
+  return headers;
+};
+
+const apiRequest = async <T>(
+  method: string,
+  endpoint: string,
+  body?: any,
+  locale?: string
+): Promise<T> => {
+  const url = `${API_BASE_URL}${endpoint}`;
+  const headers = await getApiHeaders(locale);
+
+  const config: RequestInit = {
+    method,
+    headers,
+  };
+
+  if (body) {
+    config.body = JSON.stringify(body);
+  }
+
+  try {
+    const response = await fetch(url, config);
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        `API request failed: ${response.statusText} - ${JSON.stringify(
+          errorData
+        )}`
+      );
+    }
+    return response.json();
+  } catch (error) {
+    console.error(`API Error (${method} ${endpoint}):`, error);
+    throw error;
+  }
+};
+
 async function apiFetch<T>(
   endpoint: string,
   options: RequestInit = {},
@@ -210,10 +268,7 @@ const getBlogPosts = async (
   });
 };
 
-const getBlogPost = async (
-  locale: string,
-  id: string
-): Promise<PostDetail> => {
+const getBlogPost = async (locale: string, id: string): Promise<PostDetail> => {
   return apiFetch(`/api/blog/posts/${id}/`, {
     headers: { "Accept-Language": locale },
   });
@@ -243,7 +298,7 @@ const getPostsByCategory = async (
 };
 
 export const api = {
-  getAdminConfig: () => apiFetch<any>("/api/admin/"),
+  getAdminConfig: () => apiRequest("GET", "/api/admin/config/"),
   getDashboardStats: () => apiFetch<any>("/api/admin/dashboard-stats/"),
   getModelConfig: (configUrl: string) => {
     const url = configUrl.startsWith("http")
@@ -335,72 +390,80 @@ export const api = {
   },
 
   // Auth and User Management
-  getUserProfile: () => apiFetch<any>("/api/auth/me/"),
-  updateUserProfile: (data: any) =>
-    apiFetch<any>("/api/auth/me/", {
-      method: "PATCH",
-      body: JSON.stringify(data),
-    }),
+  getUserProfile: () => apiRequest("GET", "/api/auth/me/"),
+  updateUserProfile: (data: any) => apiRequest("PATCH", "/api/auth/me/", data),
   changePassword: (data: any) =>
-    apiFetch<any>("/api/auth/me/change-password/", {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
+    apiRequest("POST", "/api/auth/me/change-password/", JSON.stringify(data)),
   requestPasswordReset: (email: string) =>
-    apiFetch<any>("/api/auth/password_reset/", {
-      method: "POST",
-      body: JSON.stringify({ email }),
-    }),
+    apiRequest("POST", "/api/auth/password_reset/", JSON.stringify({ email })),
   confirmPasswordReset: (data: any) =>
-    apiFetch<any>("/api/auth/password_reset/confirm/", {
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
-  get2FASecret: () => apiFetch<any>("/api/auth/2fa/enable/"),
+    apiRequest(
+      "POST",
+      "/api/auth/password_reset/confirm/",
+      JSON.stringify(data)
+    ),
+  get2FASecret: () => apiRequest("GET", "/api/auth/2fa/enable/"),
   verify2FA: (otp: string) =>
-    apiFetch<any>("/api/auth/2fa/verify/", {
-      method: "POST",
-      body: JSON.stringify({ otp }),
-    }),
+    apiRequest("POST", "/api/auth/2fa/verify/", JSON.stringify({ otp })),
   disable2FA: (password: string) =>
-    apiFetch<any>("/api/auth/2fa/disable/", {
-      method: "POST",
-      body: JSON.stringify({ password }),
-    }),
+    apiRequest("POST", "/api/auth/2fa/disable/", JSON.stringify({ password })),
   importModelItems: (modelKey: string, data: FormData) => {
-    return apiFetch<any>(`/api/admin/models/${modelKey}/import/`, {
-      method: "POST",
-      body: data,
-    });
+    return apiRequest("POST", `/api/admin/models/${modelKey}/import/`, data);
   },
-  getBlogPosts,
-  getBlogPost,
-  getBlogCategories,
-  getBlogStats,
-  getPostsByCategory,
-  getPostComments: async (
+  getBlogPosts: (
+    locale: string,
+    params?: { search?: string; categoryId?: string }
+  ): Promise<PaginatedResponse<PostListItem>> => {
+    const searchParams = new URLSearchParams();
+    if (params?.search) searchParams.set("search", params.search);
+    if (params?.categoryId) searchParams.set("category", params.categoryId);
+    return apiRequest(
+      "GET",
+      `/api/blog/posts/?${searchParams.toString()}`,
+      null,
+      locale
+    );
+  },
+  getBlogPost: (locale: string, id: string): Promise<PostDetail> => {
+    return apiRequest("GET", `/api/blog/posts/${id}/`, null, locale);
+  },
+  getBlogCategories: (locale: string): Promise<PaginatedResponse<Category>> => {
+    return apiRequest("GET", "/api/blog/categories/", null, locale);
+  },
+  getBlogStats: (locale: string) => {
+    return apiRequest("GET", "/api/blog/stats/", null, locale);
+  },
+  getPostsByCategory: (
+    locale: string,
+    categoryId: string
+  ): Promise<PaginatedResponse<PostListItem>> => {
+    return apiRequest(
+      "GET",
+      `/api/blog/categories/${categoryId}/posts/`,
+      null,
+      locale
+    );
+  },
+  getPostComments: (
     locale: string,
     postId: string
   ): Promise<PaginatedResponse<Comment>> => {
-    return apiFetch(`/api/blog/posts/${postId}/comments/`, {
-      headers: { "Accept-Language": locale },
-    });
+    return apiRequest(
+      "GET",
+      `/api/blog/posts/${postId}/comments/`,
+      null,
+      locale
+    );
   },
-  createComment: async (
+  createPostComment: (
     postId: string,
     data: {
       content: string;
-      parent: string | null;
+      parent?: string | null;
       author_name?: string;
       author_email?: string;
     }
-  ): Promise<Comment> => {
-    return apiFetch(`/api/blog/posts/${postId}/comments/`, {
-      method: "POST",
-      body: JSON.stringify(data),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+  ) => {
+    return apiRequest("POST", `/api/blog/posts/${postId}/comments/`, data);
   },
 };
