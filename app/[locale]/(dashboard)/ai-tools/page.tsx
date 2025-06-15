@@ -6,10 +6,18 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Copy,
   KeyRound,
@@ -22,6 +30,7 @@ import {
   Share2,
   Sparkles,
 } from "lucide-react";
+import { AiResult } from "@/components/ai-result";
 
 export default function AiToolsPage() {
   const t = useTranslations("AiToolsPage");
@@ -91,39 +100,43 @@ export default function AiToolsPage() {
   const [selectedToolId, setSelectedToolId] = useState(toolDefinitions[0].id);
 
   const SelectedToolComponent = useMemo(() => {
-    return toolDefinitions.find((tool) => tool.id === selectedToolId)
-      ?.component;
+    const tool = toolDefinitions.find((tool) => tool.id === selectedToolId);
+    return tool ? tool.component : null;
+  }, [selectedToolId, toolDefinitions]);
+
+  const selectedTool = useMemo(() => {
+    return toolDefinitions.find((tool) => tool.id === selectedToolId);
   }, [selectedToolId, toolDefinitions]);
 
   return (
-    <div className="flex flex-col md:flex-row h-[calc(100vh-120px)] gap-6">
-      <aside className="w-full md:w-1/3 lg:w-1/4 xl:w-1/5 border rounded-lg p-4 flex flex-col">
-        <div className="flex items-center gap-2 mb-4">
+    <div className="grid md:grid-cols-[280px_1fr] gap-6">
+      <aside className="sticky top-6 border rounded-lg p-4 flex flex-col bg-background self-start">
+        <div className="flex items-center gap-3 mb-6 px-2">
           <Sparkles className="h-6 w-6 text-primary" />
           <h1 className="text-xl font-bold">{t("title")}</h1>
         </div>
-        <div className="space-y-2 overflow-y-auto">
+        <div className="space-y-2 overflow-y-auto flex-1">
           {toolDefinitions.map((tool) => (
             <button
               key={tool.id}
               onClick={() => setSelectedToolId(tool.id)}
               className={cn(
-                "w-full flex items-center gap-3 p-3 rounded-md text-left transition-all duration-200",
+                "w-full flex items-center gap-4 p-3 rounded-lg text-left transition-all duration-200 ease-in-out transform hover:scale-[1.02] hover:bg-muted/50",
                 selectedToolId === tool.id
-                  ? "bg-primary/10 text-primary scale-105 shadow-sm"
-                  : "hover:bg-muted/50"
+                  ? "bg-primary/10 text-primary"
+                  : "text-foreground"
               )}>
               <div
                 className={cn(
-                  "p-2 rounded-md",
+                  "p-2.5 rounded-lg",
                   selectedToolId === tool.id
                     ? "bg-primary/20"
                     : "bg-muted text-muted-foreground"
                 )}>
-                {tool.icon}
+                {React.cloneElement(tool.icon, { className: "h-5 w-5" })}
               </div>
               <div>
-                <p className="font-semibold">{tool.title}</p>
+                <p className="font-semibold text-sm">{tool.title}</p>
                 <p className="text-xs text-muted-foreground">
                   {tool.description}
                 </p>
@@ -132,15 +145,29 @@ export default function AiToolsPage() {
           ))}
         </div>
       </aside>
-      <main className="flex-1 border rounded-lg p-6 overflow-y-auto">
+      <main>
         <AnimatePresence mode="wait">
           <motion.div
             key={selectedToolId}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}>
-            {SelectedToolComponent && <SelectedToolComponent />}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.25 }}>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3">
+                  {selectedTool &&
+                    React.cloneElement(selectedTool.icon, {
+                      className: "h-6 w-6",
+                    })}
+                  <span>{selectedTool?.title}</span>
+                </CardTitle>
+                <CardDescription>{selectedTool?.description}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {SelectedToolComponent && <SelectedToolComponent />}
+              </CardContent>
+            </Card>
           </motion.div>
         </AnimatePresence>
       </main>
@@ -159,9 +186,11 @@ function AiOutput({
   if (!completion) return null;
   return (
     <div className="mt-6">
-      <h3 className="font-semibold mb-2">{t("resultTitle")}</h3>
-      <div className="bg-muted p-4 rounded-md relative group">
-        <p className="whitespace-pre-wrap text-sm">{completion}</p>
+      <Label>{t("resultTitle")}</Label>
+      <div className="bg-muted p-4 rounded-md relative group mt-2 border">
+        <p className="whitespace-pre-wrap text-sm leading-relaxed">
+          {completion}
+        </p>
         {onCopy && (
           <Button
             variant="ghost"
@@ -206,9 +235,9 @@ function SecurePasswordGenerator() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <form onSubmit={generatePassword} className="space-y-4">
-        <div>
+        <div className="space-y-2">
           <Label htmlFor="length">{t("lengthLabel")}</Label>
           <Input
             id="length"
@@ -219,27 +248,40 @@ function SecurePasswordGenerator() {
             max="128"
           />
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-3">
           <Checkbox
             id="includeNumbers"
             checked={includeNumbers}
             onCheckedChange={(checked) => setIncludeNumbers(Boolean(checked))}
           />
-          <Label htmlFor="includeNumbers">{t("numbersLabel")}</Label>
+          <Label htmlFor="includeNumbers" className="text-sm font-normal">
+            {t("numbersLabel")}
+          </Label>
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-3">
           <Checkbox
             id="includeSymbols"
             checked={includeSymbols}
             onCheckedChange={(checked) => setIncludeSymbols(Boolean(checked))}
           />
-          <Label htmlFor="includeSymbols">{t("symbolsLabel")}</Label>
+          <Label htmlFor="includeSymbols" className="text-sm font-normal">
+            {t("symbolsLabel")}
+          </Label>
         </div>
-        <Button type="submit" disabled={isLoading}>
+        <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
           {isLoading ? t("buttonLoading") : t("button")}
         </Button>
       </form>
-      <AiOutput completion={completion} onCopy={copyToClipboard} />
+      <AiResult
+        content={completion || ""}
+        isLoading={isLoading}
+        onCopy={copyToClipboard}
+        onRegenerate={() =>
+          generatePassword(
+            new Event("submit") as any as React.FormEvent<HTMLFormElement>
+          )
+        }
+      />
     </div>
   );
 }
@@ -257,22 +299,32 @@ function TextSummarizer() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <form onSubmit={summarize} className="space-y-4">
-        <div>
+        <div className="space-y-2">
           <Label htmlFor="summary-text">{t("textLabel")}</Label>
-          <textarea
+          <Textarea
             id="summary-text"
-            className="w-full rounded-md border p-2 min-h-[150px]"
+            className="min-h-[200px] lg:min-h-[300px]"
+            placeholder={t("textPlaceholder")}
             value={text}
             onChange={(e) => setText(e.target.value)}
           />
         </div>
-        <Button type="submit" disabled={isLoading}>
+        <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
           {isLoading ? t("buttonLoading") : t("button")}
         </Button>
       </form>
-      <AiOutput completion={completion} />
+      <AiResult
+        content={completion || ""}
+        isLoading={isLoading}
+        onCopy={() => {}}
+        onRegenerate={() =>
+          summarize(
+            new Event("submit") as any as React.FormEvent<HTMLFormElement>
+          )
+        }
+      />
     </div>
   );
 }
@@ -291,31 +343,43 @@ function Translator() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <form onSubmit={translate} className="space-y-4">
-        <div>
-          <Label htmlFor="translate-text">{t("textLabel")}</Label>
-          <textarea
-            id="translate-text"
-            className="w-full rounded-md border p-2 min-h-[100px]"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-          />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="translate-text">{t("textLabel")}</Label>
+            <Textarea
+              id="translate-text"
+              className="min-h-[120px]"
+              placeholder={t("textPlaceholder")}
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="targetLang">{t("languageLabel")}</Label>
+            <Input
+              id="targetLang"
+              value={targetLang}
+              onChange={(e) => setTargetLang(e.target.value)}
+              placeholder={t("languagePlaceholder")}
+            />
+          </div>
         </div>
-        <div>
-          <Label htmlFor="targetLang">{t("languageLabel")}</Label>
-          <Input
-            id="targetLang"
-            value={targetLang}
-            onChange={(e) => setTargetLang(e.target.value)}
-            placeholder={t("languagePlaceholder")}
-          />
-        </div>
-        <Button type="submit" disabled={isLoading}>
+        <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
           {isLoading ? t("buttonLoading") : t("button")}
         </Button>
       </form>
-      <AiOutput completion={completion} />
+      <AiResult
+        content={completion || ""}
+        isLoading={isLoading}
+        onCopy={() => {}}
+        onRegenerate={() =>
+          translate(
+            new Event("submit") as any as React.FormEvent<HTMLFormElement>
+          )
+        }
+      />
     </div>
   );
 }
@@ -333,20 +397,31 @@ function EmailDraftGenerator() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <form onSubmit={generate} className="space-y-4">
-        <Label htmlFor="email-topic">{t("topicLabel")}</Label>
-        <Input
-          id="email-topic"
-          placeholder={t("topicPlaceholder")}
-          value={topic}
-          onChange={(e) => setTopic(e.target.value)}
-        />
-        <Button type="submit" disabled={isLoading}>
+        <div className="space-y-2">
+          <Label htmlFor="email-topic">{t("topicLabel")}</Label>
+          <Input
+            id="email-topic"
+            placeholder={t("topicPlaceholder")}
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+          />
+        </div>
+        <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
           {isLoading ? t("buttonLoading") : t("button")}
         </Button>
       </form>
-      <AiOutput completion={completion} />
+      <AiResult
+        content={completion || ""}
+        isLoading={isLoading}
+        onCopy={() => {}}
+        onRegenerate={() =>
+          generate(
+            new Event("submit") as any as React.FormEvent<HTMLFormElement>
+          )
+        }
+      />
     </div>
   );
 }
@@ -364,20 +439,31 @@ function MarketingIdeas() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <form onSubmit={generate} className="space-y-4">
-        <Label htmlFor="product">{t("productLabel")}</Label>
-        <Input
-          id="product"
-          placeholder={t("productPlaceholder")}
-          value={product}
-          onChange={(e) => setProduct(e.target.value)}
-        />
-        <Button type="submit" disabled={isLoading}>
+        <div className="space-y-2">
+          <Label htmlFor="product">{t("productLabel")}</Label>
+          <Input
+            id="product"
+            placeholder={t("productPlaceholder")}
+            value={product}
+            onChange={(e) => setProduct(e.target.value)}
+          />
+        </div>
+        <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
           {isLoading ? t("buttonLoading") : t("button")}
         </Button>
       </form>
-      <AiOutput completion={completion} />
+      <AiResult
+        content={completion || ""}
+        isLoading={isLoading}
+        onCopy={() => {}}
+        onRegenerate={() =>
+          generate(
+            new Event("submit") as any as React.FormEvent<HTMLFormElement>
+          )
+        }
+      />
     </div>
   );
 }
@@ -397,20 +483,31 @@ function NewsletterThemeSuggester() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <form onSubmit={suggest} className="space-y-4">
-        <Label htmlFor="audience">{t("audienceLabel")}</Label>
-        <Input
-          id="audience"
-          placeholder={t("audiencePlaceholder")}
-          value={audience}
-          onChange={(e) => setAudience(e.target.value)}
-        />
-        <Button type="submit" disabled={isLoading}>
+        <div className="space-y-2">
+          <Label htmlFor="audience">{t("audienceLabel")}</Label>
+          <Input
+            id="audience"
+            placeholder={t("audiencePlaceholder")}
+            value={audience}
+            onChange={(e) => setAudience(e.target.value)}
+          />
+        </div>
+        <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
           {isLoading ? t("buttonLoading") : t("button")}
         </Button>
       </form>
-      <AiOutput completion={completion} />
+      <AiResult
+        content={completion || ""}
+        isLoading={isLoading}
+        onCopy={() => {}}
+        onRegenerate={() =>
+          suggest(
+            new Event("submit") as any as React.FormEvent<HTMLFormElement>
+          )
+        }
+      />
     </div>
   );
 }
@@ -430,20 +527,31 @@ function SupportReplyGenerator() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <form onSubmit={generate} className="space-y-4">
-        <Label htmlFor="customer-q">{t("questionLabel")}</Label>
-        <Input
-          id="customer-q"
-          placeholder={t("questionPlaceholder")}
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-        />
-        <Button type="submit" disabled={isLoading}>
+        <div className="space-y-2">
+          <Label htmlFor="customer-q">{t("questionLabel")}</Label>
+          <Input
+            id="customer-q"
+            placeholder={t("questionPlaceholder")}
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+          />
+        </div>
+        <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
           {isLoading ? t("buttonLoading") : t("button")}
         </Button>
       </form>
-      <AiOutput completion={completion} />
+      <AiResult
+        content={completion || ""}
+        isLoading={isLoading}
+        onCopy={() => {}}
+        onRegenerate={() =>
+          generate(
+            new Event("submit") as any as React.FormEvent<HTMLFormElement>
+          )
+        }
+      />
     </div>
   );
 }
@@ -461,20 +569,31 @@ function SocialPostIdeas() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <form onSubmit={generate} className="space-y-4">
-        <Label htmlFor="social-topic">{t("topicLabel")}</Label>
-        <Input
-          id="social-topic"
-          placeholder={t("topicPlaceholder")}
-          value={topic}
-          onChange={(e) => setTopic(e.target.value)}
-        />
-        <Button type="submit" disabled={isLoading}>
+        <div className="space-y-2">
+          <Label htmlFor="social-topic">{t("topicLabel")}</Label>
+          <Input
+            id="social-topic"
+            placeholder={t("topicPlaceholder")}
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+          />
+        </div>
+        <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
           {isLoading ? t("buttonLoading") : t("button")}
         </Button>
       </form>
-      <AiOutput completion={completion} />
+      <AiResult
+        content={completion || ""}
+        isLoading={isLoading}
+        onCopy={() => {}}
+        onRegenerate={() =>
+          generate(
+            new Event("submit") as any as React.FormEvent<HTMLFormElement>
+          )
+        }
+      />
     </div>
   );
 }

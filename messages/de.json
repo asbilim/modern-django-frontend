@@ -1,19 +1,167 @@
 {
   "LoginPage": {
-    "title": "Melden Sie sich bei Ihrem Konto an",
+    "title": "Willkommen zurück",
     "usernameLabel": "Benutzername",
     "passwordLabel": "Passwort",
     "signInButton": "Anmelden",
-    "toastErrorTitle": "Authentifizierung fehlgeschlagen",
-    "toastErrorDescription": "Bitte überprüfen Sie Ihre Anmeldedaten und versuchen Sie es erneut.",
-    "toastSuccessTitle": "Erfolg",
-    "toastSuccessDescription": "Sie wurden erfolgreich angemeldet.",
+    "toastErrorTitle": "Anmeldung fehlgeschlagen",
+    "toastErrorDescription": "Ungültiger Benutzername oder Passwort. Bitte versuchen Sie es erneut.",
+    "toastSuccessTitle": "Anmeldung erfolgreich",
+    "toastSuccessDescription": "Willkommen! Sie werden zum Dashboard weitergeleitet.",
+    "toastUnexpectedErrorTitle": "Ein unerwarteter Fehler ist aufgetreten",
+    "toastUnexpectedErrorDescription": "Etwas ist schief gelaufen. Bitte versuchen Sie es später noch einmal.",
     "toastOtpInvalidTitle": "Ungültiges OTP",
-    "toastOtpInvalidDescription": "Der OTP-Code ist falsch. Bitte versuchen Sie es erneut."
+    "toastOtpInvalidDescription": "Das von Ihnen eingegebene Einmalpasswort ist falsch."
+  },
+  "HomePage": {
+    "hero": {
+      "title": "Django Modern Admin Dashboard",
+      "description": "Ein modernes, reaktionsschnelles Admin-Dashboard für Django mit Next.js, shadcn/ui und KI-gestützten Tools zur Steigerung Ihrer Produktivität.",
+      "loginButton": "Loslegen",
+      "dashboardButton": "Zum Dashboard",
+      "learnMoreButton": "Mehr erfahren"
+    },
+    "features": {
+      "title": "Leistungsstarke Funktionen",
+      "subtitle": "Alles, was Sie benötigen, um schöne, datengesteuerte Admin-Oberflächen zu erstellen.",
+      "modern": {
+        "title": "Moderne Benutzeroberfläche",
+        "description": "Entwickelt mit Next.js, Tailwind CSS und shadcn/ui für eine elegante, reaktionsfähige Oberfläche."
+      },
+      "customizable": {
+        "title": "Vollständig anpassbar",
+        "description": "Erweitern und modifizieren Sie Komponenten einfach, um die spezifischen Anforderungen Ihres Projekts zu erfüllen."
+      },
+      "ai": {
+        "title": "KI-gestützte Tools",
+        "description": "Integrierte KI-Funktionen, die bei der Automatisierung von Aufgaben helfen und die Produktivität steigern."
+      },
+      "developer": {
+        "title": "Entwicklerfreundlich",
+        "description": "Gut organisierter Code mit TypeScript für eine verbesserte Entwicklererfahrung."
+      }
+    },
+    "gettingStarted": {
+      "title": "Erste Schritte",
+      "subtitle": "Folgen Sie diesen einfachen Schritten, um mit Django Modern Admin zu beginnen.",
+      "step1": {
+        "title": "API einrichten",
+        "description": "Konfigurieren Sie Ihre Django REST Framework-API-Endpunkte."
+      },
+      "step2": {
+        "title": "UI anpassen",
+        "description": "Passen Sie das Dashboard an Ihre Anforderungen und Ihre Marke an."
+      },
+      "step3": {
+        "title": "Bereitstellen",
+        "description": "Stellen Sie Ihre Anwendung auf Ihrer bevorzugten Hosting-Plattform bereit."
+      },
+      "docsButton": "Dokumentation lesen"
+    }
+  },
+  "Header": {
+    "siteName": "Django Admin",
+    "home": "Startseite",
+    "blog": "Blog",
+    "features": "Funktionen",
+    "about": "Über uns",
+    "signIn": "Anmelden",
+    "dashboard": "Dashboard",
+    "settings": "Einstellungen",
+    "adminDashboard": "Admin-Dashboard",
+    "signOut": "Abmelden",
+    "signOutSuccessTitle": "Abgemeldet",
+    "signOutSuccessDescription": "Sie wurden erfolgreich abgemeldet."
+  },
+  "Footer": {
+    "siteName": "Django Admin",
+    "companyName": "Django Modern Admin",
+    "allRightsReserved": "Alle Rechte vorbehalten",
+    "poweredBy": "Unterstützt durch",
+    "categories": {
+      "solutions": "Lösungen",
+      "support": "Support",
+      "company": "Unternehmen",
+      "legal": "Rechtliches",
+      "language": "Sprache",
+      "followUs": "Folgen Sie uns"
+    },
+    "solutions": {
+      "admin": "Admin-Dashboard",
+      "analytics": "Analytik",
+      "commerce": "E-Commerce",
+      "insights": "Erkenntnisse"
+    },
+    "support": {
+      "docs": "Dokumentation",
+      "pricing": "Preise",
+      "guides": "Anleitungen",
+      "api": "API-Status"
+    },
+    "company": {
+      "about": "Über uns",
+      "blog": "Blog",
+      "jobs": "Jobs",
+      "partners": "Partner"
+    },
+    "legal": {
+      "privacy": "Datenschutzrichtlinie",
+      "terms": "Nutzungsbedingungen"
+    }
   },
   "DashboardPage": {
     "title": "Dashboard",
-    "description": "Eine Übersicht über die Aktivitäten Ihres Projekts."
+    "description": "Willkommen zurück! Hier ist eine Zusammenfassung Ihres Projekts.",
+    "loadErrorTitle": "Dashboard-Fehler",
+    "loadErrorDescription": "Beim Laden der Dashboard-Daten ist ein Problem aufgetreten. Einige Informationen fehlen möglicherweise. Als Fallback werden Mock-Daten verwendet.",
+    "userSignupsCardTitle": "Benutzeranmeldungen",
+    "userSignupsCardDescription": "Ein Diagramm, das die Benutzeranmeldungen der letzten Monate zeigt.",
+    "contentOverviewCardTitle": "Inhaltsübersicht",
+    "contentOverviewCardDescription": "Eine Zusammenfassung der verschiedenen Inhaltstypen.",
+    "activityFeedCardTitle": "Aktivitäts-Feed",
+    "activityFeedCardDescription": "Ein Protokoll der letzten Aktivitäten.",
+    "activityByUser": "von {user}",
+    "mock": {
+      "stats": {
+        "newUsers": {
+          "title": "Neue Benutzer",
+          "description": "seit letztem Monat"
+        },
+        "sales": {
+          "title": "Verkäufe",
+          "description": "seit letzter Woche"
+        },
+        "pendingTasks": {
+          "title": "Ausstehende Aufgaben",
+          "description": "in Bearbeitung"
+        },
+        "totalProjects": {
+          "title": "Gesamtprojekte",
+          "description": "derzeit aktiv"
+        }
+      },
+      "months": {
+        "jan": "Jan",
+        "feb": "Feb",
+        "mar": "Mär",
+        "apr": "Apr",
+        "may": "Mai",
+        "jun": "Jun",
+        "jul": "Jul"
+      },
+      "content": {
+        "projects": "Projekte",
+        "tasks": "Aufgaben",
+        "users": "Benutzer",
+        "categories": "Kategorien",
+        "tags": "Tags"
+      },
+      "feed": {
+        "newPost": "Neuer Blogbeitrag veröffentlicht: 'Die Zukunft der KI'",
+        "newComment": "Neuer Kommentar zu 'Erste Schritte mit Django'",
+        "newUser": "Neuer Benutzer registriert: John.Doe"
+      }
+    }
   },
   "ModelListPage": {
     "createNew": "Neu erstellen",
@@ -21,23 +169,44 @@
     "name": "Name / Titel",
     "createdAt": "Erstellt am",
     "actions": "Aktionen",
-    "noItems": "Keine Einträge gefunden.",
+    "noItems": "Keine Elemente gefunden.",
     "edit": "Bearbeiten",
     "delete": "Löschen",
-    "deleteTitle": "Sind Sie absolut sicher?",
+    "deleteTitle": "Sind Sie sich absolut sicher?",
     "deleteConfirm": "Diese Aktion kann nicht rückgängig gemacht werden. Dadurch wird das Element dauerhaft gelöscht.",
     "tryAgain": "Erneut versuchen",
-    "save": "Änderungen speichern"
+    "save": "Änderungen speichern",
+    "errorTitle": "Fehler beim Laden der Daten",
+    "itemCount": "{count, plural, one {# Element} other {# Elemente}}",
+    "export": "Exportieren",
+    "import": "Importieren",
+    "exportAsCsv": "Als CSV exportieren",
+    "exportAsJson": "Als JSON exportieren",
+    "cancel": "Abbrechen",
+    "deleting": "Wird gelöscht...",
+    "deleteSuccessTitle": "Element gelöscht",
+    "deleteSuccessDescription": "Das Element mit der ID {id} wurde gelöscht.",
+    "deleteErrorTitle": "Löschen fehlgeschlagen",
+    "deleteErrorDescription": "Fehler beim Löschen von Element {id}: {message}",
+    "exportPreparingTitle": "Export wird vorbereitet",
+    "exportPreparingDescription": "Bereite den Export von {totalItems} Elementen vor. Dies kann einen Moment dauern.",
+    "exportReadyTitle": "Export bereit",
+    "exportReadyDescription": "Ihre {format}-Datei steht zum Download bereit.",
+    "exportFailedTitle": "Export fehlgeschlagen",
+    "exportFailedDescription": "Beim Export ist ein Fehler aufgetreten: {message}",
+    "editTitle": "Bearbeite {modelName}: {id}",
+    "createTitle": "Erstelle neues {modelName}",
+    "loadModelConfigFailed": "Konfiguration für Modell konnte nicht geladen werden: {modelName}",
+    "loadModelDataFailed": "Daten für Modell konnten nicht geladen werden: {modelName}",
+    "loadingRelationOptions": "Lade Optionen für {fieldName}..."
+  },
+  "ModelForm": {
+    "saveSuccessTitle": "Element gespeichert",
+    "saveSuccessDescription": "Das Element wurde erfolgreich gespeichert.",
+    "saveErrorTitle": "Fehler beim Speichern des Elements"
   },
   "SettingsPage": {
     "title": "Einstellungen",
-    "general": "Allgemein",
-    "siteName": "Seitenname",
-    "logo": "Logo-URL",
-    "navbarStyle": "Navbar-Stil",
-    "otp": "Zwei-Faktor-Authentifizierung",
-    "password": "Passwort",
-    "save": "Änderungen speichern",
     "profileUpdateSuccess": "Profil erfolgreich aktualisiert.",
     "profileUpdateError": "Profil konnte nicht aktualisiert werden.",
     "profileTitle": "Benutzerprofil",
@@ -46,28 +215,150 @@
     "lastName": "Nachname",
     "email": "E-Mail-Adresse",
     "saving": "Speichern...",
+    "save": "Änderungen speichern",
     "passwordUpdateSuccess": "Passwort erfolgreich aktualisiert.",
     "passwordUpdateError": "Passwort konnte nicht aktualisiert werden.",
     "passwordTitle": "Passwort ändern",
-    "passwordDescription": "Aktualisieren Sie Ihr Kontopasswort.",
+    "passwordDescription": "Aktualisieren Sie das Passwort Ihres Kontos.",
     "currentPassword": "Aktuelles Passwort",
     "newPassword": "Neues Passwort",
     "confirmNewPassword": "Neues Passwort bestätigen",
-    "savePassword": "Passwort aktualisieren",
+    "savePassword": "Passwort speichern",
     "twoFactorTitle": "Zwei-Faktor-Authentifizierung (2FA)",
     "twoFactorDescription": "Fügen Sie Ihrem Konto eine zusätzliche Sicherheitsebene hinzu.",
     "twoFactorEnabled": "2FA ist für Ihr Konto derzeit aktiviert.",
-    "disabling": "Deaktivieren...",
+    "twoFactorDisabled": "2FA ist für Ihr Konto derzeit deaktiviert.",
+    "enable2FA": "2FA aktivieren",
+    "enabling": "Wird aktiviert...",
     "disable2FA": "2FA deaktivieren",
-    "scanQrCode": "Scannen Sie den QR-Code unten mit Ihrer Authentifizierungs-App.",
+    "disabling": "Wird deaktiviert...",
+    "scanQrCode": "Scannen Sie den QR-Code unten mit Ihrer Authenticator-App.",
     "secretKey": "Oder geben Sie diesen geheimen Schlüssel manuell ein",
     "verificationCode": "Bestätigungscode",
+    "otpPlaceholder": "6-stelliger Code",
     "cancel": "Abbrechen",
     "verifying": "Überprüfen...",
     "verifyAndActivate": "Überprüfen & Aktivieren",
-    "twoFactorDisabled": "2FA ist derzeit deaktiviert.",
-    "enabling": "Aktivieren...",
-    "enable2FA": "2FA aktivieren"
+    "disable2faPasswordPlaceholder": "Geben Sie Ihr Passwort ein, um 2FA zu deaktivieren",
+    "twoFactorEnableErrorTitle": "Fehler beim Aktivieren von 2FA",
+    "twoFactorVerifyErrorTitle": "Fehler beim Überprüfen des OTP",
+    "twoFactorEnableSuccessTitle": "2FA aktiviert",
+    "twoFactorEnableSuccessDescription": "Die Zwei-Faktor-Authentifizierung wurde erfolgreich aktiviert.",
+    "twoFactorDisableErrorTitle": "Fehler beim Deaktivieren von 2FA",
+    "twoFactorDisableSuccessTitle": "2FA deaktiviert",
+    "validation": {
+      "invalidEmail": "Ungültige E-Mail-Adresse.",
+      "oldPasswordRequired": "Aktuelles Passwort ist erforderlich.",
+      "newPasswordLength": "Das neue Passwort muss mindestens 8 Zeichen lang sein.",
+      "passwordsDontMatch": "Passwörter stimmen nicht überein.",
+      "otpLength": "Ihr Einmalpasswort muss 6 Zeichen lang sein.",
+      "passwordRequiredFor2FA": "Ihr Passwort ist erforderlich, um 2FA zu deaktivieren."
+    },
+    "seconds": "{count, plural, one {vor # Sekunde} other {vor # Sekunden}}"
+  },
+  "AiToolsPage": {
+    "title": "KI-Werkzeuge",
+    "resultTitle": "Generiertes Ergebnis",
+    "copy": "Kopieren",
+    "regenerate": "Neu generieren",
+    "generating": "Wird generiert",
+    "copySuccess": "Kopiert!",
+    "copyDescription": "In die Zwischenablage kopiert.",
+    "summarizer": {
+      "title": "Text-Zusammenfasser",
+      "description": "Langen Text auf Kernpunkte reduzieren.",
+      "textLabel": "Zusammenzufassender Text",
+      "textPlaceholder": "Geben Sie hier den Text ein, den Sie zusammenfassen möchten...",
+      "button": "Zusammenfassen",
+      "buttonLoading": "Wird zusammengefasst...",
+      "copySuccess": "Kopiert!",
+      "copyDescription": "Passwort in die Zwischenablage kopiert."
+    },
+    "translator": {
+      "title": "Sprachübersetzer",
+      "description": "Text zwischen Sprachen übersetzen.",
+      "textLabel": "Zu übersetzender Text",
+      "textPlaceholder": "Geben Sie hier den zu übersetzenden Text ein...",
+      "languageLabel": "Zielsprache",
+      "languagePlaceholder": "z.B. Französisch, Spanisch, Deutsch",
+      "button": "Übersetzen",
+      "buttonLoading": "Übersetze..."
+    },
+    "emailDrafter": {
+      "title": "E-Mail-Verfasser",
+      "description": "Schnell professionelle E-Mails entwerfen.",
+      "topicLabel": "E-Mail-Thema",
+      "topicPlaceholder": "z.B. Projekt-Update, Terminanfrage",
+      "button": "Generieren",
+      "buttonLoading": "Generiere..."
+    },
+    "supportReply": {
+      "title": "Support-Antwort-Generator",
+      "description": "Höfliche Antworten an Kunden verfassen.",
+      "questionLabel": "Kundenfrage",
+      "questionPlaceholder": "z.B. Ich kann mich nicht in mein Konto einloggen",
+      "button": "Generieren",
+      "buttonLoading": "Generiere..."
+    },
+    "socialPost": {
+      "title": "Social-Media-Post-Ideen",
+      "description": "Ansprechende Social-Media-Beiträge erstellen.",
+      "topicLabel": "Thema oder Ereignis",
+      "topicPlaceholder": "z.B. Produkteinführung, Firmenjubiläum",
+      "button": "Generieren",
+      "buttonLoading": "Generiere..."
+    },
+    "marketingIdeas": {
+      "title": "Marketing-Ideen",
+      "description": "Brainstorming für Werbekampagnen.",
+      "productLabel": "Produkt oder Dienstleistung",
+      "productPlaceholder": "z.B. eine neue Kaffeemarke, ein SaaS",
+      "button": "Generieren",
+      "buttonLoading": "Generiere..."
+    },
+    "newsletterThemes": {
+      "title": "Newsletter-Themen-Vorschlag",
+      "description": "Inspiration für Ihren nächsten Newsletter finden.",
+      "audienceLabel": "Zielgruppe",
+      "audiencePlaceholder": "z.B. Entwickler, Kleinunternehmer",
+      "button": "Vorschlagen",
+      "buttonLoading": "Schlage vor..."
+    },
+    "passwordGenerator": {
+      "title": "Sicherer Passwort-Generator",
+      "description": "Starke, zufällige Passwörter erstellen.",
+      "lengthLabel": "Passwortlänge",
+      "numbersLabel": "Zahlen einschließen",
+      "symbolsLabel": "Symbole einschließen",
+      "button": "Passwort generieren",
+      "buttonLoading": "Generiere..."
+    }
+  },
+  "AuthErrorPage": {
+    "credentialsSigninTitle": "Anmeldung fehlgeschlagen",
+    "credentialsSigninDescription": "Die eingegebene E-Mail oder das Passwort ist falsch. Bitte überprüfen Sie Ihre Anmeldeinformationen und versuchen Sie es erneut.",
+    "accessDeniedTitle": "Zugriff verweigert",
+    "accessDeniedDescription": "Sie haben keine Berechtigung, auf diese Seite zuzugreifen. Bitte kontaktieren Sie einen Administrator, wenn Sie glauben, dass dies ein Fehler ist.",
+    "configurationTitle": "Serverkonfigurationsfehler",
+    "configurationDescription": "Es gibt ein Problem mit der Authentifizierungskonfiguration des Servers. Bitte kontaktieren Sie den Support.",
+    "defaultTitle": "Ein Fehler ist aufgetreten",
+    "defaultDescription": "Ein unbekannter Authentifizierungsfehler ist aufgetreten. Bitte versuchen Sie es erneut oder kontaktieren Sie den Support, wenn das Problem weiterhin besteht.",
+    "backToLogin": "Zurück zum Login"
+  },
+  "ErrorPage": {
+    "title": "Etwas ist schief gelaufen",
+    "description": "Es tut uns leid, aber ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
+    "details": "Fehlerdetails",
+    "tryAgain": "Erneut versuchen"
+  },
+  "DashboardLayout": {
+    "dashboard": "Dashboard",
+    "tools": "Werkzeuge",
+    "aiTools": "KI-Werkzeuge",
+    "blog": "Blog",
+    "models": "Modelle",
+    "settings": "Einstellungen",
+    "signOut": "Abmelden"
   },
   "Time": {
     "years": "{count, plural, one {vor # Jahr} other {vor # Jahren}}",
@@ -77,83 +368,45 @@
     "minutes": "{count, plural, one {vor # Minute} other {vor # Minuten}}",
     "seconds": "{count, plural, one {vor # Sekunde} other {vor # Sekunden}}"
   },
-  "OtpDialog": {
-    "title": "Bestätigungscode eingeben",
-    "description": "Ein Bestätigungscode wurde an Ihre Authentifizierungs-App gesendet.",
-    "placeholder": "6-stelliger Code",
+  "ImportExport": {
+    "importTitle": "{model} importieren",
+    "importDescription": "Laden Sie eine CSV- oder JSON-Datei hoch, um Daten zu importieren. Stellen Sie sicher, dass die Dateistruktur dem Modellschema entspricht.",
+    "formatLabel": "Dateiformat",
+    "selectFormatPlaceholder": "Wählen Sie ein Format",
+    "fileLabel": "Datei",
+    "fileDescription": "Nur .csv- und .json-Dateien werden akzeptiert.",
     "cancel": "Abbrechen",
-    "verify": "Überprüfen",
-    "verifying": "Überprüfen..."
+    "importButton": "Importieren",
+    "importing": "Wird importiert...",
+    "importSuccessTitle": "Import erfolgreich",
+    "importSuccessDescription": "{count} Elemente wurden erfolgreich importiert.",
+    "importErrorTitle": "Import fehlgeschlagen"
   },
-  "AiToolsPage": {
-    "title": "KI-Werkzeugkasten",
-    "resultTitle": "Ergebnis:",
-    "summarizer": {
-      "title": "Text-Zusammenfasser",
-      "description": "Fassen Sie lange Textpassagen schnell zusammen.",
-      "textLabel": "Zusammenzufassender Text",
-      "button": "Zusammenfassen",
-      "buttonLoading": "Wird zusammengefasst..."
-    },
-    "translator": {
-      "title": "Übersetzer",
-      "description": "Übersetzen Sie Text in eine andere Sprache.",
-      "textLabel": "Text",
-      "languageLabel": "Zielsprache",
-      "languagePlaceholder": "z.B. Spanisch, Französisch, Japanisch",
-      "button": "Übersetzen",
-      "buttonLoading": "Übersetzt..."
-    },
-    "emailDrafter": {
-      "title": "E-Mail-Entwurf-Generator",
-      "description": "Lassen Sie die KI einen schnellen E-Mail-Entwurf erstellen.",
-      "topicLabel": "E-Mail-Betreff",
-      "topicPlaceholder": "z.B. Projekt-Update, Terminanfrage",
-      "button": "Generieren",
-      "buttonLoading": "Wird generiert..."
-    },
-    "supportReply": {
-      "title": "Support-Antwort-Generator",
-      "description": "Verfassen Sie höfliche Kundenantworten.",
-      "questionLabel": "Kundenfrage",
-      "questionPlaceholder": "z.B. Ich kann mich nicht in mein Konto einloggen",
-      "button": "Generieren",
-      "buttonLoading": "Wird generiert..."
-    },
-    "socialPost": {
-      "title": "Social-Media-Post-Ideen",
-      "description": "Generieren Sie ansprechende Social-Media-Posts.",
-      "topicLabel": "Thema oder Ereignis",
-      "topicPlaceholder": "z.B. Neueinführung eines Produkts, Firmenjubiläum",
-      "button": "Generieren",
-      "buttonLoading": "Wird generiert..."
-    },
-    "marketingIdeas": {
-      "title": "Marketing-Ideen",
-      "description": "Entwickeln Sie kreative Werbekampagnen.",
-      "productLabel": "Produkt oder Dienstleistung",
-      "productPlaceholder": "z.B. eine neue Kaffeemarke, ein SaaS-Produkt",
-      "button": "Generieren",
-      "buttonLoading": "Wird generiert..."
-    },
-    "newsletterThemes": {
-      "title": "Newsletter-Themen-Vorschläge",
-      "description": "Holen Sie sich Inspiration für Ihren nächsten Newsletter.",
-      "audienceLabel": "Zielgruppe",
-      "audiencePlaceholder": "z.B. Softwareentwickler, Kleinunternehmer",
-      "button": "Vorschlagen",
-      "buttonLoading": "Wird vorgeschlagen..."
-    },
-    "passwordGenerator": {
-      "title": "Sicherer Passwort-Generator",
-      "description": "Erstellen Sie starke, zufällige Passwörter.",
-      "lengthLabel": "Passwortlänge",
-      "numbersLabel": "Zahlen einschließen",
-      "symbolsLabel": "Symbole einschließen",
-      "button": "Passwort generieren",
-      "buttonLoading": "Wird generiert...",
-      "copySuccess": "Kopiert!",
-      "copyDescription": "Passwort in die Zwischenablage kopiert."
-    }
+  "Common": {
+    "saving": "Speichern...",
+    "save": "Speichern"
+  },
+  "BlogPage": {
+    "title": "Unser Blog",
+    "readingTime": "{minutes, plural, =1 {# Minute Lesezeit} other {# Minuten Lesezeit}}",
+    "searchPlaceholder": "Suche nach Beiträgen...",
+    "loading": "Beiträge werden geladen...",
+    "noResults": "Keine Beiträge gefunden.",
+    "loadingCategories": "Kategorien werden geladen...",
+    "categoriesTitle": "Kategorien",
+    "allCategories": "Alle",
+    "commentsTitle": "Kommentare",
+    "commentPlaceholder": "Schreiben Sie einen Kommentar...",
+    "replyPlaceholder": "Schreiben Sie eine Antwort...",
+    "namePlaceholder": "Ihr Name",
+    "emailPlaceholder": "Ihre E-Mail",
+    "submitComment": "Kommentar abschicken",
+    "submittingComment": "Wird gesendet...",
+    "commentSuccess": "Kommentar erfolgreich gepostet!",
+    "commentError": "Fehler beim Posten des Kommentars.",
+    "loadingComments": "Kommentare werden geladen...",
+    "noComments": "Seien Sie der Erste, der einen Kommentar abgibt.",
+    "reply": "Antworten",
+    "cancelReply": "Antwort abbrechen"
   }
 }

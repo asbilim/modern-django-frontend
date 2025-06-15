@@ -58,8 +58,8 @@ export default function LoginPage() {
       console.error("Login error:", error);
       toast({
         variant: "destructive",
-        title: t("unexpectedErrorTitle"),
-        description: t("unexpectedErrorDescription"),
+        title: t("toastUnexpectedErrorTitle"),
+        description: t("toastUnexpectedErrorDescription"),
       });
       setIsLoading(false);
     }
@@ -94,8 +94,8 @@ export default function LoginPage() {
       console.error("OTP submission error:", error);
       toast({
         variant: "destructive",
-        title: t("unexpectedErrorTitle"),
-        description: t("unexpectedErrorDescription"),
+        title: t("toastUnexpectedErrorTitle"),
+        description: t("toastUnexpectedErrorDescription"),
       });
       setIsLoading(false);
     }

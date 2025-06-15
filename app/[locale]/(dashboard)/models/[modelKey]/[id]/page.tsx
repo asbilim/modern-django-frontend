@@ -65,7 +65,7 @@ export default function EditModelPage() {
   }
 
   if (!modelConfig || !initialData) {
-    return <div>{t("loadModelDataFailed")}</div>;
+    return <div>{t("loadModelDataFailed", { modelName: modelKey })}</div>;
   }
 
   return (

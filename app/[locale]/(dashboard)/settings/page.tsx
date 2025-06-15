@@ -29,33 +29,35 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AlertCircle, CheckCircle } from "lucide-react";
 import Image from "next/image";
 
-// Zod schemas for form validation
-const profileFormSchema = z.object({
-  first_name: z.string().optional(),
-  last_name: z.string().optional(),
-  email: z.string().email(),
-});
-
-const passwordFormSchema = z
-  .object({
-    old_password: z.string().min(1, "Current password is required."),
-    new_password: z
-      .string()
-      .min(8, "New password must be at least 8 characters."),
-    confirm_password: z.string(),
-  })
-  .refine((data) => data.new_password === data.confirm_password, {
-    message: "Passwords don't match.",
-    path: ["confirm_password"],
+// Zod schema creators for form validation
+const createProfileFormSchema = (t: (key: string) => string) =>
+  z.object({
+    first_name: z.string().optional(),
+    last_name: z.string().optional(),
+    email: z.string().email(t("validation.invalidEmail")),
   });
 
-const twoFactorFormSchema = z.object({
-  otp: z.string().length(6, "OTP must be 6 digits."),
-});
+const createPasswordFormSchema = (t: (key: string) => string) =>
+  z
+    .object({
+      old_password: z.string().min(1, t("validation.oldPasswordRequired")),
+      new_password: z.string().min(8, t("validation.newPasswordLength")),
+      confirm_password: z.string(),
+    })
+    .refine((data) => data.new_password === data.confirm_password, {
+      message: t("validation.passwordsDontMatch"),
+      path: ["confirm_password"],
+    });
 
-const disableTwoFactorFormSchema = z.object({
-  password: z.string().min(1, "Your password is required to disable 2FA."),
-});
+const createTwoFactorFormSchema = (t: (key: string) => string) =>
+  z.object({
+    otp: z.string().length(6, t("validation.otpLength")),
+  });
+
+const createDisableTwoFactorFormSchema = (t: (key: string) => string) =>
+  z.object({
+    password: z.string().min(1, t("validation.passwordRequiredFor2FA")),
+  });
 
 export default function SettingsPage() {
   const t = useTranslations("SettingsPage");
@@ -88,8 +90,11 @@ export default function SettingsPage() {
 
 function ProfileForm({ user }: { user: any }) {
   const t = useTranslations("SettingsPage");
+  const tCommon = useTranslations("Common");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const profileFormSchema = createProfileFormSchema(t);
 
   const form = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
@@ -167,7 +172,7 @@ function ProfileForm({ user }: { user: any }) {
               )}
             />
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? t("saving") : t("save")}
+              {mutation.isPending ? tCommon("saving") : t("save")}
             </Button>
           </form>
         </Form>
@@ -178,7 +183,10 @@ function ProfileForm({ user }: { user: any }) {
 
 function PasswordForm() {
   const t = useTranslations("SettingsPage");
+  const tCommon = useTranslations("Common");
   const { toast } = useToast();
+  const passwordFormSchema = createPasswordFormSchema(t);
+
   const form = useForm<z.infer<typeof passwordFormSchema>>({
     resolver: zodResolver(passwordFormSchema),
     defaultValues: { old_password: "", new_password: "", confirm_password: "" },
@@ -251,7 +259,7 @@ function PasswordForm() {
               )}
             />
             <Button type="submit" disabled={mutation.isPending}>
-              {mutation.isPending ? t("saving") : t("savePassword")}
+              {mutation.isPending ? tCommon("saving") : t("savePassword")}
             </Button>
           </form>
         </Form>
@@ -266,6 +274,9 @@ function TwoFactorAuthForm({ is2FAEnabled }: { is2FAEnabled: boolean }) {
   const queryClient = useQueryClient();
   const [qrCodeUrl, setQrCodeUrl] = React.useState<string | null>(null);
   const [secret, setSecret] = React.useState<string | null>(null);
+
+  const twoFactorFormSchema = createTwoFactorFormSchema(t);
+  const disableTwoFactorFormSchema = createDisableTwoFactorFormSchema(t);
 
   // Mutation to get the 2FA secret and QR code
   const enableMutation = useMutation({

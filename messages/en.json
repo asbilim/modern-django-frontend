@@ -1,33 +1,170 @@
 {
   "LoginPage": {
-    "title": "Login to your Account",
+    "title": "Welcome Back",
     "usernameLabel": "Username",
     "passwordLabel": "Password",
     "signInButton": "Sign In",
-    "toastErrorTitle": "Authentication Failed",
-    "toastErrorDescription": "Please check your credentials and try again.",
-    "toastSuccessTitle": "Success",
-    "toastSuccessDescription": "You have been successfully logged in.",
+    "toastErrorTitle": "Login Failed",
+    "toastErrorDescription": "Invalid username or password. Please try again.",
+    "toastSuccessTitle": "Login Successful",
+    "toastSuccessDescription": "Welcome! Redirecting you to the dashboard.",
+    "toastUnexpectedErrorTitle": "An Unexpected Error Occurred",
+    "toastUnexpectedErrorDescription": "Something went wrong. Please try again later.",
     "toastOtpInvalidTitle": "Invalid OTP",
-    "toastOtpInvalidDescription": "The OTP code is incorrect. Please try again.",
-    "unexpectedErrorTitle": "Error",
-    "unexpectedErrorDescription": "An unexpected error occurred. Please try again."
+    "toastOtpInvalidDescription": "The one-time password you entered is incorrect."
+  },
+  "HomePage": {
+    "hero": {
+      "title": "Django Modern Admin Dashboard",
+      "description": "A modern, responsive admin dashboard for Django with Next.js, shadcn/ui and AI-powered tools to supercharge your productivity.",
+      "loginButton": "Get Started",
+      "dashboardButton": "Go to Dashboard",
+      "learnMoreButton": "Learn More"
+    },
+    "features": {
+      "title": "Powerful Features",
+      "subtitle": "Everything you need to build beautiful, data-driven admin interfaces.",
+      "modern": {
+        "title": "Modern UI",
+        "description": "Built with Next.js, Tailwind CSS, and shadcn/ui for a sleek, responsive interface."
+      },
+      "customizable": {
+        "title": "Fully Customizable",
+        "description": "Easily extend and modify components to match your project's specific needs."
+      },
+      "ai": {
+        "title": "AI-Powered Tools",
+        "description": "Integrated AI features that help automate tasks and increase productivity."
+      },
+      "developer": {
+        "title": "Developer-Friendly",
+        "description": "Well-organized codebase with TypeScript for improved developer experience."
+      }
+    },
+    "gettingStarted": {
+      "title": "Getting Started",
+      "subtitle": "Follow these simple steps to start using Django Modern Admin.",
+      "step1": {
+        "title": "Set Up API",
+        "description": "Configure your Django REST Framework API endpoints."
+      },
+      "step2": {
+        "title": "Customize UI",
+        "description": "Tailor the dashboard to match your requirements and brand."
+      },
+      "step3": {
+        "title": "Deploy",
+        "description": "Deploy your application to your favorite hosting platform."
+      },
+      "docsButton": "Read the Documentation"
+    }
+  },
+  "Header": {
+    "siteName": "Django Admin",
+    "home": "Home",
+    "blog": "Blog",
+    "features": "Features",
+    "about": "About",
+    "signIn": "Sign In",
+    "dashboard": "Dashboard",
+    "settings": "Settings",
+    "adminDashboard": "Admin Dashboard",
+    "signOut": "Sign Out",
+    "signOutSuccessTitle": "Signed Out",
+    "signOutSuccessDescription": "You have been successfully signed out."
+  },
+  "Footer": {
+    "siteName": "Django Admin",
+    "companyName": "Django Modern Admin",
+    "allRightsReserved": "All rights reserved",
+    "poweredBy": "Powered by",
+    "categories": {
+      "solutions": "Solutions",
+      "support": "Support",
+      "company": "Company",
+      "legal": "Legal",
+      "language": "Language",
+      "followUs": "Follow Us"
+    },
+    "solutions": {
+      "admin": "Admin Dashboard",
+      "analytics": "Analytics",
+      "commerce": "E-commerce",
+      "insights": "Insights"
+    },
+    "support": {
+      "docs": "Documentation",
+      "pricing": "Pricing",
+      "guides": "Guides",
+      "api": "API Status"
+    },
+    "company": {
+      "about": "About",
+      "blog": "Blog",
+      "jobs": "Jobs",
+      "partners": "Partners"
+    },
+    "legal": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service"
+    }
   },
   "DashboardPage": {
     "title": "Dashboard",
-    "description": "An overview of your project's activity.",
-    "loadErrorTitle": "Failed to load dashboard data",
-    "loadErrorDescription": "Displaying mock data as a fallback. Please ensure your backend endpoint at `/api/admin/dashboard-stats/` is configured correctly.",
-    "userSignupsCardTitle": "User Signups",
-    "userSignupsCardDescription": "Monthly new user registrations.",
+    "description": "Welcome back! Here's a summary of your project.",
+    "loadErrorTitle": "Dashboard Error",
+    "loadErrorDescription": "There was a problem loading dashboard data. Some information may be missing. Using mock data as a fallback.",
+    "userSignupsCardTitle": "User Sign-ups",
+    "userSignupsCardDescription": "A chart showing user sign-ups over the past few months.",
     "contentOverviewCardTitle": "Content Overview",
-    "contentOverviewCardDescription": "Total items per model.",
-    "activityFeedCardTitle": "Recent Activity",
-    "activityFeedCardDescription": "What's new in your project.",
-    "activityByUser": "by {user}"
+    "contentOverviewCardDescription": "A summary of different content types.",
+    "activityFeedCardTitle": "Activity Feed",
+    "activityFeedCardDescription": "A log of recent activities.",
+    "activityByUser": "by {user}",
+    "mock": {
+      "stats": {
+        "newUsers": {
+          "title": "New Users",
+          "description": "since last month"
+        },
+        "sales": {
+          "title": "Sales",
+          "description": "since last week"
+        },
+        "pendingTasks": {
+          "title": "Pending Tasks",
+          "description": "in progress"
+        },
+        "totalProjects": {
+          "title": "Total Projects",
+          "description": "currently active"
+        }
+      },
+      "months": {
+        "jan": "Jan",
+        "feb": "Feb",
+        "mar": "Mar",
+        "apr": "Apr",
+        "may": "May",
+        "jun": "Jun",
+        "jul": "Jul"
+      },
+      "content": {
+        "projects": "Projects",
+        "tasks": "Tasks",
+        "users": "Users",
+        "categories": "Categories",
+        "tags": "Tags"
+      },
+      "feed": {
+        "newPost": "New blog post published: 'The Future of AI'",
+        "newComment": "New comment on 'Getting Started with Django'",
+        "newUser": "New user registered: John.Doe"
+      }
+    }
   },
   "ModelListPage": {
-    "createNew": "Create new",
+    "createNew": "Create New",
     "id": "ID",
     "name": "Name / Title",
     "createdAt": "Created At",
@@ -39,43 +176,37 @@
     "deleteConfirm": "This action cannot be undone. This will permanently delete the item.",
     "tryAgain": "Try Again",
     "save": "Save Changes",
-    "import": "Import",
+    "errorTitle": "Error Loading Data",
+    "itemCount": "{count, plural, one {# item} other {# items}}",
     "export": "Export",
+    "import": "Import",
     "exportAsCsv": "Export as CSV",
     "exportAsJson": "Export as JSON",
-    "deleteSuccessTitle": "Success",
-    "deleteSuccessDescription": "Item {id} was deleted successfully.",
-    "deleteErrorTitle": "Error",
-    "deleteErrorDescription": "Failed to delete item {id}: {message}",
-    "exportPreparingTitle": "Preparing Export",
-    "exportPreparingDescription": "Fetching all {totalItems} items... This may take a moment.",
-    "exportReadyTitle": "Export Ready",
-    "exportReadyDescription": "Your {format} file has been generated and is downloading.",
-    "exportFailedTitle": "Export Failed",
-    "exportFailedDescription": "An error occurred while exporting data: {message}",
-    "itemCount": "{count, plural, =1 {item} other {items}}",
-    "errorTitle": "Error",
     "cancel": "Cancel",
     "deleting": "Deleting...",
-    "editTitle": "Edit {modelName}: #{id}",
-    "loadModelDataFailed": "Failed to load model data.",
+    "deleteSuccessTitle": "Item Deleted",
+    "deleteSuccessDescription": "The item with ID {id} has been deleted.",
+    "deleteErrorTitle": "Delete Failed",
+    "deleteErrorDescription": "Failed to delete item {id}: {message}",
+    "exportPreparingTitle": "Preparing Export",
+    "exportPreparingDescription": "Preparing to export {totalItems} items. This may take a moment.",
+    "exportReadyTitle": "Export Ready",
+    "exportReadyDescription": "Your {format} file is ready for download.",
+    "exportFailedTitle": "Export Failed",
+    "exportFailedDescription": "An error occurred during export: {message}",
+    "editTitle": "Edit {modelName}: {id}",
     "createTitle": "Create new {modelName}",
-    "loadModelConfigFailed": "Failed to load model configuration.",
-    "saveSuccessTitle": "Success",
-    "saveSuccessDescription": "Item {isUpdating, select, true {updated} false {created}} successfully.",
-    "saveErrorTitle": "Error",
-    "saving": "Saving...",
+    "loadModelConfigFailed": "Failed to load configuration for model: {modelName}",
+    "loadModelDataFailed": "Failed to load data for model: {modelName}",
     "loadingRelationOptions": "Loading options for {fieldName}..."
+  },
+  "ModelForm": {
+    "saveSuccessTitle": "Item Saved",
+    "saveSuccessDescription": "The item has been successfully saved.",
+    "saveErrorTitle": "Error Saving Item"
   },
   "SettingsPage": {
     "title": "Settings",
-    "general": "General",
-    "siteName": "Site Name",
-    "logo": "Logo URL",
-    "navbarStyle": "Navbar Style",
-    "otp": "Two Factor Authentication",
-    "password": "Password",
-    "save": "Save Changes",
     "profileUpdateSuccess": "Profile updated successfully.",
     "profileUpdateError": "Failed to update profile.",
     "profileTitle": "User Profile",
@@ -84,142 +215,94 @@
     "lastName": "Last Name",
     "email": "Email Address",
     "saving": "Saving...",
+    "save": "Save Changes",
     "passwordUpdateSuccess": "Password updated successfully.",
     "passwordUpdateError": "Failed to update password.",
     "passwordTitle": "Change Password",
-    "passwordDescription": "Update your account password.",
+    "passwordDescription": "Update your account's password.",
     "currentPassword": "Current Password",
     "newPassword": "New Password",
     "confirmNewPassword": "Confirm New Password",
-    "savePassword": "Update Password",
+    "savePassword": "Save Password",
     "twoFactorTitle": "Two-Factor Authentication (2FA)",
     "twoFactorDescription": "Add an extra layer of security to your account.",
     "twoFactorEnabled": "2FA is currently enabled on your account.",
-    "disabling": "Disabling...",
+    "twoFactorDisabled": "2FA is currently disabled on your account.",
+    "enable2FA": "Enable 2FA",
+    "enabling": "Enabling...",
     "disable2FA": "Disable 2FA",
+    "disabling": "Disabling...",
     "scanQrCode": "Scan the QR code below with your authenticator app.",
     "secretKey": "Or enter this secret key manually",
     "verificationCode": "Verification Code",
+    "otpPlaceholder": "6-digit code",
+    "cancel": "Cancel",
     "verifying": "Verifying...",
     "verifyAndActivate": "Verify & Activate",
-    "twoFactorDisabled": "2FA is currently disabled.",
-    "enabling": "Enabling...",
-    "enable2FA": "Enable 2FA",
-    "verify": "Verify",
-    "loadError": "Failed to load user settings: {message}",
-    "twoFactorEnableErrorTitle": "Failed to start 2FA setup.",
-    "twoFactorEnableSuccessTitle": "Two-Factor Authentication Enabled",
-    "twoFactorEnableSuccessDescription": "2FA has been successfully activated on your account.",
-    "twoFactorVerifyErrorTitle": "2FA Verification Failed",
-    "twoFactorDisableSuccessTitle": "Two-Factor Authentication Disabled",
-    "twoFactorDisableErrorTitle": "Failed to disable 2FA",
-    "disable2faPasswordPlaceholder": "Enter password to disable",
-    "otpPlaceholder": "123456"
-  },
-  "Time": {
-    "years": "{count, plural, one {# year ago} other {# years ago}}",
-    "months": "{count, plural, one {# month ago} other {# months ago}}",
-    "days": "{count, plural, one {# day ago} other {# days ago}}",
-    "hours": "{count, plural, one {# hour ago} other {# hours ago}}",
-    "minutes": "{count, plural, one {# minute ago} other {# minutes ago}}",
+    "disable2faPasswordPlaceholder": "Enter your password to disable 2FA",
+    "twoFactorEnableErrorTitle": "Failed to Enable 2FA",
+    "twoFactorVerifyErrorTitle": "Failed to Verify OTP",
+    "twoFactorEnableSuccessTitle": "2FA Enabled",
+    "twoFactorEnableSuccessDescription": "Two-factor authentication has been successfully enabled.",
+    "twoFactorDisableErrorTitle": "Failed to Disable 2FA",
+    "twoFactorDisableSuccessTitle": "2FA Disabled",
+    "validation": {
+      "invalidEmail": "Invalid email address.",
+      "oldPasswordRequired": "Current password is required.",
+      "newPasswordLength": "New password must be at least 8 characters.",
+      "passwordsDontMatch": "Passwords do not match.",
+      "otpLength": "Your one-time password must be 6 characters.",
+      "passwordRequiredFor2FA": "Your password is required to disable 2FA."
+    },
     "seconds": "{count, plural, one {# second ago} other {# seconds ago}}"
   },
-  "OtpDialog": {
-    "title": "Enter Verification Code",
-    "description": "A verification code has been sent to your authenticator app.",
-    "placeholder": "6-digit code",
-    "cancel": "Cancel",
-    "verify": "Verify",
-    "verifying": "Verifying..."
-  },
-  "ImportExport": {
-    "export": "Export",
-    "import": "Import",
-    "exportAsCsv": "Export as CSV",
-    "exportAsJson": "Export as JSON",
-    "exportStartedTitle": "Export Started",
-    "exportStartedDescription": "Your {format} file is downloading.",
-    "exportFailedTitle": "Export Failed",
-    "importTitle": "Import Data for {model}",
-    "importDescription": "Upload a CSV or JSON file to bulk-create items. Make sure the file columns match the model fields.",
-    "formatLabel": "File Format",
-    "selectFormatPlaceholder": "Select a format",
-    "fileLabel": "File",
-    "fileDescription": "Only .csv and .json files are accepted.",
-    "cancel": "Cancel",
-    "importButton": "Import Data",
-    "importing": "Importing...",
-    "importSuccessTitle": "Import Successful",
-    "importSuccessDescription": "{count, plural, =0 {No items were imported} one {# item was imported} other {# items were imported}}.",
-    "importErrorTitle": "Import Failed"
-  },
-  "DashboardLayout": {
-    "dashboard": "Dashboard",
-    "settings": "Settings",
-    "system": "System",
-    "signOut": "Sign out",
-    "signOutSuccessTitle": "Signed out",
-    "signOutSuccessDescription": "You have been successfully signed out.",
-    "tools": "Tools",
-    "aiTools": "AI Tools"
-  },
-  "AuthErrorPage": {
-    "credentialsSigninTitle": "Sign-in Failed",
-    "credentialsSigninDescription": "The username or password you entered is incorrect. Please double-check your credentials and try again.",
-    "accessDeniedTitle": "Access Denied",
-    "accessDeniedDescription": "You do not have permission to access this page.",
-    "configurationTitle": "Server Configuration Error",
-    "configurationDescription": "There is an issue with the server configuration. Please contact an administrator.",
-    "defaultTitle": "Something went wrong",
-    "defaultDescription": "An unexpected error occurred during authentication.",
-    "backToLogin": "Go back to Login"
-  },
-  "ErrorPage": {
-    "title": "Something went wrong!",
-    "description": "An unexpected error occurred. You can try to reload the page.",
-    "details": "Error Details",
-    "tryAgain": "Try again"
-  },
   "AiToolsPage": {
-    "title": "AI Toolbox",
-    "resultTitle": "Result:",
+    "title": "AI Power Tools",
+    "resultTitle": "Generated Result",
+    "copy": "Copy",
+    "regenerate": "Regenerate",
+    "generating": "Generating",
+    "copySuccess": "Copied!",
+    "copyDescription": "Copied to clipboard.",
     "summarizer": {
       "title": "Text Summarizer",
-      "description": "Quickly summarize long passages.",
+      "description": "Condense long text into key points.",
       "textLabel": "Text to Summarize",
+      "textPlaceholder": "Enter the text you want to summarize here...",
       "button": "Summarize",
       "buttonLoading": "Summarizing..."
     },
     "translator": {
-      "title": "Translator",
-      "description": "Translate text into another language.",
-      "textLabel": "Text",
+      "title": "Language Translator",
+      "description": "Translate text between languages.",
+      "textLabel": "Text to Translate",
+      "textPlaceholder": "Enter the text to translate here...",
       "languageLabel": "Target Language",
-      "languagePlaceholder": "e.g., Spanish, French, Japanese",
+      "languagePlaceholder": "e.g., French, Spanish, German",
       "button": "Translate",
       "buttonLoading": "Translating..."
     },
     "emailDrafter": {
-      "title": "Email Draft Generator",
-      "description": "Let AI craft a quick email draft.",
+      "title": "Email Drafter",
+      "description": "Quickly draft professional emails.",
       "topicLabel": "Email Topic",
-      "topicPlaceholder": "e.g., Project update, meeting request",
+      "topicPlaceholder": "e.g., project update, meeting request",
       "button": "Generate",
       "buttonLoading": "Generating..."
     },
     "supportReply": {
       "title": "Support Reply Generator",
-      "description": "Craft polite customer responses.",
-      "questionLabel": "Customer Question",
-      "questionPlaceholder": "e.g., I can't log in to my account",
+      "description": "Craft polite responses to customers.",
+      "questionLabel": "Customer's Question",
+      "questionPlaceholder": "e.g., I can't log into my account",
       "button": "Generate",
       "buttonLoading": "Generating..."
     },
     "socialPost": {
       "title": "Social Post Ideas",
-      "description": "Generate catchy social posts.",
+      "description": "Generate engaging social media posts.",
       "topicLabel": "Topic or Event",
-      "topicPlaceholder": "e.g., New product launch, company anniversary",
+      "topicPlaceholder": "e.g., product launch, company anniversary",
       "button": "Generate",
       "buttonLoading": "Generating..."
     },
@@ -227,15 +310,15 @@
       "title": "Marketing Ideas",
       "description": "Brainstorm promotional campaigns.",
       "productLabel": "Product or Service",
-      "productPlaceholder": "e.g., A new coffee brand, a SaaS product",
+      "productPlaceholder": "e.g., a new coffee brand, a SaaS",
       "button": "Generate",
       "buttonLoading": "Generating..."
     },
     "newsletterThemes": {
       "title": "Newsletter Theme Suggester",
-      "description": "Get inspiration for your next newsletter.",
+      "description": "Find inspiration for your next newsletter.",
       "audienceLabel": "Target Audience",
-      "audiencePlaceholder": "e.g., Software developers, small business owners",
+      "audiencePlaceholder": "e.g., developers, small business owners",
       "button": "Suggest",
       "buttonLoading": "Suggesting..."
     },
@@ -246,9 +329,83 @@
       "numbersLabel": "Include Numbers",
       "symbolsLabel": "Include Symbols",
       "button": "Generate Password",
-      "buttonLoading": "Generating...",
-      "copySuccess": "Copied!",
-      "copyDescription": "Password copied to clipboard."
+      "buttonLoading": "Generating..."
     }
+  },
+  "AuthErrorPage": {
+    "credentialsSigninTitle": "Login Failed",
+    "credentialsSigninDescription": "The email or password you entered is incorrect. Please double-check your credentials and try again.",
+    "accessDeniedTitle": "Access Denied",
+    "accessDeniedDescription": "You do not have permission to access this page. Please contact an administrator if you believe this is an error.",
+    "configurationTitle": "Server Configuration Error",
+    "configurationDescription": "There is an issue with the server's authentication configuration. Please contact support.",
+    "defaultTitle": "An Error Occurred",
+    "defaultDescription": "An unknown authentication error has occurred. Please try again or contact support if the problem persists.",
+    "backToLogin": "Back to Login"
+  },
+  "ErrorPage": {
+    "title": "Something Went Wrong",
+    "description": "We're sorry, but an unexpected error occurred. Please try again.",
+    "details": "Error Details",
+    "tryAgain": "Try Again"
+  },
+  "DashboardLayout": {
+    "dashboard": "Dashboard",
+    "aiTools": "AI Tools",
+    "blog": "Blog",
+    "models": "Models",
+    "settings": "Settings",
+    "signOut": "Sign Out",
+    "signOutSuccessTitle": "Signed Out",
+    "signOutSuccessDescription": "You have been successfully signed out."
+  },
+  "Time": {
+    "years": "{count, plural, one {# year ago} other {# years ago}}",
+    "months": "{count, plural, one {# month ago} other {# months ago}}",
+    "days": "{count, plural, one {# day ago} other {# days ago}}",
+    "hours": "{count, plural, one {# hour ago} other {# hours ago}}",
+    "minutes": "{count, plural, one {# minute ago} other {# minutes ago}}",
+    "seconds": "{count, plural, one {# second ago} other {# seconds ago}}"
+  },
+  "ImportExport": {
+    "importTitle": "Import {model}",
+    "importDescription": "Upload a CSV or JSON file to import data. Make sure the file structure matches the model schema.",
+    "formatLabel": "File Format",
+    "selectFormatPlaceholder": "Select a format",
+    "fileLabel": "File",
+    "fileDescription": "Only .csv and .json files are accepted.",
+    "cancel": "Cancel",
+    "importButton": "Import",
+    "importing": "Importing...",
+    "importSuccessTitle": "Import Successful",
+    "importSuccessDescription": "{count} items have been imported successfully.",
+    "importErrorTitle": "Import Failed"
+  },
+  "Common": {
+    "saving": "Saving...",
+    "save": "Save"
+  },
+  "BlogPage": {
+    "title": "Our Blog",
+    "readingTime": "{minutes, plural, =1 {# minute read} other {# minutes read}}",
+    "searchPlaceholder": "Search for posts...",
+    "loading": "Loading posts...",
+    "noResults": "No posts found.",
+    "loadingCategories": "Loading categories...",
+    "categoriesTitle": "Categories",
+    "allCategories": "All",
+    "commentsTitle": "Comments",
+    "commentPlaceholder": "Write a comment...",
+    "replyPlaceholder": "Write a reply...",
+    "namePlaceholder": "Your Name",
+    "emailPlaceholder": "Your Email",
+    "submitComment": "Submit Comment",
+    "submittingComment": "Submitting...",
+    "commentSuccess": "Comment posted successfully!",
+    "commentError": "Failed to post comment.",
+    "loadingComments": "Loading comments...",
+    "noComments": "Be the first to comment.",
+    "reply": "Reply",
+    "cancelReply": "Cancel Reply"
   }
 }
