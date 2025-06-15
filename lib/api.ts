@@ -212,9 +212,9 @@ const getBlogPosts = async (
 
 const getBlogPost = async (
   locale: string,
-  slug: string
+  id: string
 ): Promise<PostDetail> => {
-  return apiFetch(`/api/blog/posts/${slug}/`, {
+  return apiFetch(`/api/blog/posts/${id}/`, {
     headers: { "Accept-Language": locale },
   });
 };
@@ -235,9 +235,9 @@ const getBlogStats = async (locale: string): Promise<BlogStats> => {
 
 const getPostsByCategory = async (
   locale: string,
-  categorySlug: string
+  categoryId: string | number
 ): Promise<PaginatedResponse<PostListItem>> => {
-  return apiFetch(`/api/blog/categories/${categorySlug}/posts/`, {
+  return apiFetch(`/api/blog/categories/${categoryId}/posts/`, {
     headers: { "Accept-Language": locale },
   });
 };

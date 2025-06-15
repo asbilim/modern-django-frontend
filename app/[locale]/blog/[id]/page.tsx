@@ -5,15 +5,15 @@ import { useTranslations } from "next-intl";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
 import { Calendar, User, Clock, Tag, Folder } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { CommentSection } from "@/components/blog/CommentSection";
+import { Category, Tag as TagType } from "@/types/blog";
 
 export default function BlogPostPage({
-  params: { locale, slug },
+  params: { locale, id },
 }: {
-  params: { locale: string; slug: string };
+  params: { locale: string; id: string };
 }) {
   const t = useTranslations("BlogPage");
 
@@ -22,13 +22,17 @@ export default function BlogPostPage({
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["post", slug, locale],
-    queryFn: () => api.getBlogPost(locale, slug),
+    queryKey: ["post", id, locale],
+    queryFn: () => api.getBlogPost(locale, id),
     retry: false,
   });
 
   if (isLoading) {
-    return <div>{t("loading")}</div>;
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        {t("loading")}
+      </div>
+    );
   }
 
   if (error || !post) {
@@ -66,7 +70,7 @@ export default function BlogPostPage({
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <Folder className="h-4 w-4 text-muted-foreground" />
-            {post.categories.map((category) => (
+            {post.categories.map((category: Category) => (
               <Badge key={category.id} variant="secondary">
                 {category.name}
               </Badge>
@@ -95,7 +99,7 @@ export default function BlogPostPage({
         <footer className="mt-12 pt-8 border-t">
           <div className="flex flex-wrap items-center gap-2">
             <Tag className="h-4 w-4 text-muted-foreground" />
-            {post.tags.map((tag) => (
+            {post.tags.map((tag: TagType) => (
               <Badge key={tag.id} variant="outline">
                 {tag.name}
               </Badge>
