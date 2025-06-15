@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { AlertCircle } from "lucide-react";
 
 interface CommentSectionProps {
   postId: string;
@@ -68,9 +69,14 @@ export function CommentSection({ postId, locale }: CommentSectionProps) {
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [guestInfo, setGuestInfo] = useState({ name: "", email: "" });
 
-  const { data: commentsData, isLoading } = useQuery({
+  const {
+    data: commentsData,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["comments", postId],
     queryFn: () => api.getPostComments(locale, postId),
+    retry: 1,
   });
 
   const mutation = useMutation({
@@ -166,15 +172,27 @@ export function CommentSection({ postId, locale }: CommentSectionProps) {
 
       <div className="space-y-4">
         {isLoading && <p>{t("loadingComments")}</p>}
-        {commentsData?.results.map((comment) => (
-          <CommentItem
-            key={comment.id}
-            comment={comment}
-            onReply={setReplyingTo}
-            locale={locale}
-          />
-        ))}
-        {commentsData?.results.length === 0 && <p>{t("noComments")}</p>}
+        {error && (
+          <div className="flex items-center gap-2 text-destructive">
+            <AlertCircle className="h-4 w-4" />
+            <p>Failed to load comments</p>
+          </div>
+        )}
+        {!isLoading &&
+        !error &&
+        commentsData?.results &&
+        commentsData.results.length > 0 ? (
+          commentsData.results.map((comment) => (
+            <CommentItem
+              key={comment.id}
+              comment={comment}
+              onReply={setReplyingTo}
+              locale={locale}
+            />
+          ))
+        ) : !isLoading && !error ? (
+          <p>{t("noComments")}</p>
+        ) : null}
       </div>
     </div>
   );

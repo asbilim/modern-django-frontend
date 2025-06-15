@@ -10,11 +10,8 @@ import { Search } from "lucide-react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { CategoryList } from "@/components/blog/CategoryList";
 
-export default function BlogPage({
-  params: { locale },
-}: {
-  params: { locale: string };
-}) {
+export default function BlogPage({ params }: { params: { locale: string } }) {
+  const { locale } = params;
   const t = useTranslations("BlogPage");
   const router = useRouter();
   const pathname = usePathname();
@@ -22,26 +19,55 @@ export default function BlogPage({
 
   const [posts, setPosts] = useState<PostListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState(
     searchParams.get("search") || ""
   );
-  const selectedCategory = searchParams.get("category");
+  const selectedCategoryId = searchParams.get("categoryId");
 
   useEffect(() => {
     const fetchPosts = async () => {
       setIsLoading(true);
-      const currentSearch = searchParams.get("search") || "";
-      const currentCategory = searchParams.get("category");
+      setError(null);
 
-      let postsData;
-      if (currentCategory) {
-        postsData = await api.getPostsByCategory(locale, currentCategory);
-      } else {
-        postsData = await api.getBlogPosts(locale, { search: currentSearch });
+      try {
+        const currentSearch = searchParams.get("search") || "";
+        const currentCategoryId = searchParams.get("categoryId");
+
+        let postsData;
+        if (currentCategoryId) {
+          postsData = await api.getPostsByCategory(locale, currentCategoryId);
+        } else {
+          postsData = await api.getBlogPosts(locale, { search: currentSearch });
+        }
+
+        // Handle the new API response wrapper
+        if (
+          postsData &&
+          (postsData as any).success &&
+          Array.isArray((postsData as any).data)
+        ) {
+          setPosts((postsData as any).data);
+        } else if (postsData && Array.isArray((postsData as any).results)) {
+          // Fallback for old paginated format
+          setPosts((postsData as any).results);
+        } else if (Array.isArray(postsData)) {
+          // Fallback for direct array response
+          setPosts(postsData);
+        } else {
+          setPosts([]);
+          console.error(
+            "Invalid response format from blog posts API:",
+            postsData
+          );
+        }
+      } catch (err) {
+        console.error("Error fetching posts:", err);
+        setError("Failed to load blog posts");
+        setPosts([]);
+      } finally {
+        setIsLoading(false);
       }
-
-      setPosts(postsData.results);
-      setIsLoading(false);
     };
 
     fetchPosts();
@@ -56,16 +82,16 @@ export default function BlogPage({
       params.delete("search");
     }
     // Category selection should be cleared when performing a new search
-    params.delete("category");
+    params.delete("categoryId");
     router.push(`${pathname}?${params.toString()}`);
   };
 
-  const handleSelectCategory = (categorySlug: string | null) => {
+  const handleSelectCategory = (categoryId: number | null) => {
     const params = new URLSearchParams(searchParams);
-    if (categorySlug) {
-      params.set("category", categorySlug);
+    if (categoryId) {
+      params.set("categoryId", String(categoryId));
     } else {
-      params.delete("category");
+      params.delete("categoryId");
     }
     // Search should be cleared when selecting a new category
     params.delete("search");
@@ -74,7 +100,7 @@ export default function BlogPage({
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 pt-24 pb-8">
       <h1 className="text-4xl font-bold mb-8">{t("title")}</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -93,14 +119,16 @@ export default function BlogPage({
           </form>
           <CategoryList
             locale={locale}
-            selectedCategory={selectedCategory}
+            selectedCategoryId={selectedCategoryId}
             onSelectCategory={handleSelectCategory}
           />
         </aside>
         <main className="md:col-span-3">
           {isLoading ? (
             <p>{t("loading")}</p>
-          ) : posts.length > 0 ? (
+          ) : error ? (
+            <p className="text-destructive">{error}</p>
+          ) : posts && posts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-8">
               {posts.map((post) => (
                 <div
@@ -115,7 +143,7 @@ export default function BlogPage({
                   )}
                   <div className="p-6">
                     <h2 className="text-xl font-bold mb-2">
-                      <a href={`/blog/${post.slug}`}>{post.title}</a>
+                      <a href={`/blog/${post.id}`}>{post.title}</a>
                     </h2>
                     <p className="text-muted-foreground mb-4 text-sm">
                       {post.excerpt}

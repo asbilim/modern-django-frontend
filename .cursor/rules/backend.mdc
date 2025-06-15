@@ -1,0 +1,131 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Django Admin API
+
+A modern Django admin interface with auto-generated REST API for any Django project.
+
+Created by: **asbilim**
+
+- **Twitter:** [@iampaullilian](mdc:https:/twitter.com/iampaullilian)
+- **GitHub:** [asbilim](mdc:https:/github.com/asbilim)
+- **Portfolio:** [paullilian.dev](mdc:https:/paullilian.dev)
+
+## Features
+
+- **Auto-generated API:** Automatically creates REST API endpoints for all models registered in the Django admin.
+- **Dashboard Analytics:** A new `/api/admin/dashboard-stats/` endpoint provides a comprehensive overview of site activity, including user signups, content creation statistics, and recent activities.
+- **Pre-built Blog App:** Includes a full-featured, RESTful blog API with posts, categories, tags, comments, and more.
+- **Dynamic Configuration:** Manage site settings like email and file storage directly through the API.
+- **Enhanced Site Identity:** More detailed site identity management, including author information, contact details, and social media links.
+- **Admin User Preferences:** Users can have their own admin UI preferences, such as theme and layout density.
+- **API Request Logging:** Automatically logs API requests for analytics and monitoring.
+- **Site Identity & SEO:** Manage your site's name, logo, favicon, and SEO tags from a central place.
+- **User & Group Management:** Super admins can manage users and groups via the API.
+- **Frontend Ready:** Provides configuration endpoints for easy integration with a frontend dashboard.
+- **Customizable:** Easily extend and customize serializers, viewsets, and permissions.
+- **Automatic Translations:** All text fields are available in English, German and French. The public-facing APIs (like the Blog API) serve translated content based on the `Accept-Language` header. See the `BLOG_API_GUIDE.md` for more details.
+- **UI Component Metadata:** Each API response includes suggested components for creating, editing and displaying fields, plus predefined choices for things like icons and categories to ensure a consistent look and feel.
+
+## Quick Start
+
+1. **Setup Environment**
+
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # Linux/Mac
+   # or
+   venv\Scripts\activate  # Windows
+   ```
+
+2. **Install Dependencies**
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Environment Variables**
+
+   Create a `.env` file from the example:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   Then, edit the `.env` file with your settings. See the `.env.example` file for detailed explanations of each variable. This now includes optional configuration for Cloudflare R2 storage.
+
+4. **Database Setup**
+
+   ```bash
+   python manage.py migrate
+   python manage.py createsuperuser
+   ```
+
+5. **Run Development Server**
+
+   ```bash
+   python manage.py runserver
+   ```
+
+6. **(Optional) Create Dummy Data**
+
+   To populate the database with some sample data for testing, you can run the following command:
+
+   ```bash
+   python manage.py create_dummy_todos
+   ```
+
+## API Endpoints
+
+- **Admin API Root**: `http://localhost:8000/api/admin/`
+- **Dashboard Analytics**: `http://localhost:8000/api/admin/dashboard-stats/`
+- **API for a model**: `http://localhost:8000/api/admin/models/<model-name>/`
+- **Blog API**:
+  - Posts: `http://localhost:8000/api/blog/posts/`
+  - Categories: `http://localhost:8000/api/blog/categories/`
+  - Tags: `http://localhost:8000/api/blog/tags/`
+  - Search: `http://localhost:8000/api/blog/search/?q=<query>`
+- **Traditional Admin**: `http://localhost:8000/admin/`
+- **API Schema**:
+  - `http://localhost:8000/api/schema/` (Download OpenAPI Schema)
+  - `http://localhost:8000/api/schema/swagger-ui/` (Swagger UI)
+  - `http://localhost:8000/api/schema/redoc/` (Redoc)
+
+## Authentication Flow
+
+This project uses JWT for authentication. Here is a summary of the authentication and user management endpoints.
+
+### 1. Token Management
+
+- **Get Tokens (Login Step 1)**: `POST /api/token/`
+
+  - Provide `username` and `password`.
+  - If 2FA is **disabled**, this returns `access` and `refresh` tokens directly.
+  - If 2FA is **enabled**, it returns a temporary message: `{"detail": "OTP required.", "is_2fa_enabled": true}`.
+
+- **Verify 2FA and Get Tokens (Login Step 2)**: `POST /api/auth/token/verify/`
+
+  - If 2FA is enabled, use this endpoint.
+  - Provide `username`, `password`, and the `otp` from an authenticator app.
+  - On success, this returns the final `access` and `refresh` tokens.
+  - _Note: If you receive an "Invalid OTP" error, please ensure your phone's clock is synchronized with an internet time server._
+
+- **Refresh Token**: `POST /api/token/refresh/`
+  - Provide the `refresh` token to get a new `access` token.
+
+### 2. Password Reset
+
+- **Request Reset**: `POST /api/auth/password_reset/`
+  - Provide the user's `email` to receive a password reset link.
+- **Confirm Reset**: `POST /api/auth/password_reset/confirm/`
+  - Provide the `token` from the email and a `new_password`.
+
+### 3. Account Management (Authenticated)
+
+These endpoints require an active `access` token in the authorization header.
+
+- **User Profile**:
+  - `GET /api/auth/me/`: Retrieve the current user's profile (`
+

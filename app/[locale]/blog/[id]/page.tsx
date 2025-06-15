@@ -5,15 +5,30 @@ import { useTranslations } from "next-intl";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
 import { Calendar, User, Clock, Tag, Folder } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { CommentSection } from "@/components/blog/CommentSection";
+import { Category, Tag as TagType } from "@/types/blog";
+import { useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+
+const getCorrectImageUrl = (url: string) => {
+  if (!url) return "";
+  // Fix for malformed URLs from R2
+  if (url.startsWith("https://https:/")) {
+    return url.replace("https://https:/", "https://");
+  }
+  // If URL is relative, prepend the API base URL
+  if (url.startsWith("/media")) {
+    return `${process.env.NEXT_PUBLIC_API_URL}${url}`;
+  }
+  return url;
+};
 
 export default function BlogPostPage({
-  params: { locale, slug },
+  params: { locale, id },
 }: {
-  params: { locale: string; slug: string };
+  params: { locale: string; id: string };
 }) {
   const t = useTranslations("BlogPage");
 
@@ -22,13 +37,26 @@ export default function BlogPostPage({
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["post", slug, locale],
-    queryFn: () => api.getBlogPost(locale, slug),
+    queryKey: ["post", id, locale],
+    queryFn: () => api.getBlogPost(locale, id),
     retry: false,
   });
 
+  useEffect(() => {
+    console.log("--- Blog Post Page Debug ---");
+    console.log("Locale:", locale, "ID:", id);
+    console.log("Is Loading:", isLoading);
+    console.log("Error object:", error);
+    console.log("Post data:", post);
+    console.log("----------------------------");
+  }, [locale, id, isLoading, error, post]);
+
   if (isLoading) {
-    return <div>{t("loading")}</div>;
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        {t("loading")}
+      </div>
+    );
   }
 
   if (error || !post) {
@@ -36,7 +64,7 @@ export default function BlogPostPage({
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="container mx-auto px-4 pt-24 pb-8 max-w-4xl">
       <article>
         <header className="mb-8">
           <h1 className="text-4xl lg:text-5xl font-extrabold leading-tight mb-4">
@@ -66,7 +94,7 @@ export default function BlogPostPage({
           </div>
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <Folder className="h-4 w-4 text-muted-foreground" />
-            {post.categories.map((category) => (
+            {post.categories.map((category: Category) => (
               <Badge key={category.id} variant="secondary">
                 {category.name}
               </Badge>
@@ -77,7 +105,7 @@ export default function BlogPostPage({
         {post.featured_image && (
           <div className="mb-8 rounded-lg overflow-hidden">
             <Image
-              src={post.featured_image}
+              src={getCorrectImageUrl(post.featured_image)}
               alt={post.title}
               width={1200}
               height={630}
@@ -87,15 +115,14 @@ export default function BlogPostPage({
           </div>
         )}
 
-        <div
-          className="prose dark:prose-invert max-w-none"
-          dangerouslySetInnerHTML={{ __html: post.content }}
-        />
+        <div className="prose dark:prose-invert max-w-none">
+          <ReactMarkdown>{post.content}</ReactMarkdown>
+        </div>
 
         <footer className="mt-12 pt-8 border-t">
           <div className="flex flex-wrap items-center gap-2">
             <Tag className="h-4 w-4 text-muted-foreground" />
-            {post.tags.map((tag) => (
+            {post.tags.map((tag: TagType) => (
               <Badge key={tag.id} variant="outline">
                 {tag.name}
               </Badge>
