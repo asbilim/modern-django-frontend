@@ -15,6 +15,7 @@ import {
   Layers,
   Sparkles,
   Rss,
+  ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DynamicIcon } from "@/components/ui/dynamic-icon";
@@ -459,6 +460,7 @@ function UserNav({
 }) {
   const t = useTranslations("DashboardLayout");
   const tSettings = useTranslations("SettingsPage");
+  const tHeader = useTranslations("Header");
 
   if (!user) {
     return (
@@ -468,6 +470,8 @@ function UserNav({
       </div>
     );
   }
+
+  const isSuperUser = user.is_superuser;
 
   return (
     <DropdownMenu>
@@ -530,6 +534,14 @@ function UserNav({
               <span>{tSettings("title")}</span>
             </Link>
           </DropdownMenuItem>
+          {isSuperUser && (
+            <DropdownMenuItem asChild>
+              <Link href="/admin" className="flex items-center">
+                <ShieldCheck className="mr-2 h-4 w-4" />
+                <span>{tHeader("adminDashboard")}</span>
+              </Link>
+            </DropdownMenuItem>
+          )}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={onSignOut}>

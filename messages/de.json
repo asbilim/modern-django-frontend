@@ -13,33 +13,101 @@
     "toastOtpInvalidTitle": "Ungültiges OTP",
     "toastOtpInvalidDescription": "Das von Ihnen eingegebene Einmalpasswort ist falsch."
   },
-  "OtpDialog": {
-    "title": "Einmalpasswort eingeben",
-    "description": "Ein Code wurde an Ihre Authentifizierungs-App gesendet. Bitte geben Sie ihn unten ein, um Ihre Anmeldung abzuschließen.",
-    "placeholder": "6-stelliger Code",
-    "cancel": "Abbrechen",
-    "verify": "Überprüfen",
-    "verifying": "Wird überprüft..."
+  "HomePage": {
+    "hero": {
+      "title": "Django Modern Admin Dashboard",
+      "description": "Ein modernes, reaktionsschnelles Admin-Dashboard für Django mit Next.js, shadcn/ui und KI-gestützten Tools zur Steigerung Ihrer Produktivität.",
+      "loginButton": "Loslegen",
+      "dashboardButton": "Zum Dashboard",
+      "learnMoreButton": "Mehr erfahren"
+    },
+    "features": {
+      "title": "Leistungsstarke Funktionen",
+      "subtitle": "Alles, was Sie benötigen, um schöne, datengesteuerte Admin-Oberflächen zu erstellen.",
+      "modern": {
+        "title": "Moderne Benutzeroberfläche",
+        "description": "Entwickelt mit Next.js, Tailwind CSS und shadcn/ui für eine elegante, reaktionsfähige Oberfläche."
+      },
+      "customizable": {
+        "title": "Vollständig anpassbar",
+        "description": "Erweitern und modifizieren Sie Komponenten einfach, um die spezifischen Anforderungen Ihres Projekts zu erfüllen."
+      },
+      "ai": {
+        "title": "KI-gestützte Tools",
+        "description": "Integrierte KI-Funktionen, die bei der Automatisierung von Aufgaben helfen und die Produktivität steigern."
+      },
+      "developer": {
+        "title": "Entwicklerfreundlich",
+        "description": "Gut organisierter Code mit TypeScript für eine verbesserte Entwicklererfahrung."
+      }
+    },
+    "gettingStarted": {
+      "title": "Erste Schritte",
+      "subtitle": "Folgen Sie diesen einfachen Schritten, um mit Django Modern Admin zu beginnen.",
+      "step1": {
+        "title": "API einrichten",
+        "description": "Konfigurieren Sie Ihre Django REST Framework-API-Endpunkte."
+      },
+      "step2": {
+        "title": "UI anpassen",
+        "description": "Passen Sie das Dashboard an Ihre Anforderungen und Ihre Marke an."
+      },
+      "step3": {
+        "title": "Bereitstellen",
+        "description": "Stellen Sie Ihre Anwendung auf Ihrer bevorzugten Hosting-Plattform bereit."
+      },
+      "docsButton": "Dokumentation lesen"
+    }
   },
   "Header": {
+    "siteName": "Django Admin",
+    "home": "Startseite",
     "blog": "Blog",
-    "signIn": "Anmelden"
-  },
-  "UserNav": {
+    "features": "Funktionen",
+    "about": "Über uns",
+    "signIn": "Anmelden",
     "dashboard": "Dashboard",
     "settings": "Einstellungen",
-    "admin": "Admin",
-    "signOut": "Abmelden"
+    "adminDashboard": "Admin-Dashboard",
+    "signOut": "Abmelden",
+    "signOutSuccessTitle": "Abgemeldet",
+    "signOutSuccessDescription": "Sie wurden erfolgreich abgemeldet."
   },
   "Footer": {
-    "copyright": "© {year} Django Modern Admin. Alle Rechte vorbehalten.",
-    "privacy": "Datenschutz-Bestimmungen",
-    "terms": "Nutzungsbedingungen"
-  },
-  "HomePage": {
-    "title": "Ein modernes Admin-Dashboard für Django",
-    "description": "Dieses Projekt bietet eine schlanke, reaktionsschnelle und funktionsreiche Admin-Oberfläche, um die Standard-Django-Admin zu ersetzen. Erstellt mit Next.js, shadcn/ui und Tailwind CSS.",
-    "ctaButton": "Loslegen"
+    "siteName": "Django Admin",
+    "companyName": "Django Modern Admin",
+    "allRightsReserved": "Alle Rechte vorbehalten",
+    "poweredBy": "Unterstützt durch",
+    "categories": {
+      "solutions": "Lösungen",
+      "support": "Support",
+      "company": "Unternehmen",
+      "legal": "Rechtliches",
+      "language": "Sprache",
+      "followUs": "Folgen Sie uns"
+    },
+    "solutions": {
+      "admin": "Admin-Dashboard",
+      "analytics": "Analytik",
+      "commerce": "E-Commerce",
+      "insights": "Erkenntnisse"
+    },
+    "support": {
+      "docs": "Dokumentation",
+      "pricing": "Preise",
+      "guides": "Anleitungen",
+      "api": "API-Status"
+    },
+    "company": {
+      "about": "Über uns",
+      "blog": "Blog",
+      "jobs": "Jobs",
+      "partners": "Partner"
+    },
+    "legal": {
+      "privacy": "Datenschutzrichtlinie",
+      "terms": "Nutzungsbedingungen"
+    }
   },
   "DashboardPage": {
     "title": "Dashboard",
@@ -319,8 +387,26 @@
     "save": "Speichern"
   },
   "BlogPage": {
-    "title": "Blog",
-    "description": "Entdecken Sie Artikel über Webentwicklung, Django, Next.js und mehr.",
-    "comingSoon": "Weitere Artikel folgen in Kürze. Bleiben Sie dran!"
+    "title": "Unser Blog",
+    "readingTime": "{minutes, plural, =1 {# Minute Lesezeit} other {# Minuten Lesezeit}}",
+    "searchPlaceholder": "Suche nach Beiträgen...",
+    "loading": "Beiträge werden geladen...",
+    "noResults": "Keine Beiträge gefunden.",
+    "loadingCategories": "Kategorien werden geladen...",
+    "categoriesTitle": "Kategorien",
+    "allCategories": "Alle",
+    "commentsTitle": "Kommentare",
+    "commentPlaceholder": "Schreiben Sie einen Kommentar...",
+    "replyPlaceholder": "Schreiben Sie eine Antwort...",
+    "namePlaceholder": "Ihr Name",
+    "emailPlaceholder": "Ihre E-Mail",
+    "submitComment": "Kommentar abschicken",
+    "submittingComment": "Wird gesendet...",
+    "commentSuccess": "Kommentar erfolgreich gepostet!",
+    "commentError": "Fehler beim Posten des Kommentars.",
+    "loadingComments": "Kommentare werden geladen...",
+    "noComments": "Seien Sie der Erste, der einen Kommentar abgibt.",
+    "reply": "Antworten",
+    "cancelReply": "Antwort abbrechen"
   }
 }

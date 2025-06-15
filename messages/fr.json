@@ -13,28 +13,101 @@
     "toastOtpInvalidTitle": "OTP invalide",
     "toastOtpInvalidDescription": "Le mot de passe à usage unique que vous avez entré est incorrect."
   },
-  "OtpDialog": {
-    "title": "Saisir le mot de passe à usage unique",
-    "description": "Un code a été envoyé à votre application d'authentification. Veuillez le saisir ci-dessous pour finaliser votre connexion.",
-    "placeholder": "Code à 6 chiffres",
-    "cancel": "Annuler",
-    "verify": "Vérifier",
-    "verifying": "Vérification en cours..."
+  "HomePage": {
+    "hero": {
+      "title": "Tableau de bord Django Modern Admin",
+      "description": "Un tableau de bord d'administration moderne et réactif pour Django avec Next.js, shadcn/ui et des outils alimentés par l'IA pour augmenter votre productivité.",
+      "loginButton": "Commencer",
+      "dashboardButton": "Aller au tableau de bord",
+      "learnMoreButton": "En savoir plus"
+    },
+    "features": {
+      "title": "Fonctionnalités puissantes",
+      "subtitle": "Tout ce dont vous avez besoin pour créer de superbes interfaces d'administration riches en données.",
+      "modern": {
+        "title": "Interface moderne",
+        "description": "Construit avec Next.js, Tailwind CSS et shadcn/ui pour une interface élégante et réactive."
+      },
+      "customizable": {
+        "title": "Entièrement personnalisable",
+        "description": "Étendez et modifiez facilement les composants pour répondre aux besoins spécifiques de votre projet."
+      },
+      "ai": {
+        "title": "Outils alimentés par l'IA",
+        "description": "Fonctionnalités d'IA intégrées qui aident à automatiser les tâches et à augmenter la productivité."
+      },
+      "developer": {
+        "title": "Adapté aux développeurs",
+        "description": "Base de code bien organisée avec TypeScript pour une meilleure expérience de développement."
+      }
+    },
+    "gettingStarted": {
+      "title": "Mise en route",
+      "subtitle": "Suivez ces étapes simples pour commencer à utiliser Django Modern Admin.",
+      "step1": {
+        "title": "Configurer l'API",
+        "description": "Configurez vos points de terminaison Django REST Framework."
+      },
+      "step2": {
+        "title": "Personnaliser l'interface",
+        "description": "Adaptez le tableau de bord à vos besoins et à votre marque."
+      },
+      "step3": {
+        "title": "Déployer",
+        "description": "Déployez votre application sur votre plateforme d'hébergement préférée."
+      },
+      "docsButton": "Lire la documentation"
+    }
   },
   "Header": {
+    "siteName": "Django Admin",
+    "home": "Accueil",
     "blog": "Blog",
-    "signIn": "Se connecter"
-  },
-  "UserNav": {
+    "features": "Fonctionnalités",
+    "about": "À propos",
+    "signIn": "Se connecter",
     "dashboard": "Tableau de bord",
     "settings": "Paramètres",
-    "admin": "Admin",
-    "signOut": "Se déconnecter"
+    "adminDashboard": "Tableau de bord admin",
+    "signOut": "Se déconnecter",
+    "signOutSuccessTitle": "Déconnecté",
+    "signOutSuccessDescription": "Vous avez été déconnecté avec succès."
   },
   "Footer": {
-    "copyright": "© {year} Django Modern Admin. Tous droits réservés.",
-    "privacy": "Politique de confidentialité",
-    "terms": "Conditions d'utilisation"
+    "siteName": "Django Admin",
+    "companyName": "Django Modern Admin",
+    "allRightsReserved": "Tous droits réservés",
+    "poweredBy": "Propulsé par",
+    "categories": {
+      "solutions": "Solutions",
+      "support": "Support",
+      "company": "Entreprise",
+      "legal": "Mentions légales",
+      "language": "Langue",
+      "followUs": "Suivez-nous"
+    },
+    "solutions": {
+      "admin": "Tableau de bord",
+      "analytics": "Analytiques",
+      "commerce": "E-commerce",
+      "insights": "Insights"
+    },
+    "support": {
+      "docs": "Documentation",
+      "pricing": "Tarification",
+      "guides": "Guides",
+      "api": "État de l'API"
+    },
+    "company": {
+      "about": "À propos",
+      "blog": "Blog",
+      "jobs": "Emplois",
+      "partners": "Partenaires"
+    },
+    "legal": {
+      "privacy": "Politique de confidentialité",
+      "terms": "Conditions d'utilisation"
+    }
   },
   "DashboardPage": {
     "title": "Tableau de bord",
@@ -327,10 +400,5 @@
     "noComments": "Soyez le premier à commenter.",
     "reply": "Répondre",
     "cancelReply": "Annuler la réponse"
-  },
-  "HomePage": {
-    "title": "Un tableau de bord d'administration moderne pour Django",
-    "description": "Ce projet fournit une interface d'administration élégante, réactive et riche en fonctionnalités pour remplacer l'administration standard de Django. Construit avec Next.js, shadcn/ui et Tailwind CSS.",
-    "ctaButton": "Commencer"
   }
 }

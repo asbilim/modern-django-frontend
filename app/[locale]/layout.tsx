@@ -5,8 +5,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { dashboardConfig } from "@/lib/config";
 import { Providers } from "@/components/providers";
 import { DefaultFavicon } from "@/components/ui/default-favicon";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -30,11 +28,7 @@ export default async function LocaleLayout({
       <body className={inter.className}>
         <Providers>
           <NextIntlClientProvider messages={messages}>
-            <div className="flex flex-col min-h-screen">
-              <Header />
-              <main className="flex-1 container py-8">{children}</main>
-              <Footer />
-            </div>
+            {children}
             <Toaster />
           </NextIntlClientProvider>
         </Providers>

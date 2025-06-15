@@ -13,23 +13,101 @@
     "toastOtpInvalidTitle": "Invalid OTP",
     "toastOtpInvalidDescription": "The one-time password you entered is incorrect."
   },
-  "OtpDialog": {
-    "title": "Enter One-Time Password",
-    "description": "A code has been sent to your authenticator app. Please enter it below to complete your login.",
-    "placeholder": "6-digit code",
-    "cancel": "Cancel",
-    "verify": "Verify",
-    "verifying": "Verifying..."
+  "HomePage": {
+    "hero": {
+      "title": "Django Modern Admin Dashboard",
+      "description": "A modern, responsive admin dashboard for Django with Next.js, shadcn/ui and AI-powered tools to supercharge your productivity.",
+      "loginButton": "Get Started",
+      "dashboardButton": "Go to Dashboard",
+      "learnMoreButton": "Learn More"
+    },
+    "features": {
+      "title": "Powerful Features",
+      "subtitle": "Everything you need to build beautiful, data-driven admin interfaces.",
+      "modern": {
+        "title": "Modern UI",
+        "description": "Built with Next.js, Tailwind CSS, and shadcn/ui for a sleek, responsive interface."
+      },
+      "customizable": {
+        "title": "Fully Customizable",
+        "description": "Easily extend and modify components to match your project's specific needs."
+      },
+      "ai": {
+        "title": "AI-Powered Tools",
+        "description": "Integrated AI features that help automate tasks and increase productivity."
+      },
+      "developer": {
+        "title": "Developer-Friendly",
+        "description": "Well-organized codebase with TypeScript for improved developer experience."
+      }
+    },
+    "gettingStarted": {
+      "title": "Getting Started",
+      "subtitle": "Follow these simple steps to start using Django Modern Admin.",
+      "step1": {
+        "title": "Set Up API",
+        "description": "Configure your Django REST Framework API endpoints."
+      },
+      "step2": {
+        "title": "Customize UI",
+        "description": "Tailor the dashboard to match your requirements and brand."
+      },
+      "step3": {
+        "title": "Deploy",
+        "description": "Deploy your application to your favorite hosting platform."
+      },
+      "docsButton": "Read the Documentation"
+    }
   },
   "Header": {
+    "siteName": "Django Admin",
+    "home": "Home",
     "blog": "Blog",
-    "signIn": "Sign In"
-  },
-  "UserNav": {
+    "features": "Features",
+    "about": "About",
+    "signIn": "Sign In",
     "dashboard": "Dashboard",
     "settings": "Settings",
-    "admin": "Admin",
-    "signOut": "Sign Out"
+    "adminDashboard": "Admin Dashboard",
+    "signOut": "Sign Out",
+    "signOutSuccessTitle": "Signed Out",
+    "signOutSuccessDescription": "You have been successfully signed out."
+  },
+  "Footer": {
+    "siteName": "Django Admin",
+    "companyName": "Django Modern Admin",
+    "allRightsReserved": "All rights reserved",
+    "poweredBy": "Powered by",
+    "categories": {
+      "solutions": "Solutions",
+      "support": "Support",
+      "company": "Company",
+      "legal": "Legal",
+      "language": "Language",
+      "followUs": "Follow Us"
+    },
+    "solutions": {
+      "admin": "Admin Dashboard",
+      "analytics": "Analytics",
+      "commerce": "E-commerce",
+      "insights": "Insights"
+    },
+    "support": {
+      "docs": "Documentation",
+      "pricing": "Pricing",
+      "guides": "Guides",
+      "api": "API Status"
+    },
+    "company": {
+      "about": "About",
+      "blog": "Blog",
+      "jobs": "Jobs",
+      "partners": "Partners"
+    },
+    "legal": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service"
+    }
   },
   "DashboardPage": {
     "title": "Dashboard",
@@ -277,7 +355,9 @@
     "blog": "Blog",
     "models": "Models",
     "settings": "Settings",
-    "signOut": "Sign Out"
+    "signOut": "Sign Out",
+    "signOutSuccessTitle": "Signed Out",
+    "signOutSuccessDescription": "You have been successfully signed out."
   },
   "Time": {
     "years": "{count, plural, one {# year ago} other {# years ago}}",
@@ -326,18 +406,6 @@
     "loadingComments": "Loading comments...",
     "noComments": "Be the first to comment.",
     "reply": "Reply",
-    "cancelReply": "Cancel Reply",
-    "description": "This project provides a sleek, responsive, and feature-rich admin interface to replace the standard Django admin. Built with Next.js, shadcn/ui, and Tailwind CSS.",
-    "ctaButton": "Get Started"
-  },
-  "Footer": {
-    "copyright": "© {year} Django Modern Admin. All rights reserved.",
-    "privacy": "Privacy Policy",
-    "terms": "Terms of Service"
-  },
-  "HomePage": {
-    "title": "A Modern Admin Dashboard for Django",
-    "description": "This project provides a sleek, responsive, and feature-rich admin interface to replace the standard Django admin. Built with Next.js, shadcn/ui, and Tailwind CSS.",
-    "ctaButton": "Get Started"
+    "cancelReply": "Cancel Reply"
   }
 }
