@@ -1,4 +1,6 @@
-# Django Modern Admin
+# {{PROJECT_NAME}}
+
+{{PROJECT_DESCRIPTION}}
 
 Django Modern Admin is an open-source project that provides a sleek, modern, and highly customizable administrative interface for Django projects, built with Next.js, shadcn/ui, and Tailwind CSS. It aims to replace the standard Django admin with a more user-friendly and feature-rich frontend, while still leveraging the power and flexibility of Django's backend.
 
@@ -13,47 +15,52 @@ Django Modern Admin is an open-source project that provides a sleek, modern, and
 - **Dark Mode**: Supports light and dark themes.
 - **Internationalization**: Ready for multi-language support with next-intl.
 
-## 🚀 Getting Started
+## 🚀 Getting Started: Creating Your Own Admin Dashboard
 
-### Prerequisites
+This project is a template that can be used to generate a new, customized admin dashboard. The easiest way to get started is with `degit`.
 
-- Node.js and npm/yarn/pnpm
-- A running Django backend serving the admin API.
+1.  **Scaffold Your Project**
 
-### Environment Variables
+    Run the following command in your terminal. This will create a new directory (`your-project-name`) with a clean copy of the template.
 
-Create a `.env.local` file in the root of your frontend project and add the following variables. These are necessary for connecting to your Django backend and enabling AI features.
+    _Replace `your-github-username/django-modern-admin` with the actual path to this template repository on GitHub._
 
-```
-# The base URL of your Django backend API
-NEXT_PUBLIC_API_URL=http://localhost:8000
-
-# OpenRouter API Key for AI features
-OPEN_ROUTER_API_KEY=sk-or-v1-...
-
-# (Optional) Specify AI models to use
-OPENROUTER_MODEL=meta-llama/llama-3.1-8b-instruct
-OPENROUTER_MODEL_FALLBACK=mistralai/devstral-small
-AI_TEMPERATURE=0.8
-```
-
-### Installation & Running
-
-1.  Clone the repository:
     ```bash
-    git clone https://github.com/your-repo/django-modern-admin.git
-    cd django-modern-admin
+    npx degit your-github-username/django-modern-admin your-project-name
     ```
-2.  Install dependencies:
+
+2.  **Navigate and Install Dependencies**
+
     ```bash
+    cd your-project-name
     npm install
     ```
-3.  Run the development server:
+
+    This step is necessary to install `inquirer`, which the setup script uses for its interactive prompts.
+
+3.  **Run the Interactive Setup**
+
+    This command starts a script that will ask you for your project's details and automatically update all the necessary files (`package.json`, `README.md`, etc.).
+
+    ```bash
+    node setup.js
+    ```
+
+    Follow the prompts. Once it's done, the setup script will delete itself to keep your project clean.
+
+4.  **Final Configuration**
+
+    - **`.env.local`**: Create this file by copying `.env.example`. Update `NEXT_PUBLIC_API_URL` to point to your Django backend and add your `OPEN_ROUTER_API_KEY`.
+    - **Branding**: Replace `public/logo.svg` and `public/favicon.ico` with your own assets.
+    - **Commit**: Commit the initialized project files to your own repository.
+
+5.  **Run the Development Server**
+
     ```bash
     npm run dev
     ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+    Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 ## 🛠️ Project Status & Roadmap
 
@@ -83,45 +90,6 @@ Here are some of the features and improvements planned for the near future:
 ## 🤝 Contributing
 
 Contributions are welcome! If you have suggestions or want to contribute to the code, please feel free to open an issue or submit a pull request.
-
-## Reusability & Creating Your Own Admin
-
-This project is designed to be a reusable template for building modern admin interfaces for any Django project. You can easily create your own version by following these steps.
-
-### 1. Use as a GitHub Template
-
-The best way to start is by using this repository as a GitHub template.
-
-1.  Navigate to the main page of the repository on GitHub.
-2.  Click the **"Use this template"** button.
-3.  Choose **"Create a new repository"**.
-4.  Select an owner, provide a repository name, and click **"Create repository from template"**.
-
-This will create a new repository with the same file structure but without the commit history, giving you a clean start.
-
-### 2. Customization Checklist
-
-After creating your repository, you'll want to customize it. Here is a checklist of files to update:
-
-- **`.env.local`**: This is the most important step. Create this file (copy from `.env.example` if it exists) and set the `NEXT_PUBLIC_API_URL` to point to your Django backend. Also, add your `OPEN_ROUTER_API_KEY` for AI features.
-- **`lib/config.ts`**:
-  - Update `name`, `description`, and `repositoryUrl` to match your project.
-  - To disable the blog feature, set `blog: { enabled: false, ... }`.
-- **`package.json`**: Change the `name`, `description`, and `author` fields.
-- **`public/` directory**: Replace `logo.svg` and `favicon.ico` with your own branding.
-- **`README.md`**: Update this README file to describe your project.
-
-### 3. Advanced: Creating a CLI (Cookiecutter)
-
-For maximum reusability, you could create a dedicated CLI tool (e.g., `create-modern-admin`) that scaffolds a new project interactively. This is similar to how `create-next-app` works.
-
-This involves:
-
-- Using a tool like [**`inquirer`**](https://www.npmjs.com/package/inquirer) to prompt the user for configuration values (project name, API URL, etc.).
-- Using a templating engine like [**EJS**](https://ejs.co/) or Handlebars to replace variables (e.g., `<%= projectName %>`) in the template files.
-- Publishing the CLI tool to npm.
-
-This is a more advanced step but provides the most seamless experience for creating new projects from your template.
 
 ## Deploy on Vercel
 

@@ -26,9 +26,9 @@ export interface DashboardConfig {
 }
 
 export const dashboardConfig: DashboardConfig = {
-  name: "Django Modern Admin",
-  description: "A modern admin dashboard for Django",
-  repositoryUrl: "https://github.com/your-repo/django-modern-admin",
+  name: "{{PROJECT_NAME}}",
+  description: "{{PROJECT_DESCRIPTION}}",
+  repositoryUrl: "{{REPOSITORY_URL}}",
   logoUrl: "/logo.svg",
   favicon: "/favicon.ico",
   api: {
