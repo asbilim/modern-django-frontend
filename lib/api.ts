@@ -2,7 +2,6 @@ import { getSession, signOut } from "next-auth/react";
 import { dashboardConfig } from "@/lib/config";
 import { toast } from "@/hooks/use-toast";
 import {
-  PaginatedResponse,
   PostListItem,
   PostDetail,
   Category,
