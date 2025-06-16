@@ -29,8 +29,12 @@ export function CategoryList({
       setError(null);
       try {
         const response = await api.getBlogCategories(locale);
-        if (response && response.success && Array.isArray(response.data)) {
-          setCategories(response.data);
+        if (
+          response &&
+          (response as any).success &&
+          Array.isArray((response as any).data)
+        ) {
+          setCategories((response as any).data);
         } else if (response && Array.isArray(response.results)) {
           setCategories(response.results);
         } else if (Array.isArray(response)) {
